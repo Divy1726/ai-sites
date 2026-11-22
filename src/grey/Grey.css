@@ -623,8 +623,9 @@
   fill: #0a0a0a;
 }
 
-/* the road — quay run, one gentle curve, straight descent. The band
-   is wide (truck is ~341 units across) so the upright truck always
+/* the road — quay run, quarter-curve, vertical descent,
+   quarter-curve, bottom run. The band is wide so the truck (which
+   rotates with the road tangent, nose-down on the descent) always
    sits on the asphalt: shoulder, asphalt, dashed centre line */
 .ge-road-shoulder {
   fill: none;
