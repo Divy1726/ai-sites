@@ -1,5 +1,18 @@
-import { useEffect, useMemo, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  AnimatePresence,
+  motion,
+  useMotionValueEvent,
+  useScroll,
+  useSpring,
+  useTransform,
+} from "framer-motion";
+import Parallax from "../fx/Parallax";
+import Reveal from "../fx/Reveal";
+import ProgressBar from "../fx/ProgressBar";
+import VelocityMarquee from "../fx/VelocityMarquee";
+import Magnetic from "../fx/Magnetic";
+import { scrollTopInstant } from "../lenis";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -146,6 +159,37 @@ const pageFade = {
   exit: { opacity: 0, y: -8, transition: { duration: 0.2, ease: "easeIn" } },
 };
 
+/* Boarding passes deal in like printed cards: slight tilt + scale. */
+const passVariant = {
+  hidden: (i = 0) => ({
+    opacity: 0,
+    y: 28,
+    rotate: i % 2 === 0 ? -1.4 : 1.4,
+    scale: 0.96,
+  }),
+  show: (i = 0) => ({
+    opacity: 1,
+    y: 0,
+    rotate: 0,
+    scale: 1,
+    transition: { duration: 0.5, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] },
+  }),
+};
+
+/* Ascent profile in a 1000 x 300 coordinate space. Single source of truth:
+   the SVG path uses it verbatim; the moving marker scales it to pixels. */
+const TRAJ_PATH =
+  "M 20 275 C 180 275, 260 120, 480 80 C 680 45, 840 35, 980 28";
+
+function scalePath(path, sx, sy) {
+  let i = 0;
+  return path.replace(/-?\d+(?:\.\d+)?/g, (n) => {
+    const factor = i % 2 === 0 ? sx : sy;
+    i += 1;
+    return (parseFloat(n) * factor).toFixed(1);
+  });
+}
+
 const pad2 = (n) => String(n).padStart(2, "0");
 
 const formatPrice = (n) => "$" + n.toLocaleString("en-US");
@@ -206,10 +250,9 @@ function Ticker() {
     "ORB-1 · NEXT WINDOW OPEN · KARMAN LINE 100 KM · ALTITUDE 408 KM · CREW 4 + 2 · PAD 39A · MANIFEST 2026 · ";
   return (
     <div className="or-ticker" aria-hidden="true">
-      <div className="or-ticker-track">
-        <span>{line.repeat(2)}</span>
-        <span>{line.repeat(2)}</span>
-      </div>
+      <VelocityMarquee baseVelocity={2} className="or-ticker-vm" chunkClassName="or-ticker-chunk">
+        {line}
+      </VelocityMarquee>
     </div>
   );
 }
@@ -231,7 +274,7 @@ function SectionHead({ number, title, note }) {
   return (
     <div className="or-section-head">
       <span className="or-section-num">{number}</span>
-      <h2 className="or-section-title">{title}</h2>
+      <Reveal text={title} as="h2" className="or-section-title" />
       {note && <span className="or-section-note">{note}</span>}
     </div>
   );
@@ -303,20 +346,171 @@ function Footer({ onNavigate }) {
   );
 }
 
+/* ---------- Signature: scroll-drawn trajectory ---------- */
+
+function TrajectorySection() {
+  const sectionRef = useRef(null);
+  const stageRef = useRef(null);
+  const [stageSize, setStageSize] = useState({ w: 1000, h: 300 });
+  const [altitude, setAltitude] = useState(0);
+  const [velocity, setVelocity] = useState("0.00");
+  const [downrange, setDownrange] = useState(0);
+  const [phase, setPhase] = useState("LAUNCH");
+
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end end"],
+  });
+  const progress = useSpring(scrollYProgress, {
+    stiffness: 90,
+    damping: 26,
+    mass: 0.4,
+  });
+
+  const altValue = useTransform(progress, [0, 1], [0, 408]);
+  const velValue = useTransform(progress, [0, 1], [0, 7.66]);
+  const downValue = useTransform(progress, [0, 1], [0, 1850]);
+  const offsetDistance = useTransform(progress, [0, 1], ["0%", "100%"]);
+
+  useMotionValueEvent(altValue, "change", (v) => {
+    const next = Math.round(v);
+    setAltitude((prev) => (prev === next ? prev : next));
+  });
+  useMotionValueEvent(velValue, "change", (v) => {
+    const next = v.toFixed(2);
+    setVelocity((prev) => (prev === next ? prev : next));
+  });
+  useMotionValueEvent(downValue, "change", (v) => {
+    const next = Math.round(v);
+    setDownrange((prev) => (prev === next ? prev : next));
+  });
+  useMotionValueEvent(progress, "change", (v) => {
+    const next =
+      v < 0.18 ? "LAUNCH" : v < 0.62 ? "ASCENT" : v < 0.97 ? "ORBIT INSERTION" : "IN ORBIT";
+    setPhase((prev) => (prev === next ? prev : next));
+  });
+
+  useEffect(() => {
+    const el = stageRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return undefined;
+    const ro = new ResizeObserver((entries) => {
+      const rect = entries[0].contentRect;
+      setStageSize((prev) =>
+        Math.abs(prev.w - rect.width) > 1 || Math.abs(prev.h - rect.height) > 1
+          ? { w: rect.width, h: rect.height }
+          : prev
+      );
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const offsetPath = `path("${scalePath(TRAJ_PATH, stageSize.w / 1000, stageSize.h / 300)}")`;
+
+  return (
+    <section className="or-traj" ref={sectionRef} aria-label="ORB-1 flight trajectory">
+      <div className="or-traj-sticky">
+        <div className="or-traj-inner">
+          <SectionHead number="02" title="TRAJECTORY" note="SCROLL TO FLY — ASCENT PROFILE" />
+
+          <div className="or-traj-stage" ref={stageRef}>
+            <span className="or-traj-gridline" style={{ top: "9.3%" }} aria-hidden="true">
+              <span className="or-traj-gridlabel">408 KM — TARGET ORBIT</span>
+            </span>
+            <span className="or-traj-gridline" style={{ top: "71.5%" }} aria-hidden="true">
+              <span className="or-traj-gridlabel">100 KM — KARMAN LINE</span>
+            </span>
+
+            <svg
+              className="or-traj-svg"
+              viewBox="0 0 1000 300"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            >
+              <path
+                d={TRAJ_PATH}
+                fill="none"
+                stroke="#111111"
+                strokeWidth="1.5"
+                strokeDasharray="6 6"
+                opacity="0.35"
+              />
+              <motion.path
+                d={TRAJ_PATH}
+                fill="none"
+                stroke="#ff4d00"
+                strokeWidth="2.5"
+                style={{ pathLength: progress }}
+              />
+              <circle cx="20" cy="275" r="5" fill="#111111" />
+              <circle cx="980" cy="28" r="5" fill="#ff4d00" stroke="#111111" strokeWidth="2" />
+            </svg>
+
+            <motion.div
+              className="or-traj-dot"
+              style={{ offsetDistance, offsetPath, offsetRotate: "0deg" }}
+              aria-hidden="true"
+            >
+              <span className="or-traj-dot-tag">ORB-1</span>
+            </motion.div>
+
+            <span className="or-traj-endlabel or-traj-endlabel--start">LAUNCH — PAD 39A</span>
+            <span className="or-traj-endlabel or-traj-endlabel--end">ORBIT INSERTION</span>
+          </div>
+
+          <p className="or-figure-caption or-traj-caption">
+            FIG. 02 — ORB-1 ASCENT PROFILE, PAD TO STATION RENDEZVOUS. KEEP SCROLLING TO FLY IT.
+          </p>
+
+          <div className="or-telemetry or-traj-telemetry" aria-label="Ascent telemetry">
+            <div className="or-telemetry-cell">
+              <span className="or-telemetry-label">ALTITUDE</span>
+              <span className="or-telemetry-value">{altitude} KM</span>
+            </div>
+            <div className="or-telemetry-cell">
+              <span className="or-telemetry-label">VELOCITY</span>
+              <span className="or-telemetry-value">{velocity} KM/S</span>
+            </div>
+            <div className="or-telemetry-cell">
+              <span className="or-telemetry-label">DOWNRANGE</span>
+              <span className="or-telemetry-value">{downrange.toLocaleString("en-US")} KM</span>
+            </div>
+            <div className="or-telemetry-cell">
+              <span className="or-telemetry-label">FLIGHT PHASE</span>
+              <span className="or-telemetry-value or-telemetry-value--orange">{phase}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ---------- Page: PROGRAMME ---------- */
 
 function ProgrammePage({ onBook }) {
+  const heroRef = useRef(null);
+  const { scrollYProgress: heroProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"],
+  });
+  const heroSmooth = useSpring(heroProgress, { stiffness: 90, damping: 26, mass: 0.4 });
+  const planetRotate = useTransform(heroSmooth, [0, 1], [0, 40]);
+  const planetY = useTransform(heroSmooth, [0, 1], [0, 70]);
+  const copyY = useTransform(heroSmooth, [0, 1], [0, -50]);
+  const copyOpacity = useTransform(heroSmooth, [0, 1], [1, 0.3]);
+
   return (
     <div className="or-page">
       {/* Hero */}
-      <section className="or-hero">
+      <section className="or-hero" ref={heroRef}>
         <div className="or-hero-topstrip">
           <span>EST. 2026 · FLIGHT ORB-1 · KARMAN LINE 100 KM</span>
           <span className="or-hero-topstrip-right">DOSSIER NO. 01 / REV. C</span>
         </div>
 
         <div className="or-hero-grid">
-          <div className="or-hero-copy">
+          <motion.div className="or-hero-copy" style={{ y: copyY, opacity: copyOpacity }}>
             <motion.p className="or-hero-kicker" variants={fadeUp} initial="hidden" animate="show" custom={0}>
               CIVILIAN SPACE PROGRAMME — NOW BOARDING
             </motion.p>
@@ -329,15 +523,19 @@ function ProgrammePage({ onBook }) {
               you home changed.
             </motion.p>
             <motion.div className="or-hero-actions" variants={fadeUp} initial="hidden" animate="show" custom={3}>
-              <button type="button" className="or-btn or-btn-solid" onClick={() => onBook("orbital")}>
-                BOOK A SEAT <ArrowRight size={16} />
-              </button>
+              <Magnetic strength={0.3}>
+                <button type="button" className="or-btn or-btn-solid" onClick={() => onBook("orbital")}>
+                  BOOK A SEAT <ArrowRight size={16} />
+                </button>
+              </Magnetic>
               <span className="or-hero-note">FULLY REFUNDABLE DEPOSIT · MEDICAL SCREENING INCLUDED</span>
             </motion.div>
-          </div>
+          </motion.div>
 
           <motion.div className="or-hero-art" variants={fadeUp} initial="hidden" animate="show" custom={2}>
-            <PlanetArt />
+            <motion.div className="or-planet-motion" style={{ rotate: planetRotate, y: planetY }}>
+              <PlanetArt />
+            </motion.div>
             <MissionPatch />
           </motion.div>
         </div>
@@ -392,11 +590,13 @@ function ProgrammePage({ onBook }) {
             custom={1}
           >
             <div className="or-figure-media">
-              <img
-                src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1400&q=80&auto=format&fit=crop"
-                alt="Earth seen from orbit at night"
-                loading="lazy"
-              />
+              <Parallax speed={0.1} className="or-parallax-fill">
+                <img
+                  src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1400&q=80&auto=format&fit=crop"
+                  alt="Earth seen from orbit at night"
+                  loading="lazy"
+                />
+              </Parallax>
             </div>
             <figcaption className="or-figure-caption">
               FIG. 01 — EARTH FROM 408 KM. SIXTEEN SUNRISES PER DAY.
@@ -405,15 +605,18 @@ function ProgrammePage({ onBook }) {
         </div>
       </section>
 
-      {/* 02 / Flights — boarding passes */}
+      {/* 02 / Trajectory — scroll-drawn flight path */}
+      <TrajectorySection />
+
+      {/* 03 / Flights — boarding passes */}
       <section className="or-section">
-        <SectionHead number="02" title="FLIGHTS" note="SELECT A FLIGHT TO BOOK" />
+        <SectionHead number="03" title="FLIGHTS" note="SELECT A FLIGHT TO BOOK" />
         <div className="or-flights-grid">
           {FLIGHTS.map((f, i) => (
             <motion.article
               key={f.id}
               className="or-pass"
-              variants={fadeUp}
+              variants={passVariant}
               initial="hidden"
               whileInView="show"
               viewport={{ once: true, margin: "-60px" }}
@@ -478,11 +681,13 @@ function VehiclePage() {
 
         <motion.figure className="or-figure or-figure--wide" variants={fadeUp} initial="hidden" animate="show" custom={0}>
           <div className="or-figure-media or-figure-media--wide">
-            <img
-              src="https://images.unsplash.com/photo-1517976487492-5750f3195933?w=1800&q=80&auto=format&fit=crop"
-              alt="ORB-1 launch vehicle lifting off from the pad"
-              loading="lazy"
-            />
+            <Parallax speed={0.1} className="or-parallax-fill">
+              <img
+                src="https://images.unsplash.com/photo-1517976487492-5750f3195933?w=1800&q=80&auto=format&fit=crop"
+                alt="ORB-1 launch vehicle lifting off from the pad"
+                loading="lazy"
+              />
+            </Parallax>
             <Stamp text="APPROVED FOR FLIGHT" className="or-stamp--figure" />
           </div>
           <figcaption className="or-figure-caption">FIG. 01 — ORB-1 ON PAD 39A, T-MINUS 10 MINUTES.</figcaption>
@@ -547,7 +752,9 @@ function CrewPage() {
               custom={i}
             >
               <div className="or-crew-media">
-                <img src={c.img} alt={c.alt} loading="lazy" />
+                <Parallax speed={0.1} className="or-parallax-fill">
+                  <img src={c.img} alt={c.alt} loading="lazy" />
+                </Parallax>
                 <span className="or-crew-index">{c.index}</span>
               </div>
               <div className="or-crew-body">
@@ -814,7 +1021,7 @@ export default function Orbital() {
   const [selectedFlight, setSelectedFlight] = useState("orbital");
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    scrollTopInstant();
   }, [page]);
 
   const goTo = (next) => setPage(next);
@@ -826,6 +1033,7 @@ export default function Orbital() {
 
   return (
     <div className="or-root">
+      <ProgressBar color="#ff4d00" />
       <header className="or-nav">
         <button type="button" className="or-nav-brand" onClick={() => goTo("programme")} aria-label="ORBITAL — Programme">
           <span className="or-nav-name">ORBITAL</span>

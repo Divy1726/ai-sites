@@ -1,5 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import {
+  motion,
+  AnimatePresence,
+  useScroll,
+  useTransform,
+  useSpring,
+  useMotionValueEvent,
+} from "framer-motion";
 import {
   ShoppingBag,
   Plus,
@@ -9,6 +16,13 @@ import {
   ArrowUpRight,
   Quote,
 } from "lucide-react";
+import Parallax from "../fx/Parallax";
+import Reveal from "../fx/Reveal";
+import ProgressBar from "../fx/ProgressBar";
+import VelocityMarquee from "../fx/VelocityMarquee";
+import Magnetic from "../fx/Magnetic";
+import TiltCard from "../fx/TiltCard";
+import { scrollTopInstant, getLenis } from "../lenis";
 import "./Voidwear.css";
 
 // ---------------------------------------------------------------------------
@@ -174,6 +188,9 @@ const CATEGORIES = ["All", "Hoodies", "Tees", "Accessories"];
 
 const MARQUEE_TEXT = "NEW DROP — NO RESTOCK — VOIDWEAR — DROP 004 LIVE — ";
 
+// Spring used to smooth every scroll-linked transform on this site.
+const SCROLL_SPRING = { stiffness: 90, damping: 26, mass: 0.4 };
+
 // ---------------------------------------------------------------------------
 // Motion presets
 // ---------------------------------------------------------------------------
@@ -184,6 +201,18 @@ const fadeUp = {
     opacity: 1,
     y: 0,
     transition: { duration: 0.7, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] },
+  }),
+};
+
+// Product cards swing in with a slight rotation + scale settle.
+const cardReveal = {
+  hidden: { opacity: 0, y: 56, rotate: -2.5, scale: 0.94 },
+  show: (i = 0) => ({
+    opacity: 1,
+    y: 0,
+    rotate: 0,
+    scale: 1,
+    transition: { duration: 0.75, delay: i * 0.12, ease: [0.22, 1, 0.36, 1] },
   }),
 };
 
@@ -257,20 +286,45 @@ function SpinBadge() {
 }
 
 // ---------------------------------------------------------------------------
-// Shared product card
+// Giant outline background word that drifts sideways on scroll
+// ---------------------------------------------------------------------------
+
+function BgWord({ text, className = "", from = 60, to = -60 }) {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"],
+  });
+  const xRaw = useTransform(scrollYProgress, [0, 1], [from, to]);
+  const x = useSpring(xRaw, SCROLL_SPRING);
+
+  return (
+    <motion.span
+      ref={ref}
+      className={`vw-bg-word ${className}`}
+      style={{ x }}
+      aria-hidden="true"
+    >
+      {text}
+    </motion.span>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Shared product card — parallax image + 3D tilt visual, rotate/scale reveal
 // ---------------------------------------------------------------------------
 
 function ProductCard({ product, isAdded, onAdd, index = 0, layoutMode = false }) {
   const motionProps = layoutMode
     ? {
         layout: true,
-        initial: { opacity: 0, scale: 0.92 },
-        animate: { opacity: 1, scale: 1 },
-        exit: { opacity: 0, scale: 0.92 },
+        initial: { opacity: 0, scale: 0.92, rotate: -1.5 },
+        animate: { opacity: 1, scale: 1, rotate: 0 },
+        exit: { opacity: 0, scale: 0.92, rotate: 1.5 },
         transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] },
       }
     : {
-        variants: fadeUp,
+        variants: cardReveal,
         initial: "hidden",
         whileInView: "show",
         viewport: { once: true, margin: "-60px" },
@@ -279,43 +333,147 @@ function ProductCard({ product, isAdded, onAdd, index = 0, layoutMode = false })
 
   return (
     <motion.article className="vw-card" {...motionProps}>
-      <div className="vw-card-media">
-        <img src={product.img} alt={product.name} loading="lazy" />
-        <span className="vw-card-sweep" />
-        <span className={`vw-card-tag vw-tag-${product.tag.toLowerCase()}`}>
-          {product.tag}
-        </span>
-        <button
-          type="button"
-          className={`vw-add${isAdded ? " vw-added" : ""}`}
-          onClick={() => onAdd(product.id)}
-        >
-          {isAdded ? (
-            <>
-              ADDED <Check size={16} strokeWidth={3} />
-            </>
-          ) : (
-            <>
-              ADD <Plus size={16} strokeWidth={3} />
-            </>
-          )}
-        </button>
-      </div>
-      <div className="vw-card-info">
-        <h3>{product.name}</h3>
-        <span className="vw-price">${product.price}</span>
-      </div>
+      <TiltCard as="div" className="vw-card-tilt" max={6}>
+        <div className="vw-card-media">
+          <Parallax className="vw-parallax-fill" speed={0.1}>
+            <img src={product.img} alt={product.name} loading="lazy" />
+          </Parallax>
+          <span className="vw-card-sweep" />
+          <span className={`vw-card-tag vw-tag-${product.tag.toLowerCase()}`}>
+            {product.tag}
+          </span>
+          <button
+            type="button"
+            className={`vw-add${isAdded ? " vw-added" : ""}`}
+            onClick={() => onAdd(product.id)}
+          >
+            {isAdded ? (
+              <>
+                ADDED <Check size={16} strokeWidth={3} />
+              </>
+            ) : (
+              <>
+                ADD <Plus size={16} strokeWidth={3} />
+              </>
+            )}
+          </button>
+        </div>
+        <div className="vw-card-info">
+          <h3>{product.name}</h3>
+          <span className="vw-price">${product.price}</span>
+        </div>
+      </TiltCard>
     </motion.article>
   );
 }
 
 // ---------------------------------------------------------------------------
-// Shared footer (every page)
+// SIGNATURE: pinned horizontal lookbook (Home)
+// Outer section is 300vh tall; a sticky 100vh stage pins while vertical
+// scroll drives the panel track sideways. On mobile (<768px) the pin is
+// removed and the track becomes a native horizontal snap-scroll row.
+// ---------------------------------------------------------------------------
+
+function PinnedLookbook({ goTo }) {
+  const sectionRef = useRef(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [activeLook, setActiveLook] = useState(1);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)");
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end end"],
+  });
+
+  // 6 panels at 44vw + 20px gaps + side padding ≈ 275vw of track.
+  // Shifting by (275 - 100) / 275 ≈ 64% of the track width lands the
+  // last panel flush against the right edge of the viewport.
+  const trackXRaw = useTransform(scrollYProgress, [0, 1], ["0%", "-64%"]);
+  const trackX = useSpring(trackXRaw, SCROLL_SPRING);
+  const progressScaleX = useSpring(scrollYProgress, SCROLL_SPRING);
+
+  useMotionValueEvent(scrollYProgress, "change", (v) => {
+    const next = Math.min(LOOKS.length, Math.max(1, Math.round(v * (LOOKS.length - 1)) + 1));
+    setActiveLook((prev) => (prev === next ? prev : next));
+  });
+
+  return (
+    <section className="vw-hscroll" ref={sectionRef}>
+      <div className="vw-hscroll-sticky">
+        <div className="vw-hscroll-head">
+          <div>
+            <p className="vw-eyebrow">03 — LOOKBOOK</p>
+            <Reveal text="SHOT ON CONCRETE" as="h2" className="vw-h2" />
+          </div>
+          <button
+            type="button"
+            className="vw-scroll-hint vw-hint-btn"
+            onClick={() => goTo("lookbook")}
+          >
+            FULL LOOKBOOK <ArrowRight size={16} strokeWidth={2.5} />
+          </button>
+        </div>
+
+        <div className="vw-hscroll-viewport">
+          <motion.div
+            className="vw-hscroll-track"
+            style={isMobile ? undefined : { x: trackX }}
+          >
+            {LOOKS.map((look, i) => (
+              <figure className="vw-hscroll-panel" key={look.cap}>
+                <span className="vw-hscroll-num" aria-hidden="true">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <div className="vw-hscroll-media">
+                  <Parallax className="vw-parallax-fill" speed={0.12}>
+                    <img src={look.img} alt={look.cap} loading="lazy" />
+                  </Parallax>
+                </div>
+                <figcaption>{look.cap}</figcaption>
+              </figure>
+            ))}
+          </motion.div>
+        </div>
+
+        <div className="vw-hscroll-progress" aria-hidden="true">
+          <span className="vw-hscroll-count">
+            {String(activeLook).padStart(2, "0")} / {String(LOOKS.length).padStart(2, "0")}
+          </span>
+          <span className="vw-hscroll-line">
+            <motion.span
+              className="vw-hscroll-line-fill"
+              style={{ scaleX: progressScaleX }}
+            />
+          </span>
+          <span className="vw-hscroll-hint">SCROLL</span>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Shared footer (every page) — giant outline word drifts on scroll
 // ---------------------------------------------------------------------------
 
 function SiteFooter({ goTo }) {
+  const footerRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: footerRef,
+    offset: ["start end", "end end"],
+  });
+  const giantXRaw = useTransform(scrollYProgress, [0, 1], [-70, 70]);
+  const giantX = useSpring(giantXRaw, SCROLL_SPRING);
+
   return (
-    <footer className="vw-footer">
+    <footer className="vw-footer" ref={footerRef}>
       <div className="vw-footer-top">
         <div className="vw-footer-col">
           <h4>VOIDWEAR</h4>
@@ -341,7 +499,11 @@ function SiteFooter({ goTo }) {
           <button
             type="button"
             className="vw-footer-link"
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            onClick={() => {
+              const lenis = getLenis();
+              if (lenis) lenis.scrollTo(0, { duration: 1.2 });
+              else window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
           >
             Back to top
           </button>
@@ -354,9 +516,9 @@ function SiteFooter({ goTo }) {
           <p>RESTOCK: NEVER</p>
         </div>
       </div>
-      <div className="vw-footer-giant" aria-hidden="true">
+      <motion.div className="vw-footer-giant" style={{ x: giantX }} aria-hidden="true">
         VOIDWEAR
-      </div>
+      </motion.div>
       <div className="vw-footer-bottom">
         <span>© 2026 VOIDWEAR</span>
         <span>NO RESTOCK — NO SEASONS — NO APOLOGY</span>
@@ -373,11 +535,40 @@ function HomePage({ cartCount, added, onAdd, goTo }) {
   const { days, hours, mins, secs } = useCountdown();
   const featuredAdded = !!added[FEATURED.id];
 
+  // Hero parallax: media lags behind, copy races ahead and fades,
+  // and the two title lines split apart in opposite X directions.
+  const heroRef = useRef(null);
+  const { scrollYProgress: heroProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"],
+  });
+  const heroMediaY = useSpring(
+    useTransform(heroProgress, [0, 1], [0, 120]),
+    SCROLL_SPRING
+  );
+  const heroCopyY = useSpring(
+    useTransform(heroProgress, [0, 1], [0, -60]),
+    SCROLL_SPRING
+  );
+  const heroOpacity = useTransform(heroProgress, [0, 0.85], [1, 0]);
+  const heroScale = useTransform(heroProgress, [0, 1], [1, 0.96]);
+  const lineLeftX = useSpring(
+    useTransform(heroProgress, [0, 1], [0, -120]),
+    SCROLL_SPRING
+  );
+  const lineRightX = useSpring(
+    useTransform(heroProgress, [0, 1], [0, 120]),
+    SCROLL_SPRING
+  );
+
   return (
     <>
       {/* ---------------------------------------------------------- HERO */}
-      <section className="vw-hero">
-        <div className="vw-hero-copy">
+      <section className="vw-hero" ref={heroRef}>
+        <motion.div
+          className="vw-hero-copy"
+          style={{ y: heroCopyY, opacity: heroOpacity, scale: heroScale }}
+        >
           <motion.p
             className="vw-hero-kicker"
             variants={fadeUp}
@@ -389,23 +580,27 @@ function HomePage({ cartCount, added, onAdd, goTo }) {
           </motion.p>
 
           <h1 className="vw-hero-title">
-            <motion.span
-              className="vw-hero-line"
-              variants={lineReveal}
-              initial="hidden"
-              animate="show"
-              custom={1}
-            >
-              VOID
+            <motion.span className="vw-hero-linewrap" style={{ x: lineLeftX }}>
+              <motion.span
+                className="vw-hero-line"
+                variants={lineReveal}
+                initial="hidden"
+                animate="show"
+                custom={1}
+              >
+                VOID
+              </motion.span>
             </motion.span>
-            <motion.span
-              className="vw-hero-line vw-hero-line-outline"
-              variants={lineReveal}
-              initial="hidden"
-              animate="show"
-              custom={2}
-            >
-              WEAR
+            <motion.span className="vw-hero-linewrap" style={{ x: lineRightX }}>
+              <motion.span
+                className="vw-hero-line vw-hero-line-outline"
+                variants={lineReveal}
+                initial="hidden"
+                animate="show"
+                custom={2}
+              >
+                WEAR
+              </motion.span>
             </motion.span>
           </h1>
 
@@ -427,20 +622,24 @@ function HomePage({ cartCount, added, onAdd, goTo }) {
             animate="show"
             custom={4}
           >
-            <button
-              type="button"
-              className="vw-btn vw-btn-acid"
-              onClick={() => goTo("shop")}
-            >
-              Shop the drop <ArrowRight size={18} strokeWidth={2.5} />
-            </button>
-            <button
-              type="button"
-              className="vw-btn vw-btn-outline"
-              onClick={() => goTo("manifesto")}
-            >
-              Manifesto
-            </button>
+            <Magnetic>
+              <button
+                type="button"
+                className="vw-btn vw-btn-acid"
+                onClick={() => goTo("shop")}
+              >
+                Shop the drop <ArrowRight size={18} strokeWidth={2.5} />
+              </button>
+            </Magnetic>
+            <Magnetic>
+              <button
+                type="button"
+                className="vw-btn vw-btn-outline"
+                onClick={() => goTo("manifesto")}
+              >
+                Manifesto
+              </button>
+            </Magnetic>
           </motion.div>
 
           <motion.div
@@ -460,16 +659,19 @@ function HomePage({ cartCount, added, onAdd, goTo }) {
               <strong>48H</strong> TO GONE
             </span>
           </motion.div>
-        </div>
+        </motion.div>
 
         <motion.div
           className="vw-hero-media"
+          style={{ y: heroMediaY }}
           initial={{ opacity: 0, x: 60 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.9, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
         >
           <div className="vw-hero-imgwrap">
-            <img src={HERO_IMG} alt="VOIDWEAR Drop 004 editorial" />
+            <Parallax className="vw-parallax-fill" speed={0.14}>
+              <img src={HERO_IMG} alt="VOIDWEAR Drop 004 editorial" />
+            </Parallax>
             <span className="vw-hero-tint" />
             <span className="vw-hero-tag">DROP 004 / SS26</span>
           </div>
@@ -478,12 +680,13 @@ function HomePage({ cartCount, added, onAdd, goTo }) {
       </section>
 
       {/* ---------------------------------------------------------- MARQUEE */}
-      <div className="vw-marquee" aria-hidden="true">
-        <div className="vw-marquee-track">
-          <span>{MARQUEE_TEXT.repeat(3)}</span>
-          <span>{MARQUEE_TEXT.repeat(3)}</span>
-        </div>
-      </div>
+      <VelocityMarquee
+        className="vw-marquee vw-velocity-marquee"
+        chunkClassName="vw-marquee-chunk"
+        baseVelocity={2.4}
+      >
+        <span className="vw-marquee-text">{MARQUEE_TEXT.repeat(2)}</span>
+      </VelocityMarquee>
 
       {/* ---------------------------------------------------------- COUNTDOWN */}
       <section className="vw-countdown">
@@ -495,7 +698,7 @@ function HomePage({ cartCount, added, onAdd, goTo }) {
           viewport={{ once: true, margin: "-80px" }}
         >
           <p className="vw-eyebrow">01 — THE CLOCK</p>
-          <h2 className="vw-h2">DROP 004 ENDS IN</h2>
+          <Reveal text="DROP 004 ENDS IN" as="h2" className="vw-h2" />
         </motion.div>
 
         <motion.div
@@ -541,7 +744,9 @@ function HomePage({ cartCount, added, onAdd, goTo }) {
           whileInView="show"
           viewport={{ once: true, margin: "-80px" }}
         >
-          <img src={FEATURED.img} alt={FEATURED.name} loading="lazy" />
+          <Parallax className="vw-parallax-fill" speed={0.12}>
+            <img src={FEATURED.img} alt={FEATURED.name} loading="lazy" />
+          </Parallax>
           <span className="vw-hero-tint" />
           <span className="vw-hero-tag">FEATURED / DROP 004</span>
         </motion.div>
@@ -598,7 +803,7 @@ function HomePage({ cartCount, added, onAdd, goTo }) {
         >
           <div>
             <p className="vw-eyebrow">02 — THE DROP</p>
-            <h2 className="vw-h2">SHOP DROP 004</h2>
+            <Reveal text="SHOP DROP 004" as="h2" className="vw-h2" />
           </div>
           <p className="vw-shop-count">
             CART ({cartCount}) — 9 PIECES — ALL FINAL
@@ -634,45 +839,8 @@ function HomePage({ cartCount, added, onAdd, goTo }) {
         </motion.div>
       </section>
 
-      {/* ---------------------------------------------------------- LOOKBOOK STRIP */}
-      <section className="vw-lookbook">
-        <motion.div
-          className="vw-section-head vw-section-head-row"
-          variants={fadeUp}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, margin: "-80px" }}
-        >
-          <div>
-            <p className="vw-eyebrow">03 — LOOKBOOK</p>
-            <h2 className="vw-h2">SHOT ON CONCRETE</h2>
-          </div>
-          <button
-            type="button"
-            className="vw-scroll-hint vw-hint-btn"
-            onClick={() => goTo("lookbook")}
-          >
-            FULL LOOKBOOK <ArrowRight size={16} strokeWidth={2.5} />
-          </button>
-        </motion.div>
-
-        <div className="vw-look-row">
-          {LOOKS.map((look, i) => (
-            <motion.figure
-              className="vw-look"
-              key={look.cap}
-              variants={fadeUp}
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, margin: "-40px" }}
-              custom={i % 3}
-            >
-              <img src={look.img} alt={look.cap} loading="lazy" />
-              <figcaption>{look.cap}</figcaption>
-            </motion.figure>
-          ))}
-        </div>
-      </section>
+      {/* ---------------------------------------------------------- LOOKBOOK (PINNED HORIZONTAL) */}
+      <PinnedLookbook goTo={goTo} />
 
       {/* ---------------------------------------------------------- STREET QUOTES */}
       <section className="vw-quotes">
@@ -684,7 +852,7 @@ function HomePage({ cartCount, added, onAdd, goTo }) {
           viewport={{ once: true, margin: "-80px" }}
         >
           <p className="vw-eyebrow">04 — STREET TALK</p>
-          <h2 className="vw-h2">WORD ON THE STREET</h2>
+          <Reveal text="WORD ON THE STREET" as="h2" className="vw-h2" />
         </motion.div>
 
         <div className="vw-quotes-grid">
@@ -712,6 +880,7 @@ function HomePage({ cartCount, added, onAdd, goTo }) {
 
       {/* ---------------------------------------------------------- MANIFESTO TEASER */}
       <section className="vw-manifesto">
+        <BgWord text="VOID" className="vw-bg-word-manifesto" from={90} to={-90} />
         <p className="vw-eyebrow">05 — MANIFESTO</p>
         <h2 className="vw-manifesto-lines">
           {[
@@ -784,7 +953,7 @@ function ShopPage({ cartCount, added, onAdd }) {
       >
         <div>
           <p className="vw-eyebrow">DROP 004 — FULL RANGE</p>
-          <h2 className="vw-h2">SHOP ALL</h2>
+          <Reveal text="SHOP ALL" as="h2" className="vw-h2" />
         </div>
         <p className="vw-shop-count">
           {visible.length} PRODUCTS — CART ({cartCount}) — ALL FINAL
@@ -837,7 +1006,7 @@ function ShopPage({ cartCount, added, onAdd }) {
 }
 
 // ---------------------------------------------------------------------------
-// PAGE: LOOKBOOK (masonry grid, hover zoom + acid label)
+// PAGE: LOOKBOOK (masonry grid, parallax images, hover zoom + acid label)
 // ---------------------------------------------------------------------------
 
 function LookbookPage() {
@@ -851,7 +1020,7 @@ function LookbookPage() {
       >
         <div>
           <p className="vw-eyebrow">DROP 004 — EDITORIAL</p>
-          <h2 className="vw-h2">LOOKBOOK</h2>
+          <Reveal text="LOOKBOOK" as="h2" className="vw-h2" />
         </div>
         <p className="vw-shop-count">{LOOKBOOK_FULL.length} LOOKS — SHOT ON CONCRETE</p>
       </motion.div>
@@ -868,7 +1037,9 @@ function LookbookPage() {
             custom={i % 3}
           >
             <div className="vw-lb-media">
-              <img src={look.img} alt={look.cap} loading="lazy" />
+              <Parallax className="vw-lb-parallax" speed={0.1}>
+                <img src={look.img} alt={look.cap} loading="lazy" />
+              </Parallax>
               <span className="vw-lb-label">{look.cap}</span>
             </div>
             <figcaption>{look.cap}</figcaption>
@@ -890,6 +1061,7 @@ function LookbookPage() {
 function ManifestoPage({ goTo }) {
   return (
     <section className="vw-manifesto-page">
+      <BgWord text="NO RESTOCK" className="vw-bg-word-mani" from={-90} to={90} />
       <p className="vw-eyebrow">THE VOIDWEAR MANIFESTO</p>
 
       <h2 className="vw-mani-hero">
@@ -1004,9 +1176,9 @@ export default function Voidwear() {
     return () => Object.values(stash).forEach(clearTimeout);
   }, []);
 
-  // Reset scroll on every page switch
+  // Reset scroll on every page switch (instant, Lenis-aware)
   useEffect(() => {
-    window.scrollTo(0, 0);
+    scrollTopInstant();
   }, [page]);
 
   const handleAdd = (id) => {
@@ -1022,6 +1194,7 @@ export default function Voidwear() {
 
   return (
     <div className="vw-root">
+      <ProgressBar color="#d9ff3d" />
       {/* ---------------------------------------------------------- NAV */}
       <header className="vw-nav">
         <button

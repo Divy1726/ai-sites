@@ -1421,3 +1421,368 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ==========================================================================
+   NEXT-LEVEL SCROLL FX (vw- prefixed additions)
+   Parallax frames, velocity marquee, pinned horizontal lookbook,
+   drifting outline words. Transform/opacity only.
+   ========================================================================== */
+
+/* ---------------------------------------------------------- Parallax frames */
+
+/* Fill-frame used inside hero / featured / card / hscroll media boxes.
+   The parent keeps its original sizing (aspect-ratio, min-height, etc.). */
+.vw-parallax-fill {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Keep the original photo treatments on the parallax inner images and
+   neutralise the old absolute-position img rules inside parallax frames. */
+.vw-hero-imgwrap .fx-parallax-inner img,
+.vw-featured-media .fx-parallax-inner img,
+.vw-card-media .fx-parallax-inner img,
+.vw-hscroll-media .fx-parallax-inner img {
+  position: static;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.vw-hero-imgwrap .fx-parallax-inner img {
+  filter: grayscale(1) contrast(1.18) brightness(0.95);
+}
+
+.vw-featured-media .fx-parallax-inner img {
+  filter: grayscale(0.4) contrast(1.12);
+}
+
+.vw-card-media .fx-parallax-inner img {
+  filter: grayscale(0.35) contrast(1.08);
+  transition: filter 0.55s ease;
+}
+
+.vw-card:hover .vw-card-media .fx-parallax-inner img {
+  filter: grayscale(0) contrast(1.1);
+}
+
+.vw-hscroll-media .fx-parallax-inner img {
+  filter: grayscale(0.6) contrast(1.1);
+  transition: filter 0.4s ease;
+}
+
+.vw-hscroll-panel:hover .vw-hscroll-media .fx-parallax-inner img {
+  filter: grayscale(0) contrast(1.1);
+}
+
+/* Lookbook page: parallax frame takes the masonry aspect ratios that
+   used to live on the raw img elements. */
+.vw-lb-parallax {
+  width: 100%;
+  background: #1a1a1a;
+}
+
+.vw-lb-item:nth-child(3n + 1) .vw-lb-parallax {
+  aspect-ratio: 3 / 4;
+}
+
+.vw-lb-item:nth-child(3n + 2) .vw-lb-parallax {
+  aspect-ratio: 4 / 5;
+}
+
+.vw-lb-item:nth-child(3n) .vw-lb-parallax {
+  aspect-ratio: 1 / 1.15;
+}
+
+.vw-lb-media .fx-parallax-inner img {
+  filter: grayscale(0.55) contrast(1.1);
+  transition: filter 0.55s ease;
+}
+
+.vw-lb-item:hover .vw-lb-media .fx-parallax-inner img {
+  filter: grayscale(0) contrast(1.1);
+}
+
+/* ---------------------------------------------------------- Hero split lines */
+
+.vw-hero-linewrap {
+  display: block;
+  will-change: transform;
+}
+
+/* ---------------------------------------------------------- Velocity marquee */
+
+/* The band keeps the acid / tilted look; VelocityMarquee drives motion. */
+.vw-velocity-marquee {
+  padding: 14px 0;
+}
+
+.vw-marquee-chunk {
+  font-family: "Anton", sans-serif;
+  font-size: 26px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.vw-marquee-text {
+  white-space: nowrap;
+  padding-right: 8px;
+}
+
+/* ---------------------------------------------------------- Card tilt */
+
+.vw-card-tilt {
+  height: 100%;
+}
+
+/* ---------------------------------------------------------- Drifting outline words */
+
+.vw-bg-word {
+  position: absolute;
+  font-family: "Anton", sans-serif;
+  text-transform: uppercase;
+  line-height: 0.85;
+  color: transparent;
+  -webkit-text-stroke: 2px #262626;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+  will-change: transform;
+}
+
+.vw-manifesto,
+.vw-manifesto-page {
+  position: relative;
+  overflow: hidden;
+}
+
+.vw-manifesto > *:not(.vw-bg-word),
+.vw-manifesto-page > *:not(.vw-bg-word) {
+  position: relative;
+  z-index: 1;
+}
+
+.vw-bg-word-manifesto {
+  top: 24px;
+  right: -10px;
+  font-size: clamp(140px, 22vw, 320px);
+}
+
+.vw-bg-word-mani {
+  top: 90px;
+  left: -10px;
+  font-size: clamp(110px, 17vw, 260px);
+  -webkit-text-stroke-color: #232323;
+}
+
+/* ---------------------------------------------------------- Pinned horizontal lookbook */
+
+.vw-hscroll {
+  position: relative;
+  height: 300vh;
+}
+
+.vw-hscroll-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 28px;
+  padding: 96px 0 40px;
+}
+
+.vw-hscroll-head {
+  max-width: 1440px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 32px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.vw-hscroll-viewport {
+  overflow: hidden;
+  width: 100%;
+}
+
+.vw-hscroll-track {
+  display: flex;
+  gap: 20px;
+  width: max-content;
+  padding: 0 32px;
+  will-change: transform;
+}
+
+.vw-hscroll-panel {
+  position: relative;
+  flex: 0 0 44vw;
+  margin: 0;
+  border: 2px solid var(--vw-white);
+  background: var(--vw-panel);
+  transition: border-color 0.2s ease;
+}
+
+.vw-hscroll-panel:hover {
+  border-color: var(--vw-acid);
+}
+
+.vw-hscroll-num {
+  position: absolute;
+  top: -34px;
+  right: 14px;
+  z-index: 2;
+  font-family: "Anton", sans-serif;
+  font-size: clamp(64px, 7vw, 110px);
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 2px var(--vw-acid);
+  pointer-events: none;
+}
+
+.vw-hscroll-media {
+  position: relative;
+  height: 52vh;
+  min-height: 320px;
+  overflow: hidden;
+  background: #1a1a1a;
+}
+
+.vw-hscroll-panel figcaption {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  padding: 16px 18px;
+  border-top: 2px solid var(--vw-white);
+  background: #0a0a0a;
+  color: var(--vw-dim);
+}
+
+.vw-hscroll-progress {
+  max-width: 1440px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  color: var(--vw-dim);
+}
+
+.vw-hscroll-count {
+  color: var(--vw-acid);
+  font-weight: 700;
+  min-width: 72px;
+}
+
+.vw-hscroll-line {
+  flex: 1;
+  height: 3px;
+  background: #2c2c2c;
+  overflow: hidden;
+}
+
+.vw-hscroll-line-fill {
+  display: block;
+  height: 100%;
+  background: var(--vw-acid);
+  transform-origin: 0 50%;
+}
+
+.vw-hscroll-hint {
+  color: var(--vw-acid);
+}
+
+/* ---------------------------------------------------------- FX responsive */
+
+@media (max-width: 1024px) {
+  .vw-hscroll-panel {
+    flex-basis: 58vw;
+  }
+
+  .vw-hscroll-media {
+    height: 46vh;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Clean degrade: no pin, native horizontal snap-scroll row.
+     The JS also stops applying the track transform at this width. */
+  .vw-hscroll {
+    height: auto;
+    padding: 64px 0;
+  }
+
+  .vw-hscroll-sticky {
+    position: static;
+    height: auto;
+    overflow: visible;
+    padding: 0;
+    gap: 24px;
+  }
+
+  .vw-hscroll-head,
+  .vw-hscroll-progress {
+    padding: 0 20px;
+  }
+
+  .vw-hscroll-viewport {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: thin;
+    scrollbar-color: var(--vw-acid) #1a1a1a;
+    padding-bottom: 14px;
+  }
+
+  .vw-hscroll-viewport::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .vw-hscroll-viewport::-webkit-scrollbar-track {
+    background: #1a1a1a;
+  }
+
+  .vw-hscroll-viewport::-webkit-scrollbar-thumb {
+    background: var(--vw-acid);
+  }
+
+  .vw-hscroll-track {
+    padding: 0 20px;
+  }
+
+  .vw-hscroll-panel {
+    flex-basis: 80vw;
+    scroll-snap-align: start;
+  }
+
+  .vw-hscroll-media {
+    height: 400px;
+    min-height: 0;
+  }
+
+  .vw-hscroll-num {
+    top: -26px;
+    font-size: 56px;
+  }
+
+  .vw-bg-word-manifesto {
+    font-size: 150px;
+  }
+
+  .vw-bg-word-mani {
+    font-size: 110px;
+    top: 60px;
+  }
+}

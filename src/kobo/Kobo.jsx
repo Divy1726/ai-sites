@@ -1,5 +1,18 @@
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import {
+  motion,
+  AnimatePresence,
+  useScroll,
+  useTransform,
+  useSpring,
+  useMotionValueEvent,
+} from "framer-motion";
+import Parallax from "../fx/Parallax";
+import Reveal from "../fx/Reveal";
+import ProgressBar from "../fx/ProgressBar";
+import VelocityMarquee from "../fx/VelocityMarquee";
+import Magnetic from "../fx/Magnetic";
+import { scrollTopInstant } from "../lenis";
 import {
   Coffee,
   MapPin,
@@ -26,6 +39,20 @@ const fadeUp = {
     transition: { duration: 0.7, delay: i * 0.12, ease: [0.22, 1, 0.36, 1] },
   }),
 };
+
+// Card entrance: same calm rise as fadeUp, plus a slight scale settle.
+const cardUp = {
+  hidden: { opacity: 0, y: 28, scale: 0.97 },
+  visible: (i = 0) => ({
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.7, delay: i * 0.12, ease: [0.22, 1, 0.36, 1] },
+  }),
+};
+
+// Warm, calm spring used for every scrubbed scroll value on this site.
+const KB_SPRING = { stiffness: 80, damping: 28, mass: 0.45 };
 
 const menuData = {
   espresso: [
@@ -184,19 +211,55 @@ function formatTime(totalSeconds) {
   return `${m}:${String(s).padStart(2, "0")}`;
 }
 
+// Vertical Japanese edge label that drifts slowly against the scroll
+// as its section travels through the viewport.
+function ScrollVertical({ children, className = "", range = 70 }) {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"],
+  });
+  const yRaw = useTransform(scrollYProgress, [0, 1], [range, -range]);
+  const y = useSpring(yRaw, KB_SPRING);
+  return (
+    <motion.span ref={ref} className={className} style={{ y }} aria-hidden="true">
+      {children}
+    </motion.span>
+  );
+}
+
+// Giant outline background word that slides sideways on scroll.
+function BgWord({ children, className = "" }) {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"],
+  });
+  const xRaw = useTransform(scrollYProgress, [0, 1], [60, -60]);
+  const x = useSpring(xRaw, KB_SPRING);
+  return (
+    <motion.span ref={ref} className={className} style={{ x }} aria-hidden="true">
+      {children}
+    </motion.span>
+  );
+}
+
 function BeanCard({ bean, index, added, onToggle, grind, onGrind, showGrind }) {
+  // Alternating parallax speeds so neighbouring cards drift at
+  // different rates while the grid scrolls past.
+  const parallaxSpeed = index % 2 === 0 ? 0.08 : 0.18;
   return (
     <motion.article
       className="kb-bean-card"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: "-60px" }}
-      variants={fadeUp}
+      variants={cardUp}
       custom={index % 3}
     >
-      <div className="kb-bean-imgwrap">
+      <Parallax speed={parallaxSpeed} className="kb-bean-imgwrap">
         <img src={bean.img} alt={`${bean.name} coffee beans`} className="kb-bean-img" loading="lazy" />
-      </div>
+      </Parallax>
       <div className="kb-bean-body">
         <p className="kb-bean-region">{bean.region}</p>
         <h3 className="kb-bean-name">{bean.name}</h3>
@@ -304,7 +367,7 @@ function BrewGuidePage() {
 
   return (
     <section className="kb-section kb-guide-section">
-      <span className="kb-vertical kb-vertical-edge kb-vertical-right" aria-hidden="true">淹れ方</span>
+      <ScrollVertical className="kb-vertical kb-vertical-edge kb-vertical-right">淹れ方</ScrollVertical>
       <div className="kb-container">
         <motion.div
           className="kb-section-head kb-page-head"
@@ -313,7 +376,7 @@ function BrewGuidePage() {
           variants={fadeUp}
         >
           <p className="kb-label">— Brew Guide</p>
-          <h1 className="kb-section-title">Brew it <em>the slow way.</em></h1>
+          <Reveal as="h1" className="kb-section-title" text="Brew it the slow way." />
           <p className="kb-section-sub">
             Pick your method, follow the steps, and let the timer keep you honest.
             Same recipes we use at the pour-over bar in Shibuya.
@@ -420,8 +483,43 @@ export default function Kobo() {
   const [grindByBean, setGrindByBean] = useState({});
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    scrollTopInstant();
   }, [page]);
+
+  // ---- Hero parallax: arch image drifts slow, copy moves faster
+  // and fades, vertical Japanese text travels the other way. ----
+  const heroRef = useRef(null);
+  const { scrollYProgress: heroProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"],
+  });
+  const heroImgY = useSpring(useTransform(heroProgress, [0, 1], [0, 70]), KB_SPRING);
+  const heroCopyY = useSpring(useTransform(heroProgress, [0, 1], [0, 120]), KB_SPRING);
+  const heroCopyOpacity = useTransform(heroProgress, [0, 0.75], [1, 0]);
+  const heroVertY = useSpring(useTransform(heroProgress, [0, 1], [0, -140]), KB_SPRING);
+
+  // ---- Signature pinned brew process (Home): the cup fills and
+  // steams while the four steps light up one by one, all scrubbed
+  // by how far the tall outer section has scrolled. ----
+  const processRef = useRef(null);
+  const { scrollYProgress: processProgress } = useScroll({
+    target: processRef,
+    offset: ["start start", "end end"],
+  });
+  const processSmooth = useSpring(processProgress, KB_SPRING);
+  const cupLiquidScaleY = useTransform(processSmooth, [0.05, 0.95], [0.08, 1]);
+  const cupSteamOpacity = useTransform(processSmooth, [0, 0.3, 1], [0.15, 0.65, 1]);
+  const cupSteamScaleY = useTransform(processSmooth, [0, 1], [0.4, 1.6]);
+  const cupSteamY = useTransform(processSmooth, [0, 1], [6, -10]);
+  const [activeStep, setActiveStep] = useState(0);
+  const activeStepRef = useRef(0);
+  useMotionValueEvent(processProgress, "change", (value) => {
+    const next = Math.min(processSteps.length - 1, Math.floor(value * processSteps.length));
+    if (next !== activeStepRef.current) {
+      activeStepRef.current = next;
+      setActiveStep(next);
+    }
+  });
 
   const orderCount = Object.values(addedBeans).filter(Boolean).length;
 
@@ -497,13 +595,14 @@ export default function Kobo() {
   const renderHome = () => (
     <>
       {/* HERO */}
-      <section className="kb-hero">
+      <section className="kb-hero" ref={heroRef}>
         <div className="kb-hero-inner">
           <motion.div
             className="kb-hero-copy"
             initial="hidden"
             animate="visible"
             variants={{ visible: { transition: { staggerChildren: 0.12 } } }}
+            style={{ y: heroCopyY, opacity: heroCopyOpacity }}
           >
             <motion.p className="kb-label" variants={fadeUp} custom={0}>
               TOKYO — SPECIALTY COFFEE LAB
@@ -518,7 +617,9 @@ export default function Kobo() {
               one pair of hands at a time.
             </motion.p>
             <motion.div className="kb-hero-ctas" variants={fadeUp} custom={3}>
-              <button type="button" className="kb-btn kb-btn-dark" onClick={() => setPage("menu")}>See the Menu</button>
+              <Magnetic strength={0.3}>
+                <button type="button" className="kb-btn kb-btn-dark" onClick={() => setPage("menu")}>See the Menu</button>
+              </Magnetic>
               <button type="button" className="kb-btn kb-btn-outline" onClick={() => setPage("beans")}>Our Beans</button>
             </motion.div>
             <motion.div className="kb-hero-meta" variants={fadeUp} custom={4}>
@@ -535,11 +636,13 @@ export default function Kobo() {
             transition={{ duration: 0.9, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
           >
             <div className="kb-hero-imgwrap">
-              <img
-                src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=1200&q=80&auto=format&fit=crop"
-                alt="A cup of coffee on a wooden table in warm light"
-                className="kb-hero-img"
-              />
+              <motion.div className="kb-hero-img-inner" style={{ y: heroImgY }}>
+                <img
+                  src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=1200&q=80&auto=format&fit=crop"
+                  alt="A cup of coffee on a wooden table in warm light"
+                  className="kb-hero-img"
+                />
+              </motion.div>
             </div>
             <div className="kb-steam-card">
               <div className="kb-steam-wrap" aria-hidden="true">
@@ -550,54 +653,92 @@ export default function Kobo() {
               <Coffee size={34} strokeWidth={1.4} className="kb-steam-cup" />
               <p className="kb-steam-text">Fresh from<br />the pour-over bar</p>
             </div>
-            <span className="kb-vertical kb-vertical-hero" aria-hidden="true">コーヒー</span>
+            <span className="kb-vertical-hero" aria-hidden="true">
+              <motion.span className="kb-vertical kb-vertical-hero-text" style={{ y: heroVertY }}>
+                コーヒー
+              </motion.span>
+            </span>
           </motion.div>
         </div>
       </section>
 
-      {/* PROCESS STRIP */}
-      <section className="kb-section kb-process-section">
-        <div className="kb-container">
-          <motion.div
-            className="kb-section-head"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-80px" }}
-            variants={fadeUp}
-          >
-            <p className="kb-label">— From Bean to Cup</p>
-            <h2 className="kb-section-title">Four hands-on steps, <em>zero shortcuts.</em></h2>
-          </motion.div>
+      {/* SLOW MARQUEE BAND */}
+      <VelocityMarquee baseVelocity={1.2} className="kb-marquee-band" chunkClassName="kb-marquee-chunk">
+        <span className="kb-marquee-item">Slow Coffee</span>
+        <span className="kb-marquee-dot" aria-hidden="true" />
+        <span className="kb-marquee-item kb-marquee-item-jp">工房</span>
+        <span className="kb-marquee-dot" aria-hidden="true" />
+        <span className="kb-marquee-item">Tokyo — Shibuya</span>
+        <span className="kb-marquee-dot" aria-hidden="true" />
+        <span className="kb-marquee-item kb-marquee-item-jp">コーヒー</span>
+        <span className="kb-marquee-dot" aria-hidden="true" />
+        <span className="kb-marquee-item">Roasted Every Tuesday</span>
+        <span className="kb-marquee-dot" aria-hidden="true" />
+      </VelocityMarquee>
 
-          <div className="kb-process-grid">
-            {processSteps.map((step, i) => {
-              const Icon = step.icon;
-              return (
-                <motion.article
-                  key={step.num}
-                  className="kb-process-step"
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true, margin: "-60px" }}
-                  variants={fadeUp}
-                  custom={i}
-                >
-                  <div className="kb-process-icon">
-                    <Icon size={24} strokeWidth={1.6} />
-                  </div>
-                  <span className="kb-process-num">{step.num}</span>
-                  <h3 className="kb-process-title">{step.title}</h3>
-                  <p className="kb-process-desc">{step.desc}</p>
-                </motion.article>
-              );
-            })}
+      {/* PINNED BREW PROCESS — scroll scrubs the cup fill, the
+          steam, and the step highlight one by one. */}
+      <section className="kb-pinned-process" ref={processRef}>
+        <div className="kb-pinned-sticky">
+          <div className="kb-container kb-pinned-inner">
+            <div className="kb-section-head kb-pinned-head">
+              <p className="kb-label">— From Bean to Cup</p>
+              <Reveal className="kb-section-title" text="Four hands-on steps, zero shortcuts." />
+              <p className="kb-pinned-hint">Keep scrolling — watch the cup fill.</p>
+            </div>
+
+            <div className="kb-cup-scene" aria-hidden="true">
+              <div className="kb-cup-steam">
+                <motion.span
+                  className="kb-cup-steam-line kb-cup-steam-line-1"
+                  style={{ opacity: cupSteamOpacity, scaleY: cupSteamScaleY, y: cupSteamY }}
+                />
+                <motion.span
+                  className="kb-cup-steam-line kb-cup-steam-line-2"
+                  style={{ opacity: cupSteamOpacity, scaleY: cupSteamScaleY, y: cupSteamY }}
+                />
+                <motion.span
+                  className="kb-cup-steam-line kb-cup-steam-line-3"
+                  style={{ opacity: cupSteamOpacity, scaleY: cupSteamScaleY, y: cupSteamY }}
+                />
+              </div>
+              <div className="kb-cup">
+                <motion.div className="kb-cup-liquid" style={{ scaleY: cupLiquidScaleY }} />
+                <span className="kb-cup-handle" />
+              </div>
+              <div className="kb-cup-saucer" />
+            </div>
+
+            <div className="kb-pinned-steps">
+              {processSteps.map((step, i) => {
+                const Icon = step.icon;
+                const isActive = i === activeStep;
+                return (
+                  <article
+                    key={step.num}
+                    className={`kb-pinned-step ${isActive ? "kb-pinned-step-active" : ""}`}
+                  >
+                    <div className="kb-process-icon">
+                      <Icon size={24} strokeWidth={1.6} />
+                    </div>
+                    <span className="kb-process-num">{step.num}</span>
+                    <h3 className="kb-process-title">{step.title}</h3>
+                    <p className="kb-process-desc">{step.desc}</p>
+                  </article>
+                );
+              })}
+            </div>
+
+            <div className="kb-pinned-progress" aria-hidden="true">
+              <motion.div className="kb-pinned-progress-fill" style={{ scaleX: processSmooth }} />
+            </div>
           </div>
         </div>
       </section>
 
       {/* MENU PREVIEW */}
       <section className="kb-section kb-menu-section">
-        <span className="kb-vertical kb-vertical-edge" aria-hidden="true">メニュー</span>
+        <ScrollVertical className="kb-vertical kb-vertical-edge">メニュー</ScrollVertical>
         <div className="kb-container">
           <motion.div
             className="kb-section-head"
@@ -607,7 +748,7 @@ export default function Kobo() {
             variants={fadeUp}
           >
             <p className="kb-label">— The Menu</p>
-            <h2 className="kb-section-title">Poured to order, <em>never rushed.</em></h2>
+            <Reveal className="kb-section-title" text="Poured to order, never rushed." />
           </motion.div>
 
           {renderMenuTabs()}
@@ -623,6 +764,7 @@ export default function Kobo() {
 
       {/* BEANS PREVIEW */}
       <section className="kb-section kb-beans-section">
+        <BgWord className="kb-bg-word">KOBO</BgWord>
         <div className="kb-container">
           <motion.div
             className="kb-section-head"
@@ -632,7 +774,7 @@ export default function Kobo() {
             variants={fadeUp}
           >
             <p className="kb-label">— Fresh Beans</p>
-            <h2 className="kb-section-title">Six origins, <em>one small roaster.</em></h2>
+            <Reveal className="kb-section-title" text="Six origins, one small roaster." />
             <p className="kb-section-sub">
               Roasted every Tuesday in Shibuya. Whole bean or ground to your brewer.
             </p>
@@ -663,7 +805,7 @@ export default function Kobo() {
 
       {/* BREW PREVIEW */}
       <section className="kb-section kb-brew-section">
-        <span className="kb-vertical kb-vertical-edge kb-vertical-right" aria-hidden="true">淹れ方</span>
+        <ScrollVertical className="kb-vertical kb-vertical-edge kb-vertical-right">淹れ方</ScrollVertical>
         <div className="kb-container">
           <motion.div
             className="kb-section-head"
@@ -673,7 +815,7 @@ export default function Kobo() {
             variants={fadeUp}
           >
             <p className="kb-label">— Brew Guide</p>
-            <h2 className="kb-section-title">Four quiet steps <em>to a better cup.</em></h2>
+            <Reveal className="kb-section-title" text="Four quiet steps to a better cup." />
           </motion.div>
 
           <div className="kb-brew-grid">
@@ -684,7 +826,7 @@ export default function Kobo() {
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true, margin: "-60px" }}
-                variants={fadeUp}
+                variants={cardUp}
                 custom={i}
               >
                 <span className="kb-brew-num">{step.num}</span>
@@ -714,7 +856,7 @@ export default function Kobo() {
             variants={fadeUp}
           >
             <p className="kb-label">— Visit Us</p>
-            <h2 className="kb-section-title">Find us in <em>Shibuya.</em></h2>
+            <Reveal className="kb-section-title" text="Find us in Shibuya." />
             <p className="kb-visit-note">
               A small twelve-seat lab tucked behind the station. No reservations —
               just walk in, take a breath, and let us pour you something slow.
@@ -742,14 +884,14 @@ export default function Kobo() {
             viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="kb-visit-imgwrap">
+            <Parallax speed={0.12} className="kb-visit-imgwrap">
               <img
                 src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=1200&q=80&auto=format&fit=crop"
                 alt="Warm cafe interior with wooden tables"
                 className="kb-visit-img"
                 loading="lazy"
               />
-            </div>
+            </Parallax>
             <div className="kb-visit-chip">
               <Coffee size={15} /> Now pouring — Ethiopia Yirgacheffe
             </div>
@@ -761,7 +903,7 @@ export default function Kobo() {
 
   const renderMenuPage = () => (
     <section className="kb-section kb-menu-section">
-      <span className="kb-vertical kb-vertical-edge" aria-hidden="true">メニュー</span>
+      <ScrollVertical className="kb-vertical kb-vertical-edge">メニュー</ScrollVertical>
       <div className="kb-container">
         <motion.div
           className="kb-section-head kb-page-head"
@@ -770,7 +912,7 @@ export default function Kobo() {
           variants={fadeUp}
         >
           <p className="kb-label">— The Menu</p>
-          <h1 className="kb-section-title">Everything we pour, <em>all day.</em></h1>
+          <Reveal as="h1" className="kb-section-title" text="Everything we pour, all day." />
           <p className="kb-section-sub">
             Espresso pulled to order, filters brewed one at a time, and a small
             seasonal board that changes with the weather. Oat milk on request.
@@ -796,6 +938,7 @@ export default function Kobo() {
 
   const renderBeansPage = () => (
     <section className="kb-section kb-beans-section">
+      <BgWord className="kb-bg-word">KOBO</BgWord>
       <div className="kb-container">
         <motion.div
           className="kb-section-head kb-page-head"
@@ -804,7 +947,7 @@ export default function Kobo() {
           variants={fadeUp}
         >
           <p className="kb-label">— Fresh Beans</p>
-          <h1 className="kb-section-title">Six origins, <em>one small roaster.</em></h1>
+          <Reveal as="h1" className="kb-section-title" text="Six origins, one small roaster." />
           <p className="kb-section-sub">
             Roasted every Tuesday in Shibuya and rested for seven days before
             they ship. Pick your grind, add a bag to your order, and we will
@@ -844,6 +987,7 @@ export default function Kobo() {
 
   return (
     <div className="kb-root">
+      <ProgressBar color="#c47b3a" />
       {/* NAV */}
       <header className="kb-nav">
         <div className="kb-nav-inner">

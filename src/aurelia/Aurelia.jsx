@@ -1,5 +1,18 @@
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import {
+  motion,
+  AnimatePresence,
+  useScroll,
+  useTransform,
+  useSpring,
+} from "framer-motion";
+import Parallax from "../fx/Parallax";
+import Reveal from "../fx/Reveal";
+import ProgressBar from "../fx/ProgressBar";
+import VelocityMarquee from "../fx/VelocityMarquee";
+import Magnetic from "../fx/Magnetic";
+import TiltCard from "../fx/TiltCard";
+import { scrollTopInstant } from "../lenis";
 import {
   Search,
   User,
@@ -22,13 +35,38 @@ import {
 import "./Aurelia.css";
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 28 },
+  hidden: { opacity: 0, y: 28, scale: 0.96 },
   visible: (i = 0) => ({
     opacity: 1,
     y: 0,
+    scale: 1,
     transition: { duration: 1, ease: "easeOut", delay: i * 0.12 },
   }),
 };
+
+/* Clip-path reveal: the image frame opens from a soft inset as the
+   card travels into view. Slow luxury spring smoothing. */
+function ClipReveal({ children, className = "", ...rest }) {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "start 55%"],
+  });
+  const smooth = useSpring(scrollYProgress, {
+    stiffness: 70,
+    damping: 28,
+    mass: 0.5,
+  });
+  const clipPath = useTransform(smooth, (v) => {
+    const t = 1 - Math.min(1, Math.max(0, v));
+    return `inset(${(14 * t).toFixed(2)}% ${(10 * t).toFixed(2)}% ${(14 * t).toFixed(2)}% ${(10 * t).toFixed(2)}%)`;
+  });
+  return (
+    <motion.div ref={ref} className={className} style={{ clipPath }} {...rest}>
+      {children}
+    </motion.div>
+  );
+}
 
 const perfumes = [
   {
@@ -279,8 +317,57 @@ export default function Aurelia() {
   const [selectedArticle, setSelectedArticle] = useState(null);
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    scrollTopInstant();
   }, [page, selectedPerfume, selectedArticle]);
+
+  /* Hero parallax — gentle drift as the hero leaves the viewport. */
+  const heroRef = useRef(null);
+  const { scrollYProgress: heroProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"],
+  });
+  const heroArchY = useSpring(useTransform(heroProgress, [0, 1], [0, 60]), {
+    stiffness: 70,
+    damping: 28,
+    mass: 0.5,
+  });
+  const heroHeadY = useSpring(useTransform(heroProgress, [0, 1], [0, -30]), {
+    stiffness: 70,
+    damping: 28,
+    mass: 0.5,
+  });
+  const heroHeadOpacity = useTransform(heroProgress, [0, 0.85], [1, 0]);
+
+  /* Pinned perfume story — notes scrubbed in one by one. */
+  const pinnedRef = useRef(null);
+  const { scrollYProgress: pinnedProgress } = useScroll({
+    target: pinnedRef,
+    offset: ["start start", "end end"],
+  });
+  const pinnedSmooth = useSpring(pinnedProgress, {
+    stiffness: 70,
+    damping: 28,
+    mass: 0.5,
+  });
+  const pinnedImgY = useTransform(pinnedSmooth, [0, 1], [26, -26]);
+  const pinnedTopOpacity = useTransform(pinnedSmooth, [0.05, 0.3], [0, 1]);
+  const pinnedTopY = useTransform(pinnedSmooth, [0.05, 0.3], [26, 0]);
+  const pinnedHeartOpacity = useTransform(pinnedSmooth, [0.35, 0.6], [0, 1]);
+  const pinnedHeartY = useTransform(pinnedSmooth, [0.35, 0.6], [26, 0]);
+  const pinnedBaseOpacity = useTransform(pinnedSmooth, [0.65, 0.9], [0, 1]);
+  const pinnedBaseY = useTransform(pinnedSmooth, [0.65, 0.9], [26, 0]);
+
+  /* Big serif background word drifting across the Ritual section. */
+  const ritualRef = useRef(null);
+  const { scrollYProgress: ritualProgress } = useScroll({
+    target: ritualRef,
+    offset: ["start end", "end start"],
+  });
+  const bgWordX = useSpring(useTransform(ritualProgress, [0, 1], [60, -60]), {
+    stiffness: 70,
+    damping: 28,
+    mass: 0.5,
+  });
 
   const goPage = (key) => {
     setPage(key);
@@ -322,25 +409,31 @@ export default function Aurelia() {
   const renderHome = () => (
     <>
       {/* Hero */}
-      <section className="au-hero">
+      <section ref={heroRef} className="au-hero">
         <div className="au-hero-text">
           <motion.span className="au-label" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0}>
             Maison de Parfum — Est. 1987
           </motion.span>
-          <motion.h1 className="au-hero-title" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={1}>
-            Wear the <em>Light</em><br />You Carry
-          </motion.h1>
+          <motion.div className="au-hero-head-wrap" style={{ y: heroHeadY, opacity: heroHeadOpacity }}>
+            <motion.h1 className="au-hero-title" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={1}>
+              Wear the <em>Light</em><br />You Carry
+            </motion.h1>
+          </motion.div>
           <motion.p className="au-hero-copy" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={2}>
             Hand-blended in Grasse from rare essences gathered at dawn.
             Each AURELIA creation is a quiet architecture of scent —
             luminous, intimate, and made to be remembered.
           </motion.p>
           <motion.div className="au-hero-actions" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={3}>
-            <button className="au-btn-primary" onClick={() => goPage("collection")}>
-              Discover the Collection
-              <ArrowRight size={16} strokeWidth={1.5} />
-            </button>
-            <button className="au-link-underline au-link-btn" onClick={() => goPage("story")}>Our Story</button>
+            <Magnetic strength={0.3}>
+              <button className="au-btn-primary" onClick={() => goPage("collection")}>
+                Discover the Collection
+                <ArrowRight size={16} strokeWidth={1.5} />
+              </button>
+            </Magnetic>
+            <Magnetic strength={0.25}>
+              <button className="au-link-underline au-link-btn" onClick={() => goPage("story")}>Our Story</button>
+            </Magnetic>
           </motion.div>
           <motion.div className="au-hero-meta" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={4}>
             <span>50ml &nbsp;·&nbsp; Extrait de Parfum</span>
@@ -354,9 +447,11 @@ export default function Aurelia() {
         <motion.div className="au-hero-visual" initial={{ opacity: 0, y: 36 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 1.1, ease: "easeOut", delay: 0.2 }}>
           <div className="au-ring" />
           <div className="au-ring au-ring--small" />
-          <div className="au-arch">
-            <img src="https://images.unsplash.com/photo-1541643600914-78b084683601?w=1200&q=80&auto=format&fit=crop" alt="AURELIA Lumière perfume bottle" />
-          </div>
+          <motion.div className="au-hero-arch-wrap" style={{ y: heroArchY }}>
+            <div className="au-arch">
+              <img src="https://images.unsplash.com/photo-1541643600914-78b084683601?w=1200&q=80&auto=format&fit=crop" alt="AURELIA Lumière perfume bottle" />
+            </div>
+          </motion.div>
           <div className="au-float-card">
             <span className="au-float-num">No. 01 — Lumière</span>
             <span className="au-float-notes">Bergamot · Iris · Musk</span>
@@ -369,13 +464,23 @@ export default function Aurelia() {
         </motion.div>
       </section>
 
+      {/* Slow maison band */}
+      <VelocityMarquee baseVelocity={1} className="au-marquee" chunkClassName="au-marquee-chunk">
+        <span className="au-marquee-item">Maison de Parfum</span>
+        <span className="au-marquee-dot" />
+        <span className="au-marquee-item au-marquee-item--italic">Grasse, France</span>
+        <span className="au-marquee-dot" />
+        <span className="au-marquee-item">Est. 1987</span>
+        <span className="au-marquee-dot" />
+        <span className="au-marquee-item au-marquee-item--italic">Hand-Poured &amp; Sealed with Wax</span>
+        <span className="au-marquee-dot" />
+      </VelocityMarquee>
+
       {/* Notes */}
       <section className="au-section">
         <div className="au-section-head">
           <motion.span className="au-label" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}>The Composition</motion.span>
-          <motion.h2 className="au-section-title" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={1}>
-            Composed in <em>Three Acts</em>
-          </motion.h2>
+          <Reveal text="Composed in Three Acts" as="h2" className="au-section-title" duration={1.1} />
           <motion.p className="au-section-sub" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={2}>
             Like a piece of music, every AURELIA fragrance unfolds in time —
             an opening, a heart, and a lingering final note.
@@ -402,13 +507,54 @@ export default function Aurelia() {
         </div>
       </section>
 
+      {/* Pinned perfume story — Lumière unfolds act by act */}
+      <section ref={pinnedRef} className="au-pinned" aria-label="The notes of Lumière">
+        <div className="au-pinned-sticky">
+          <div className="au-pinned-inner">
+            <div className="au-pinned-media">
+              <motion.div className="au-pinned-img-wrap" style={{ y: pinnedImgY }}>
+                <img src={perfumes[0].img} alt="Lumière No. 01 perfume bottle" />
+              </motion.div>
+              <motion.span className="au-pinned-line" style={{ scaleY: pinnedSmooth }} aria-hidden="true" />
+              <span className="au-pinned-caption">Lumière — No. 01</span>
+            </div>
+            <div className="au-pinned-notes">
+              <span className="au-label">The Composition</span>
+              <h2 className="au-pinned-title">Lumière, in <em>Three Acts</em></h2>
+              <motion.div className="au-pinned-note" style={{ opacity: pinnedTopOpacity, y: pinnedTopY }}>
+                <span className="au-pinned-note-num">01</span>
+                <div>
+                  <h3 className="au-pinned-note-title">Top Notes <span>The First Breath</span></h3>
+                  <p className="au-pinned-note-items">{perfumes[0].pyramid.top.join(" · ")}</p>
+                  <p className="au-pinned-note-desc">A luminous opening that catches light — bright, fleeting, unforgettable.</p>
+                </div>
+              </motion.div>
+              <motion.div className="au-pinned-note" style={{ opacity: pinnedHeartOpacity, y: pinnedHeartY }}>
+                <span className="au-pinned-note-num">02</span>
+                <div>
+                  <h3 className="au-pinned-note-title">Heart Notes <span>The Soul</span></h3>
+                  <p className="au-pinned-note-items">{perfumes[0].pyramid.heart.join(" · ")}</p>
+                  <p className="au-pinned-note-desc">Where the perfume reveals its character — soft petals over powdery depth.</p>
+                </div>
+              </motion.div>
+              <motion.div className="au-pinned-note" style={{ opacity: pinnedBaseOpacity, y: pinnedBaseY }}>
+                <span className="au-pinned-note-num">03</span>
+                <div>
+                  <h3 className="au-pinned-note-title">Base Notes <span>The Memory</span></h3>
+                  <p className="au-pinned-note-items">{perfumes[0].pyramid.base.join(" · ")}</p>
+                  <p className="au-pinned-note-desc">The trail that lingers on skin and silk — warm, intimate, enduring.</p>
+                </div>
+              </motion.div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Ingredients */}
       <section className="au-section au-ingredients-section">
         <div className="au-section-head">
           <motion.span className="au-label" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}>Rare Ingredients</motion.span>
-          <motion.h2 className="au-section-title" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={1}>
-            Sourced at <em>Dawn</em>
-          </motion.h2>
+          <Reveal text="Sourced at Dawn" as="h2" className="au-section-title" duration={1.1} />
           <motion.p className="au-section-sub" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={2}>
             Thirty-eight essences, gathered from growers we have known for decades.
             Four of them define the maison.
@@ -430,9 +576,7 @@ export default function Aurelia() {
       <section className="au-section au-section--alt">
         <div className="au-section-head">
           <motion.span className="au-label" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}>The Collection</motion.span>
-          <motion.h2 className="au-section-title" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={1}>
-            Three <em>Signatures</em>
-          </motion.h2>
+          <Reveal text="Three Signatures" as="h2" className="au-section-title" duration={1.1} />
           <motion.p className="au-section-sub" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={2}>
             Each extrait is macerated for six weeks, then hand-poured
             and sealed with wax in our Grasse atelier.
@@ -440,11 +584,11 @@ export default function Aurelia() {
         </div>
         <div className="au-collection-grid">
           {perfumes.slice(0, 3).map((p, idx) => (
-            <motion.article key={p.id} className="au-product-card" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={idx}>
-              <div className="au-product-media au-product-media--click" onClick={() => { setPage("collection"); openPerfume(p); }}>
+            <TiltCard key={p.id} as="article" max={4} className="au-product-card" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={idx}>
+              <ClipReveal className="au-product-media au-product-media--click" onClick={() => { setPage("collection"); openPerfume(p); }}>
                 <img src={p.img} alt={`${p.name} ${p.edition}`} />
                 <span className="au-product-tag">{p.tag}</span>
-              </div>
+              </ClipReveal>
               <div className="au-product-body">
                 <div className="au-product-head">
                   <h3 className="au-product-name">{p.name} <span>{p.edition}</span></h3>
@@ -455,7 +599,7 @@ export default function Aurelia() {
                   {added.has(p.id) ? (<><Check size={15} strokeWidth={2} /> Added to Bag</>) : (<>Add to Bag <ArrowRight size={15} strokeWidth={1.5} className="au-add-arrow" /></>)}
                 </button>
               </div>
-            </motion.article>
+            </TiltCard>
           ))}
         </div>
         <motion.div className="au-collection-foot" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}>
@@ -470,9 +614,7 @@ export default function Aurelia() {
       <section className="au-section au-press-section">
         <div className="au-section-head">
           <motion.span className="au-label" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}>In the Press</motion.span>
-          <motion.h2 className="au-section-title" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={1}>
-            Quietly <em>Acclaimed</em>
-          </motion.h2>
+          <Reveal text="Quietly Acclaimed" as="h2" className="au-section-title" duration={1.1} />
         </div>
         <div className="au-press-grid">
           {pressQuotes.map((q, idx) => (
@@ -489,11 +631,12 @@ export default function Aurelia() {
       </section>
 
       {/* Ritual */}
-      <section className="au-ritual">
+      <section ref={ritualRef} className="au-ritual">
         <motion.div className="au-ritual-media" initial={{ scale: 1.12 }} whileInView={{ scale: 1 }} viewport={{ once: true }} transition={{ duration: 1.6, ease: "easeOut" }}>
           <img src="https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=1600&q=80&auto=format&fit=crop" alt="Perfume atelier in Grasse" />
           <div className="au-ritual-overlay" />
         </motion.div>
+        <motion.span className="au-bg-word" style={{ x: bgWordX }} aria-hidden="true">AURELIA</motion.span>
         <div className="au-ritual-content">
           <motion.span className="au-label au-label--light" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}>The Ritual</motion.span>
           <motion.blockquote className="au-quote" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={1}>
@@ -514,10 +657,10 @@ export default function Aurelia() {
           </motion.div>
         </div>
         <div className="au-ritual-strip">
-          <div className="au-strip-img"><img src="https://images.unsplash.com/photo-1615634260167-c8cdede054de?w=1200&q=80&auto=format&fit=crop" alt="Perfume ingredients" /></div>
-          <div className="au-strip-img"><img src="https://images.unsplash.com/photo-1587017539504-67cfbddac569?w=1200&q=80&auto=format&fit=crop" alt="Perfume bottle detail" /></div>
-          <div className="au-strip-img"><img src="https://images.unsplash.com/photo-1563170351-be82bc888aa4?w=1200&q=80&auto=format&fit=crop" alt="Fragrance ritual" /></div>
-          <div className="au-strip-img"><img src="https://images.unsplash.com/photo-1557170334-a9632e77c6e4?w=1200&q=80&auto=format&fit=crop" alt="Perfume craftsmanship" /></div>
+          <div className="au-strip-img"><Parallax speed={0.06} className="au-parallax-fill"><img src="https://images.unsplash.com/photo-1615634260167-c8cdede054de?w=1200&q=80&auto=format&fit=crop" alt="Perfume ingredients" /></Parallax></div>
+          <div className="au-strip-img"><Parallax speed={0.07} className="au-parallax-fill"><img src="https://images.unsplash.com/photo-1587017539504-67cfbddac569?w=1200&q=80&auto=format&fit=crop" alt="Perfume bottle detail" /></Parallax></div>
+          <div className="au-strip-img"><Parallax speed={0.06} className="au-parallax-fill"><img src="https://images.unsplash.com/photo-1563170351-be82bc888aa4?w=1200&q=80&auto=format&fit=crop" alt="Fragrance ritual" /></Parallax></div>
+          <div className="au-strip-img"><Parallax speed={0.08} className="au-parallax-fill"><img src="https://images.unsplash.com/photo-1557170334-a9632e77c6e4?w=1200&q=80&auto=format&fit=crop" alt="Perfume craftsmanship" /></Parallax></div>
         </div>
       </section>
 
@@ -525,7 +668,7 @@ export default function Aurelia() {
       <section className="au-newsletter">
         <motion.div className="au-newsletter-inner" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}>
           <span className="au-label">Correspondence</span>
-          <h2 className="au-newsletter-title">Letters from the <em>Maison</em></h2>
+          <Reveal text="Letters from the Maison" as="h2" className="au-newsletter-title" duration={1.1} />
           <p className="au-newsletter-copy">Seasonal notes, private releases, and stories from the atelier — delivered once a month, never more.</p>
           {subscribed ? (
             <motion.div className="au-success" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, ease: "easeOut" }}>
@@ -557,7 +700,9 @@ export default function Aurelia() {
           </motion.button>
           <div className="au-detail-grid">
             <motion.div className="au-detail-media" initial={{ opacity: 0, y: 32 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, ease: "easeOut" }}>
-              <img src={p.img} alt={`${p.name} ${p.edition}`} />
+              <Parallax speed={0.06} className="au-parallax-fill">
+                <img src={p.img} alt={`${p.name} ${p.edition}`} />
+              </Parallax>
               <span className="au-product-tag">{p.tag}</span>
             </motion.div>
             <motion.div className="au-detail-info" initial={{ opacity: 0, y: 32 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, ease: "easeOut", delay: 0.15 }}>
@@ -608,9 +753,7 @@ export default function Aurelia() {
       <section className="au-section">
         <div className="au-section-head">
           <motion.span className="au-label" variants={fadeUp} initial="hidden" animate="visible">The Collection</motion.span>
-          <motion.h1 className="au-section-title" variants={fadeUp} initial="hidden" animate="visible" custom={1}>
-            Six <em>Extraits</em>
-          </motion.h1>
+          <Reveal text="Six Extraits" as="h1" className="au-section-title" duration={1.1} />
           <motion.p className="au-section-sub" variants={fadeUp} initial="hidden" animate="visible" custom={2}>
             Each extrait is macerated for six weeks, then hand-poured and sealed
             with wax in our Grasse atelier. Select a fragrance to discover its story.
@@ -618,11 +761,11 @@ export default function Aurelia() {
         </div>
         <div className="au-collection-grid au-collection-grid--six">
           {perfumes.map((p, idx) => (
-            <motion.article key={p.id} className="au-product-card" variants={fadeUp} initial="hidden" animate="visible" custom={idx % 3}>
-              <div className="au-product-media au-product-media--click" onClick={() => openPerfume(p)}>
+            <TiltCard key={p.id} as="article" max={4} className="au-product-card" variants={fadeUp} initial="hidden" animate="visible" custom={idx % 3}>
+              <ClipReveal className="au-product-media au-product-media--click" onClick={() => openPerfume(p)}>
                 <img src={p.img} alt={`${p.name} ${p.edition}`} />
                 <span className="au-product-tag">{p.tag}</span>
-              </div>
+              </ClipReveal>
               <div className="au-product-body">
                 <div className="au-product-head">
                   <h3 className="au-product-name">{p.name} <span>{p.edition}</span></h3>
@@ -634,7 +777,7 @@ export default function Aurelia() {
                 </button>
                 <button className="au-view-link" onClick={() => openPerfume(p)}>Discover <ArrowUpRight size={13} strokeWidth={1.5} /></button>
               </div>
-            </motion.article>
+            </TiltCard>
           ))}
         </div>
         <motion.div className="au-collection-foot" variants={fadeUp} initial="hidden" animate="visible" custom={2}>
@@ -658,7 +801,9 @@ export default function Aurelia() {
           Nearly four decades later, the rooms are larger. The conviction is unchanged.
         </motion.p>
         <motion.div className="au-story-image" initial={{ opacity: 0, y: 36 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.1, ease: "easeOut", delay: 0.2 }}>
-          <img src="https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=1600&q=80&auto=format&fit=crop" alt="The AURELIA atelier in Grasse" />
+          <Parallax speed={0.07} className="au-parallax-fill">
+            <img src="https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=1600&q=80&auto=format&fit=crop" alt="The AURELIA atelier in Grasse" />
+          </Parallax>
           <span className="au-story-caption"><MapPin size={13} strokeWidth={1.5} /> Atelier AURELIA — Grasse, France</span>
         </motion.div>
       </section>
@@ -666,9 +811,7 @@ export default function Aurelia() {
       <section className="au-section au-timeline-section">
         <div className="au-section-head">
           <motion.span className="au-label" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}>The Journey</motion.span>
-          <motion.h2 className="au-section-title" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={1}>
-            Four Decades of <em>Craft</em>
-          </motion.h2>
+          <Reveal text="Four Decades of Craft" as="h2" className="au-section-title" duration={1.1} />
         </div>
         <div className="au-timeline">
           {timeline.map((t, idx) => (
@@ -716,7 +859,9 @@ export default function Aurelia() {
             <h1 className="au-article-title">{a.title}</h1>
           </motion.div>
           <motion.div className="au-article-image" initial={{ opacity: 0, y: 32 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, ease: "easeOut", delay: 0.15 }}>
-            <img src={a.img} alt={a.title} />
+            <Parallax speed={0.07} className="au-parallax-fill">
+              <img src={a.img} alt={a.title} />
+            </Parallax>
           </motion.div>
           <motion.div className="au-article-body" variants={fadeUp} initial="hidden" animate="visible" custom={2}>
             {a.body.map((para, i) => (<p key={i}>{para}</p>))}
@@ -734,9 +879,7 @@ export default function Aurelia() {
       <section className="au-section">
         <div className="au-section-head">
           <motion.span className="au-label" variants={fadeUp} initial="hidden" animate="visible">The Journal</motion.span>
-          <motion.h1 className="au-section-title" variants={fadeUp} initial="hidden" animate="visible" custom={1}>
-            Letters from the <em>Atelier</em>
-          </motion.h1>
+          <Reveal text="Letters from the Atelier" as="h1" className="au-section-title" duration={1.1} />
           <motion.p className="au-section-sub" variants={fadeUp} initial="hidden" animate="visible" custom={2}>
             Notes on harvests, maceration, and the quiet discipline of wearing scent well.
           </motion.p>
@@ -745,7 +888,9 @@ export default function Aurelia() {
           {articles.map((a, idx) => (
             <motion.article key={a.id} className="au-journal-card" variants={fadeUp} initial="hidden" animate="visible" custom={idx}>
               <div className="au-journal-media" onClick={() => setSelectedArticle(a)}>
-                <img src={a.img} alt={a.title} />
+                <Parallax speed={0.06} className="au-parallax-fill">
+                  <img src={a.img} alt={a.title} />
+                </Parallax>
               </div>
               <div className="au-journal-body">
                 <span className="au-journal-date"><Clock size={12} strokeWidth={1.5} /> {a.date}</span>
@@ -762,6 +907,7 @@ export default function Aurelia() {
 
   return (
     <div className="au-page">
+      <ProgressBar color="#b08d4f" />
       {/* Micro bar */}
       <div className="au-microbar">
         <p>Complimentary shipping over $150 &nbsp;—&nbsp; Paris · Grasse · Dubai</p>

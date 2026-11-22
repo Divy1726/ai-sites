@@ -1621,3 +1621,304 @@
     font-size: 13.5px;
   }
 }
+
+/* ============================================================
+   KOBO next-level scroll layer — hero parallax, marquee band,
+   pinned brew process, background outline word
+   ============================================================ */
+
+/* ---------- Hero parallax layers ---------- */
+
+.kb-hero-imgwrap {
+  position: relative;
+}
+
+/* Oversized inner layer so the slow 0 -> 70px drift never
+   exposes an empty edge inside the arch frame. */
+.kb-hero-img-inner {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -70px;
+  bottom: -70px;
+  will-change: transform;
+}
+
+.kb-vertical-hero-text {
+  display: block;
+  font-size: 22px;
+  color: rgba(43, 29, 18, 0.42);
+  will-change: transform;
+}
+
+/* ---------- Slow marquee band ---------- */
+
+.kb-marquee-band {
+  background: var(--kb-paper);
+  border-bottom: 1px solid var(--kb-line-soft);
+  padding: 20px 0;
+}
+
+.kb-marquee-chunk {
+  gap: 30px;
+  padding-right: 30px;
+}
+
+.kb-marquee-item {
+  font-family: var(--kb-serif);
+  font-style: italic;
+  font-size: 21px;
+  line-height: 1.2;
+  color: var(--kb-ink-soft);
+  white-space: nowrap;
+}
+
+.kb-marquee-item-jp {
+  font-family: var(--kb-jp);
+  font-style: normal;
+  letter-spacing: 0.18em;
+  color: var(--kb-amber);
+}
+
+.kb-marquee-dot {
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--kb-amber);
+}
+
+/* ---------- Background outline word ---------- */
+
+.kb-bg-word {
+  position: absolute;
+  top: 36px;
+  right: -8px;
+  z-index: 0;
+  font-family: var(--kb-serif);
+  font-size: clamp(120px, 18vw, 240px);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(196, 123, 58, 0.22);
+  pointer-events: none;
+  user-select: none;
+  will-change: transform;
+}
+
+.kb-beans-section .kb-container {
+  position: relative;
+  z-index: 1;
+}
+
+/* ---------- Pinned brew process ---------- */
+
+.kb-pinned-process {
+  position: relative;
+  height: 250vh;
+  border-bottom: 1px solid var(--kb-line-soft);
+}
+
+.kb-pinned-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.kb-pinned-inner {
+  width: 100%;
+}
+
+.kb-pinned-head {
+  max-width: 720px;
+  margin: 0 auto 6px;
+  text-align: center;
+}
+
+.kb-pinned-hint {
+  margin-top: 14px;
+  font-family: var(--kb-mono);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--kb-ink-soft);
+}
+
+/* CSS cup scene — steam lines and liquid level are scrubbed
+   by scroll progress from Kobo.jsx (transform/opacity only). */
+.kb-cup-scene {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 14px auto 38px;
+}
+
+.kb-cup-steam {
+  position: relative;
+  width: 64px;
+  height: 58px;
+  margin-bottom: 4px;
+}
+
+.kb-cup-steam-line {
+  position: absolute;
+  bottom: 0;
+  width: 6px;
+  height: 46px;
+  border-radius: 999px;
+  background: linear-gradient(to top, rgba(196, 123, 58, 0), rgba(196, 123, 58, 0.8), rgba(196, 123, 58, 0));
+  filter: blur(1.5px);
+  transform-origin: 50% 100%;
+  will-change: transform, opacity;
+}
+
+.kb-cup-steam-line-1 { left: 9px; }
+.kb-cup-steam-line-2 { left: 29px; height: 54px; }
+.kb-cup-steam-line-3 { left: 49px; }
+
+.kb-cup {
+  position: relative;
+  width: 150px;
+  height: 104px;
+  background: var(--kb-paper);
+  border: 2px solid var(--kb-ink);
+  border-top-width: 3px;
+  border-radius: 12px 12px 70px 70px;
+  transform: translateX(-15px);
+}
+
+.kb-cup-liquid {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 100%;
+  border-radius: 0 0 66px 66px;
+  background: linear-gradient(to top, #4a2c14, #7a4a22 55%, var(--kb-amber));
+  transform-origin: 50% 100%;
+  will-change: transform;
+}
+
+.kb-cup-handle {
+  position: absolute;
+  right: -30px;
+  top: 22px;
+  width: 32px;
+  height: 46px;
+  border: 3px solid var(--kb-ink);
+  border-left: none;
+  border-radius: 0 999px 999px 0;
+}
+
+.kb-cup-saucer {
+  width: 214px;
+  height: 15px;
+  margin-top: 12px;
+  border: 2px solid var(--kb-ink);
+  border-radius: 50%;
+  background: var(--kb-paper);
+  box-shadow: 0 16px 30px rgba(43, 29, 18, 0.14);
+}
+
+.kb-pinned-steps {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 26px;
+}
+
+.kb-pinned-steps::before {
+  content: "";
+  position: absolute;
+  top: 35px;
+  left: 13%;
+  right: 13%;
+  border-top: 2px dotted rgba(196, 123, 58, 0.45);
+  pointer-events: none;
+}
+
+.kb-pinned-step {
+  position: relative;
+  text-align: center;
+  padding: 0 8px;
+  opacity: 0.32;
+  transform: translateY(6px) scale(0.98);
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+.kb-pinned-step-active {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.kb-pinned-step-active .kb-process-icon {
+  background: var(--kb-amber);
+  color: #fff;
+  transform: translateY(-5px);
+  box-shadow: 0 18px 34px rgba(196, 123, 58, 0.35);
+}
+
+.kb-pinned-progress {
+  height: 4px;
+  max-width: 520px;
+  margin: 38px auto 0;
+  border-radius: 999px;
+  background: rgba(43, 29, 18, 0.12);
+  overflow: hidden;
+}
+
+.kb-pinned-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--kb-amber-soft), var(--kb-amber));
+  transform-origin: 0 50%;
+  will-change: transform;
+}
+
+/* ---------- Scroll layer responsive ---------- */
+
+@media (max-width: 1024px) {
+  .kb-pinned-steps {
+    grid-template-columns: 1fr 1fr;
+    gap: 40px 26px;
+  }
+  .kb-pinned-steps::before {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Pinned section degrades: no sticky, no tall track,
+     every step fully visible in a simple stack. */
+  .kb-pinned-process {
+    height: auto;
+  }
+  .kb-pinned-sticky {
+    position: static;
+    height: auto;
+    padding: 72px 0;
+    overflow: visible;
+  }
+  .kb-pinned-steps {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+  .kb-pinned-step {
+    opacity: 1;
+    transform: none;
+  }
+  .kb-pinned-hint {
+    display: none;
+  }
+  .kb-bg-word {
+    font-size: 110px;
+    top: 20px;
+  }
+  .kb-marquee-item {
+    font-size: 17px;
+  }
+}

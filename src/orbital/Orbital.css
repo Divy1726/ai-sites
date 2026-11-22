@@ -249,6 +249,13 @@
   padding: 40px 20px 56px;
 }
 
+.or-planet-motion {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  will-change: transform;
+}
+
 .or-planet-wrap {
   position: relative;
   width: min(320px, 70vw);
@@ -489,24 +496,17 @@
   padding: 9px 0;
 }
 
-.or-ticker-track {
-  display: flex;
-  width: max-content;
-  animation: or-ticker 28s linear infinite;
+.or-ticker-vm {
+  width: 100%;
 }
 
-.or-ticker-track span {
+.or-ticker-chunk {
   font-family: var(--or-font-mono);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.18em;
   white-space: nowrap;
   padding-right: 8px;
-}
-
-@keyframes or-ticker {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
 }
 
 /* Sections */
@@ -669,6 +669,13 @@
   height: 100%;
   object-fit: cover;
   filter: grayscale(1) contrast(1.08);
+}
+
+/* Parallax frame fills its bordered figure / crew media box. */
+.or-root .or-parallax-fill {
+  position: absolute;
+  inset: 0;
+  height: 100%;
 }
 
 .or-figure-media--wide {
@@ -1300,6 +1307,135 @@
   letter-spacing: 0.12em;
 }
 
+/* ---------- Trajectory: scroll-drawn flight path ---------- */
+
+.or-traj {
+  height: 230vh;
+  border-top: 2px solid var(--or-ink);
+  border-bottom: 2px solid var(--or-ink);
+  background: var(--or-paper-2);
+}
+
+.or-traj-sticky {
+  position: sticky;
+  top: 54px;
+  height: calc(100vh - 54px);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.or-traj-inner {
+  width: min(1240px, 100%);
+  margin: 0 auto;
+  padding: 24px 28px;
+}
+
+.or-traj-inner .or-section-head {
+  margin-bottom: 20px;
+}
+
+.or-traj-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1000 / 300;
+  background: var(--or-paper);
+  border: 2px solid var(--or-ink);
+  overflow: hidden;
+}
+
+.or-traj-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.or-traj-gridline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  border-top: 1px dashed rgba(17, 17, 17, 0.3);
+  pointer-events: none;
+}
+
+.or-traj-gridlabel {
+  position: absolute;
+  left: 10px;
+  top: -18px;
+  font-family: var(--or-font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  color: #5c5648;
+  white-space: nowrap;
+}
+
+.or-traj-dot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--or-orange);
+  border: 2px solid var(--or-ink);
+  offset-anchor: 50% 50%;
+  will-change: offset-distance;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.or-traj-dot-tag {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 6px);
+  transform: translateX(-50%);
+  font-family: var(--or-font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--or-paper);
+  background: var(--or-ink);
+  padding: 3px 7px;
+  white-space: nowrap;
+}
+
+.or-traj-endlabel {
+  position: absolute;
+  font-family: var(--or-font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  background: var(--or-paper);
+  border: 1px solid var(--or-ink);
+  padding: 4px 8px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.or-traj-endlabel--start {
+  left: 12px;
+  bottom: 10px;
+}
+
+.or-traj-endlabel--end {
+  right: 12px;
+  top: 10px;
+  color: var(--or-orange);
+}
+
+.or-traj-caption {
+  padding-top: 10px;
+}
+
+.or-traj-telemetry {
+  grid-template-columns: repeat(4, 1fr);
+  border: 2px solid var(--or-ink);
+  margin-top: 14px;
+}
+
 /* ---------- Responsive ---------- */
 
 @media (max-width: 1024px) {
@@ -1328,6 +1464,18 @@
   .or-telemetry-cell:nth-child(4),
   .or-telemetry-cell:nth-child(5) {
     border-bottom: none;
+  }
+
+  .or-traj-telemetry {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .or-traj-telemetry .or-telemetry-cell {
+    border-bottom: none;
+  }
+
+  .or-traj-telemetry .or-telemetry-cell:nth-child(3) {
+    border-right: var(--or-line);
   }
 }
 
@@ -1387,6 +1535,35 @@
 
   .or-footer-meta {
     text-align: left;
+  }
+
+  .or-traj {
+    height: 195vh;
+  }
+
+  .or-traj-inner {
+    padding: 20px 18px;
+  }
+
+  .or-traj-stage {
+    aspect-ratio: 1000 / 400;
+  }
+
+  .or-traj-telemetry {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .or-traj-telemetry .or-telemetry-cell {
+    border-bottom: var(--or-line);
+  }
+
+  .or-traj-telemetry .or-telemetry-cell:nth-child(2n) {
+    border-right: none;
+  }
+
+  .or-traj-telemetry .or-telemetry-cell:nth-child(3),
+  .or-traj-telemetry .or-telemetry-cell:nth-child(4) {
+    border-bottom: none;
   }
 }
 
@@ -1513,10 +1690,28 @@
   .or-patch-code {
     font-size: 17px;
   }
+
+  .or-traj {
+    height: 175vh;
+  }
+
+  .or-traj-endlabel {
+    font-size: 8.5px;
+    padding: 3px 6px;
+  }
+
+  .or-traj-gridlabel {
+    font-size: 8px;
+    top: -15px;
+  }
+
+  .or-traj-dot {
+    width: 13px;
+    height: 13px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .or-root .or-ticker-track,
   .or-root .or-patch-ring {
     animation: none;
   }

@@ -1,6 +1,16 @@
-import React, { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  motion,
+  AnimatePresence,
+  useScroll,
+  useTransform,
+  useSpring,
+  useMotionValue,
+} from "framer-motion";
 import { ArrowLeft, ArrowUpRight, Sparkles } from "lucide-react";
+import Lenis from "lenis";
+import { setLenis, scrollTopInstant, prefersReducedMotion } from "./lenis";
+import ProgressBar from "./fx/ProgressBar";
 import "./App.css";
 
 // Import all 5 sites
@@ -68,13 +78,163 @@ const sites = [
   },
 ];
 
+// Split a line into animated letters for the home hero title.
+function AnimatedLine({ text, delay = 0, className = "" }) {
+  return (
+    <span className={className} aria-label={text}>
+      {text.split("").map((ch, i) => (
+        <motion.span
+          key={i}
+          className="home-hero-char"
+          aria-hidden="true"
+          initial={{ y: "110%", rotate: 4 }}
+          animate={{ y: "0%", rotate: 0 }}
+          transition={{
+            duration: 0.85,
+            delay: delay + i * 0.045,
+            ease: [0.22, 1, 0.36, 1],
+          }}
+        >
+          {ch === " " ? "\u00A0" : ch}
+        </motion.span>
+      ))}
+    </span>
+  );
+}
+
+// One home card: 3D tilt on hover + inner image parallax on scroll.
+function HomeCard({ site, index, onOpen }) {
+  const ref = useRef(null);
+
+  // Image parallax tied to this card travelling through the viewport.
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"],
+  });
+  const imgYRaw = useTransform(scrollYProgress, [0, 1], ["-9%", "9%"]);
+  const imgY = useSpring(imgYRaw, { stiffness: 90, damping: 26, mass: 0.4 });
+
+  // Subtle tilt toward the cursor.
+  const px = useMotionValue(0.5);
+  const py = useMotionValue(0.5);
+  const rotateY = useSpring(useTransform(px, [0, 1], [-5, 5]), {
+    stiffness: 220,
+    damping: 20,
+    mass: 0.4,
+  });
+  const rotateX = useSpring(useTransform(py, [0, 1], [5, -5]), {
+    stiffness: 220,
+    damping: 20,
+    mass: 0.4,
+  });
+
+  function handleMove(e) {
+    const rect = ref.current?.getBoundingClientRect();
+    if (!rect) return;
+    px.set((e.clientX - rect.left) / rect.width);
+    py.set((e.clientY - rect.top) / rect.height);
+  }
+
+  function handleLeave() {
+    px.set(0.5);
+    py.set(0.5);
+  }
+
+  return (
+    <motion.button
+      ref={ref}
+      className="home-card"
+      style={{ "--accent": site.accent, rotateX, rotateY, transformPerspective: 1000 }}
+      onClick={() => onOpen(site.id)}
+      onMouseMove={handleMove}
+      onMouseLeave={handleLeave}
+      initial={{ opacity: 0, y: 36 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.65, delay: 0.12 + index * 0.09, ease: [0.22, 1, 0.36, 1] }}
+      whileHover={{ y: -8 }}
+      whileTap={{ scale: 0.98 }}
+    >
+      <span className="home-card-img" style={{ backgroundColor: site.bg }}>
+        <motion.img
+          className="fx-home-img"
+          src={site.img}
+          alt={site.name}
+          loading="lazy"
+          style={{ y: imgY, scale: 1.18 }}
+        />
+        <span className="home-card-shade" />
+        <span className="home-card-num">{site.num}</span>
+      </span>
+      <span className="home-card-body">
+        <span className="home-card-tag">
+          <i style={{ background: site.accent }} />
+          {site.tag}
+        </span>
+        <span className="home-card-name">{site.name}</span>
+        <span className="home-card-desc">{site.desc}</span>
+        <span className="home-card-enter">
+          <span>
+            Enter site
+            <em className="home-card-pages">{site.pages}</em>
+          </span>
+          <span className="home-card-arrow">
+            <ArrowUpRight size={18} />
+          </span>
+        </span>
+      </span>
+    </motion.button>
+  );
+}
+
 function App() {
   const [page, setPage] = useState("home");
+  const heroRef = useRef(null);
 
-  // Scroll to top whenever the page changes
+  // Lenis smooth scrolling for the whole app (native scroll as fallback).
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "instant" });
+    if (prefersReducedMotion()) return undefined;
+    let lenis = null;
+    let rafId = 0;
+    try {
+      lenis = new Lenis({ duration: 1.15, smoothWheel: true });
+      setLenis(lenis);
+      const raf = (time) => {
+        lenis.raf(time);
+        rafId = requestAnimationFrame(raf);
+      };
+      rafId = requestAnimationFrame(raf);
+    } catch (e) {
+      setLenis(null);
+      return undefined;
+    }
+    return () => {
+      cancelAnimationFrame(rafId);
+      try {
+        lenis.destroy();
+      } catch (e) {
+        // Ignore: native scroll continues either way.
+      }
+      setLenis(null);
+    };
+  }, []);
+
+  // Scroll to top whenever the page changes.
+  useEffect(() => {
+    scrollTopInstant();
   }, [page]);
+
+  // Home hero drifts/scales/fades slightly as it scrolls out.
+  const { scrollYProgress: heroProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"],
+  });
+  const heroY = useSpring(useTransform(heroProgress, [0, 1], [0, 90]), {
+    stiffness: 90,
+    damping: 26,
+    mass: 0.4,
+  });
+  const heroScale = useTransform(heroProgress, [0, 1], [1, 0.94]);
+  const heroOpacity = useTransform(heroProgress, [0, 0.85], [1, 0.25]);
 
   if (page !== "home") {
     return (
@@ -105,6 +265,7 @@ function App() {
 
   return (
     <div className="home">
+      <ProgressBar color="#ffffff" />
       <div className="home-noise" aria-hidden="true" />
 
       <header className="home-top">
@@ -114,7 +275,11 @@ function App() {
         </span>
       </header>
 
-      <section className="home-hero">
+      <motion.section
+        ref={heroRef}
+        className="home-hero"
+        style={{ y: heroY, scale: heroScale, opacity: heroOpacity }}
+      >
         <motion.p
           className="home-kicker"
           initial={{ opacity: 0, y: 16 }}
@@ -123,61 +288,28 @@ function App() {
         >
           Select a world
         </motion.p>
-        <motion.h1
-          initial={{ opacity: 0, y: 32 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-        >
-          5 SITES.
-          <span>5 WORLDS.</span>
-        </motion.h1>
+        <h1>
+          <span className="home-hero-line">
+            <AnimatedLine text="5 SITES." delay={0.1} />
+          </span>
+          <span className="home-hero-line home-hero-line-outline">
+            <AnimatedLine text="5 WORLDS." delay={0.45} />
+          </span>
+        </h1>
         <motion.p
           className="home-sub"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.2 }}
+          transition={{ duration: 0.7, delay: 0.75 }}
         >
           Streetwear, perfume, space, iron and coffee — each site has its own
           language, motion and rules. Click one. Step inside.
         </motion.p>
-      </section>
+      </motion.section>
 
       <section className="home-grid">
         {sites.map((site, i) => (
-          <motion.button
-            key={site.id}
-            className="home-card"
-            style={{ "--accent": site.accent }}
-            onClick={() => setPage(site.id)}
-            initial={{ opacity: 0, y: 36 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.65, delay: 0.12 + i * 0.09, ease: [0.22, 1, 0.36, 1] }}
-            whileHover={{ y: -8 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <span className="home-card-img" style={{ backgroundColor: site.bg }}>
-              <img src={site.img} alt={site.name} loading="lazy" />
-              <span className="home-card-shade" />
-              <span className="home-card-num">{site.num}</span>
-            </span>
-            <span className="home-card-body">
-              <span className="home-card-tag">
-                <i style={{ background: site.accent }} />
-                {site.tag}
-              </span>
-              <span className="home-card-name">{site.name}</span>
-              <span className="home-card-desc">{site.desc}</span>
-              <span className="home-card-enter">
-                <span>
-                  Enter site
-                  <em className="home-card-pages">{site.pages}</em>
-                </span>
-                <span className="home-card-arrow">
-                  <ArrowUpRight size={18} />
-                </span>
-              </span>
-            </span>
-          </motion.button>
+          <HomeCard key={site.id} site={site} index={i} onOpen={setPage} />
         ))}
       </section>
 

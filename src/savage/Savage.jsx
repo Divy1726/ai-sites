@@ -1,5 +1,21 @@
 import { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion, useInView } from "framer-motion";
+import {
+  AnimatePresence,
+  motion,
+  useInView,
+  useMotionValueEvent,
+  useScroll,
+  useSpring,
+  useTransform,
+  useVelocity,
+} from "framer-motion";
+import Parallax from "../fx/Parallax";
+import Reveal from "../fx/Reveal";
+import ProgressBar from "../fx/ProgressBar";
+import VelocityMarquee from "../fx/VelocityMarquee";
+import Magnetic from "../fx/Magnetic";
+import TiltCard from "../fx/TiltCard";
+import { scrollTopInstant } from "../lenis";
 import {
   ArrowRight,
   BadgeCheck,
@@ -144,6 +160,11 @@ const TRANSFORMATIONS = [
     detail: "From 3 workouts a week to a 100 kg deadlift. No crash diet, just coached strength and protein targets.",
     progress: 86,
     tag: "STRENGTH TRACK",
+    value: 12,
+    prefix: "-",
+    suffix: " KG",
+    metricSub: "lost in 16 weeks",
+    fill: 0.86,
   },
   {
     name: "Jordan Blake",
@@ -151,6 +172,11 @@ const TRANSFORMATIONS = [
     detail: "Added 40 kg to his squat on the Pro plan with twice-weekly coach check-ins and a custom meal split.",
     progress: 74,
     tag: "MUSCLE BUILD",
+    value: 40,
+    prefix: "+",
+    suffix: " KG",
+    metricSub: "added to his squat in 20 weeks",
+    fill: 0.74,
   },
   {
     name: "Sofia Mendes",
@@ -158,6 +184,11 @@ const TRANSFORMATIONS = [
     detail: "Started with Desk Reset yoga, finished with Inferno HIIT three times a week and a sub-55 minute 10K.",
     progress: 92,
     tag: "CONDITIONING",
+    value: 10,
+    prefix: "",
+    suffix: "K",
+    metricSub: "first race in 12 weeks",
+    fill: 0.92,
   },
 ];
 
@@ -309,6 +340,18 @@ const fadeUp = {
   }),
 };
 
+/* Card entrance with a slight rotate + scale settle */
+const cardPop = {
+  hidden: { opacity: 0, y: 34, rotate: -1.2, scale: 0.97 },
+  show: (i = 0) => ({
+    opacity: 1,
+    y: 0,
+    rotate: 0,
+    scale: 1,
+    transition: { duration: 0.6, delay: i * 0.09, ease: [0.22, 1, 0.36, 1] },
+  }),
+};
+
 const pageFade = {
   initial: { opacity: 0, y: 18 },
   animate: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } },
@@ -334,7 +377,7 @@ function PlanCards({ yearly, onPick }) {
         <motion.article
           className={`sv-plan ${plan.featured ? "sv-plan-featured" : ""}`}
           key={plan.name}
-          variants={fadeUp}
+          variants={cardPop}
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: "-40px" }}
@@ -396,6 +439,250 @@ function BillingToggle({ yearly, setYearly }) {
   );
 }
 
+/* True below the mobile breakpoint — used to degrade the pinned section */
+function useIsMobile(breakpoint = 768) {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia(`(max-width: ${breakpoint - 1}px)`);
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, [breakpoint]);
+  return isMobile;
+}
+
+/* One scrubbed transformation row inside the pinned section */
+function TransformRow({ row, index, progress, isMobile }) {
+  const start = 0.08 + index * 0.26;
+  const end = start + 0.24;
+  const fillRaw = useTransform(progress, [start, end], [0, row.fill]);
+  const fill = useSpring(fillRaw, { stiffness: 90, damping: 26, mass: 0.4 });
+  const numRaw = useTransform(progress, [start, end], [0, row.value]);
+  const pctRaw = useTransform(progress, [start, end], [0, row.progress]);
+  const [display, setDisplay] = useState(isMobile ? row.value : 0);
+  const [pct, setPct] = useState(isMobile ? row.progress : 0);
+
+  /* Mobile fallback: show final numbers (bars animate via whileInView) */
+  useEffect(() => {
+    if (isMobile) {
+      setDisplay(row.value);
+      setPct(row.progress);
+    }
+  }, [isMobile, row.value, row.progress]);
+
+  useMotionValueEvent(numRaw, "change", (v) => {
+    if (isMobile) return;
+    const r = Math.round(v);
+    setDisplay((prev) => (prev === r ? prev : r));
+  });
+  useMotionValueEvent(pctRaw, "change", (v) => {
+    if (isMobile) return;
+    const r = Math.round(v);
+    setPct((prev) => (prev === r ? prev : r));
+  });
+
+  return (
+    <div className="sv-pin-row">
+      <div className="sv-pin-row-top">
+        <span className="sv-pin-name">{row.name}</span>
+        <span className="sv-pin-tag">{row.tag}</span>
+        <span className="sv-pin-metric">
+          {row.prefix}
+          {display}
+          {row.suffix}
+        </span>
+      </div>
+      <p className="sv-pin-detail">{row.detail}</p>
+      <div
+        className="sv-pin-track"
+        role="progressbar"
+        aria-valuenow={pct}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label={`${row.name} goal progress`}
+      >
+        {isMobile ? (
+          <motion.div
+            className="sv-pin-fill"
+            initial={{ scaleX: 0 }}
+            whileInView={{ scaleX: row.fill }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 1, delay: index * 0.12, ease: [0.22, 1, 0.36, 1] }}
+          />
+        ) : (
+          <motion.div className="sv-pin-fill" style={{ scaleX: fill }} />
+        )}
+      </div>
+      <div className="sv-pin-meta">
+        <span>{row.metricSub}</span>
+        <span className="sv-pin-pct">{pct}% of goal</span>
+      </div>
+    </div>
+  );
+}
+
+/* Signature pinned section: 250vh scrub drives the outline word,
+   the red slash, staggered bars and counting metrics */
+function PinnedTransformations() {
+  const ref = useRef(null);
+  const isMobile = useIsMobile();
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start start", "end end"],
+  });
+  const bgScaleRaw = useTransform(scrollYProgress, [0, 1], [0.85, 1.15]);
+  const bgScale = useSpring(bgScaleRaw, { stiffness: 90, damping: 26, mass: 0.4 });
+  const slashXRaw = useTransform(scrollYProgress, [0, 1], [-160, 160]);
+  const slashX = useSpring(slashXRaw, { stiffness: 90, damping: 26, mass: 0.4 });
+  const hintOpacity = useTransform(scrollYProgress, [0, 0.08], [1, 0]);
+
+  return (
+    <section className="sv-pin-outer" ref={ref}>
+      <div className="sv-pin-sticky">
+        <motion.div className="sv-pin-bg" style={{ scale: bgScale }} aria-hidden="true">
+          SAVAGE
+        </motion.div>
+        <motion.div className="sv-pin-slash" style={{ x: slashX, rotate: -14 }} aria-hidden="true" />
+        <div className="sv-wrap sv-pin-content">
+          <div className="sv-section-head sv-pin-head">
+            <p className="sv-kicker">Member Results</p>
+            <Reveal text="PROOF, NOT PROMISES" as="h2" className="sv-h2" />
+            <p className="sv-lead">
+              Real members, real timelines. Keep scrolling — the numbers earn themselves.
+            </p>
+          </div>
+          <div className="sv-pin-rows">
+            {TRANSFORMATIONS.map((row, i) => (
+              <TransformRow
+                key={row.name}
+                row={row}
+                index={i}
+                progress={scrollYProgress}
+                isMobile={isMobile}
+              />
+            ))}
+          </div>
+          <motion.p className="sv-pin-hint" style={{ opacity: hintOpacity }} aria-hidden="true">
+            Scroll to see the work
+          </motion.p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* Hero: parallax image, headline drifts out, skews with scroll velocity */
+function SavageHero({ go }) {
+  const heroRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"],
+  });
+  const headlineYRaw = useTransform(scrollYProgress, [0, 1], [0, -90]);
+  const headlineY = useSpring(headlineYRaw, { stiffness: 90, damping: 26, mass: 0.4 });
+  const headlineOpacity = useTransform(scrollYProgress, [0, 0.65], [1, 0]);
+  const slashXRaw = useTransform(scrollYProgress, [0, 1], [0, 70]);
+  const slashX = useSpring(slashXRaw, { stiffness: 90, damping: 26, mass: 0.4 });
+
+  const { scrollY } = useScroll();
+  const scrollVelocity = useVelocity(scrollY);
+  const skewRaw = useTransform(scrollVelocity, [-1200, 1200], [-4, 4]);
+  const skewY = useSpring(skewRaw, { stiffness: 200, damping: 30 });
+
+  return (
+    <section className="sv-hero" ref={heroRef}>
+      <div className="sv-hero-bg">
+        <Parallax className="sv-hero-parallax" speed={0.12}>
+          <img
+            src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1200&q=80&auto=format&fit=crop"
+            alt="Savage Club training floor"
+          />
+        </Parallax>
+        <div className="sv-hero-overlay" />
+      </div>
+      <motion.div className="sv-slash sv-slash-1" style={{ x: slashX, rotate: -14 }} />
+      <motion.div className="sv-slash sv-slash-2" style={{ x: slashX, rotate: -14 }} />
+      <div className="sv-slash sv-slash-3" />
+
+      <div className="sv-hero-inner">
+        <motion.p
+          className="sv-eyebrow"
+          initial={{ opacity: 0, x: -24 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
+          <Flame size={15} /> No mirrors. No egos. Just work.
+        </motion.p>
+
+        <motion.h1
+          className="sv-hero-title"
+          style={{ y: headlineY, opacity: headlineOpacity, skewY }}
+        >
+          <motion.span
+            className="sv-hero-line"
+            initial={{ opacity: 0, x: -60, skewX: -8 }}
+            animate={{ opacity: 1, x: 0, skewX: 0 }}
+            transition={{ duration: 0.6, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+          >
+            BUILT,
+          </motion.span>
+          <motion.span
+            className="sv-hero-line"
+            initial={{ opacity: 0, x: -60, skewX: -8 }}
+            animate={{ opacity: 1, x: 0, skewX: 0 }}
+            transition={{ duration: 0.6, delay: 0.28, ease: [0.22, 1, 0.36, 1] }}
+          >
+            NOT <span className="sv-outline">BORN.</span>
+          </motion.span>
+        </motion.h1>
+
+        <motion.p
+          className="sv-hero-sub"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, delay: 0.45 }}
+        >
+          Strength is earned in the reps nobody claps for. Savage Club is a
+          40,000 sq ft arena of iron, sweat and coaching that refuses to let
+          you stay average.
+        </motion.p>
+
+        <motion.div
+          className="sv-hero-ctas"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, delay: 0.58 }}
+        >
+          <Magnetic strength={0.35}>
+            <button type="button" className="sv-btn sv-btn-red" onClick={() => go("membership")}>
+              <span>Start 7-Day Trial</span> <ArrowRight size={17} />
+            </button>
+          </Magnetic>
+          <button type="button" className="sv-btn sv-btn-ghost" onClick={() => go("classes")}>
+            <span>View Classes</span>
+          </button>
+        </motion.div>
+
+        <motion.div
+          className="sv-hero-meta"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.75 }}
+        >
+          <span><Clock size={14} /> Open 5 AM – 11 PM</span>
+          <span><MapPin size={14} /> Iron District, Downtown</span>
+          <span><Dumbbell size={14} /> First week free</span>
+        </motion.div>
+      </div>
+
+      <div className="sv-hero-marquee" aria-hidden="true">
+        <span>TRAIN HARD ✕ STAY SAVAGE ✕ TRAIN HARD ✕ STAY SAVAGE ✕ TRAIN HARD ✕ STAY SAVAGE ✕</span>
+      </div>
+    </section>
+  );
+}
+
 export default function Savage() {
   const [page, setPage] = useState("home");
   const [activeTab, setActiveTab] = useState("Strength");
@@ -414,7 +701,7 @@ export default function Savage() {
   const tabs = Object.keys(SCHEDULE);
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    scrollTopInstant();
   }, [page]);
 
   const go = (id) => setPage(id);
@@ -464,6 +751,7 @@ export default function Savage() {
 
   return (
     <div className="sv-root">
+      <ProgressBar color="#ff2d2d" />
       {/* ---------- NAV ---------- */}
       <header className="sv-nav">
         <button type="button" className="sv-logo sv-logo-btn" onClick={() => go("home")} aria-label="Savage Club home">
@@ -493,88 +781,7 @@ export default function Savage() {
         {page === "home" && (
           <motion.main key="home" {...pageFade}>
             {/* ---------- HERO ---------- */}
-            <section className="sv-hero">
-              <div className="sv-hero-bg">
-                <img
-                  src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1200&q=80&auto=format&fit=crop"
-                  alt="Savage Club training floor"
-                />
-                <div className="sv-hero-overlay" />
-              </div>
-              <div className="sv-slash sv-slash-1" />
-              <div className="sv-slash sv-slash-2" />
-              <div className="sv-slash sv-slash-3" />
-
-              <div className="sv-hero-inner">
-                <motion.p
-                  className="sv-eyebrow"
-                  initial={{ opacity: 0, x: -24 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.5, delay: 0.1 }}
-                >
-                  <Flame size={15} /> No mirrors. No egos. Just work.
-                </motion.p>
-
-                <h1 className="sv-hero-title">
-                  <motion.span
-                    className="sv-hero-line"
-                    initial={{ opacity: 0, x: -60, skewX: -8 }}
-                    animate={{ opacity: 1, x: 0, skewX: 0 }}
-                    transition={{ duration: 0.6, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-                  >
-                    BUILT,
-                  </motion.span>
-                  <motion.span
-                    className="sv-hero-line"
-                    initial={{ opacity: 0, x: -60, skewX: -8 }}
-                    animate={{ opacity: 1, x: 0, skewX: 0 }}
-                    transition={{ duration: 0.6, delay: 0.28, ease: [0.22, 1, 0.36, 1] }}
-                  >
-                    NOT <span className="sv-outline">BORN.</span>
-                  </motion.span>
-                </h1>
-
-                <motion.p
-                  className="sv-hero-sub"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.55, delay: 0.45 }}
-                >
-                  Strength is earned in the reps nobody claps for. Savage Club is a
-                  40,000 sq ft arena of iron, sweat and coaching that refuses to let
-                  you stay average.
-                </motion.p>
-
-                <motion.div
-                  className="sv-hero-ctas"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.55, delay: 0.58 }}
-                >
-                  <button type="button" className="sv-btn sv-btn-red" onClick={() => go("membership")}>
-                    <span>Start 7-Day Trial</span> <ArrowRight size={17} />
-                  </button>
-                  <button type="button" className="sv-btn sv-btn-ghost" onClick={() => go("classes")}>
-                    <span>View Classes</span>
-                  </button>
-                </motion.div>
-
-                <motion.div
-                  className="sv-hero-meta"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.75 }}
-                >
-                  <span><Clock size={14} /> Open 5 AM – 11 PM</span>
-                  <span><MapPin size={14} /> Iron District, Downtown</span>
-                  <span><Dumbbell size={14} /> First week free</span>
-                </motion.div>
-              </div>
-
-              <div className="sv-hero-marquee" aria-hidden="true">
-                <span>TRAIN HARD ✕ STAY SAVAGE ✕ TRAIN HARD ✕ STAY SAVAGE ✕ TRAIN HARD ✕ STAY SAVAGE ✕</span>
-              </div>
-            </section>
+            <SavageHero go={go} />
 
             {/* ---------- COUNTERS ---------- */}
             <section className="sv-stats">
@@ -605,7 +812,7 @@ export default function Savage() {
                   viewport={{ once: true, margin: "-60px" }}
                 >
                   <p className="sv-kicker">Weekly Timetable</p>
-                  <h2 className="sv-h2">PICK YOUR <span className="sv-red">POISON</span></h2>
+                  <Reveal text="PICK YOUR POISON" as="h2" className="sv-h2" />
                   <p className="sv-lead">120+ classes a week. Every session coached, every rep counted.</p>
                 </motion.div>
 
@@ -676,23 +883,27 @@ export default function Savage() {
                   viewport={{ once: true, margin: "-60px" }}
                 >
                   <p className="sv-kicker">The Coaching Staff</p>
-                  <h2 className="sv-h2">MEET THE <span className="sv-red">SAVAGES</span></h2>
+                  <Reveal text="MEET THE SAVAGES" as="h2" className="sv-h2" />
                   <p className="sv-lead">Competitors, fighters and movement nerds. They will push you further than you push yourself.</p>
                 </motion.div>
 
                 <div className="sv-trainers">
                   {TRAINERS.map((t, i) => (
-                    <motion.article
+                    <TiltCard
+                      as="article"
                       className="sv-trainer"
                       key={t.name}
-                      variants={fadeUp}
+                      max={6}
+                      variants={cardPop}
                       initial="hidden"
                       whileInView="show"
                       viewport={{ once: true, margin: "-40px" }}
                       custom={i}
                     >
                       <div className="sv-trainer-img">
-                        <img src={t.img} alt={`${t.name}, ${t.specialty} coach`} loading="lazy" />
+                        <Parallax className="sv-parallax-fill" speed={0.12}>
+                          <img src={t.img} alt={`${t.name}, ${t.specialty} coach`} loading="lazy" />
+                        </Parallax>
                         <span className="sv-trainer-tag">{t.tag}</span>
                         <div className="sv-trainer-socials">
                           <button type="button" aria-label={`${t.name} on Instagram`} onClick={() => go("trainers")}><Instagram size={16} /></button>
@@ -704,15 +915,23 @@ export default function Savage() {
                         <p>{t.specialty}</p>
                       </div>
                       <div className="sv-trainer-bar" />
-                    </motion.article>
+                    </TiltCard>
                   ))}
                 </div>
 
                 <div className="sv-strip">
-                  <img src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=1200&q=80&auto=format&fit=crop" alt="Member training with dumbbells" loading="lazy" />
-                  <img src="https://images.unsplash.com/photo-1526506118085-60ce8714f8c5?w=1200&q=80&auto=format&fit=crop" alt="Barbell deadlift" loading="lazy" />
-                  <img src="https://images.unsplash.com/photo-1605296867304-46d5465a13f1?w=1200&q=80&auto=format&fit=crop" alt="Deadlift training" loading="lazy" />
-                  <img src="https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?w=1200&q=80&auto=format&fit=crop" alt="Battle ropes workout" loading="lazy" />
+                  <Parallax className="sv-strip-frame" speed={0.1}>
+                    <img src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=1200&q=80&auto=format&fit=crop" alt="Member training with dumbbells" loading="lazy" />
+                  </Parallax>
+                  <Parallax className="sv-strip-frame" speed={0.13}>
+                    <img src="https://images.unsplash.com/photo-1526506118085-60ce8714f8c5?w=1200&q=80&auto=format&fit=crop" alt="Barbell deadlift" loading="lazy" />
+                  </Parallax>
+                  <Parallax className="sv-strip-frame" speed={0.11}>
+                    <img src="https://images.unsplash.com/photo-1605296867304-46d5465a13f1?w=1200&q=80&auto=format&fit=crop" alt="Deadlift training" loading="lazy" />
+                  </Parallax>
+                  <Parallax className="sv-strip-frame" speed={0.14}>
+                    <img src="https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?w=1200&q=80&auto=format&fit=crop" alt="Battle ropes workout" loading="lazy" />
+                  </Parallax>
                 </div>
 
                 <div className="sv-section-cta">
@@ -723,54 +942,13 @@ export default function Savage() {
               </div>
             </section>
 
-            {/* ---------- TRANSFORMATIONS ---------- */}
-            <section className="sv-section">
-              <div className="sv-wrap">
-                <motion.div
-                  className="sv-section-head"
-                  variants={fadeUp}
-                  initial="hidden"
-                  whileInView="show"
-                  viewport={{ once: true, margin: "-60px" }}
-                >
-                  <p className="sv-kicker">Member Results</p>
-                  <h2 className="sv-h2">PROOF, NOT <span className="sv-red">PROMISES</span></h2>
-                  <p className="sv-lead">Real members, real timelines. Coached programs, tracked progress, zero shortcuts.</p>
-                </motion.div>
+            {/* ---------- TRANSFORMATIONS (pinned scrub) ---------- */}
+            <PinnedTransformations />
 
-                <div className="sv-transform-grid">
-                  {TRANSFORMATIONS.map((m, i) => (
-                    <motion.article
-                      className="sv-transform"
-                      key={m.name}
-                      variants={fadeUp}
-                      initial="hidden"
-                      whileInView="show"
-                      viewport={{ once: true, margin: "-40px" }}
-                      custom={i}
-                    >
-                      <span className="sv-transform-tag">{m.tag}</span>
-                      <div className="sv-transform-result">{m.result}</div>
-                      <h3 className="sv-transform-name">{m.name}</h3>
-                      <p className="sv-transform-detail">{m.detail}</p>
-                      <div className="sv-progress-row">
-                        <span>Goal progress</span>
-                        <span className="sv-progress-pct">{m.progress}%</span>
-                      </div>
-                      <div className="sv-progress" role="progressbar" aria-valuenow={m.progress} aria-valuemin={0} aria-valuemax={100} aria-label={`${m.name} goal progress`}>
-                        <motion.div
-                          className="sv-progress-fill"
-                          initial={{ width: 0 }}
-                          whileInView={{ width: `${m.progress}%` }}
-                          viewport={{ once: true, margin: "-40px" }}
-                          transition={{ duration: 1.1, delay: 0.15 + i * 0.12, ease: [0.22, 1, 0.36, 1] }}
-                        />
-                      </div>
-                    </motion.article>
-                  ))}
-                </div>
-              </div>
-            </section>
+            {/* ---------- VELOCITY MARQUEE ---------- */}
+            <VelocityMarquee baseVelocity={3} className="sv-velocity-band" chunkClassName="sv-velocity-chunk">
+              NO EXCUSES <em>✕</em> TRAIN HARD <em>✕</em> SAVAGE CLUB <em>✕</em>{" "}
+            </VelocityMarquee>
 
             {/* ---------- PRICING PREVIEW ---------- */}
             <section className="sv-section sv-section-dark">
@@ -783,7 +961,7 @@ export default function Savage() {
                   viewport={{ once: true, margin: "-60px" }}
                 >
                   <p className="sv-kicker">Membership</p>
-                  <h2 className="sv-h2">NO CONTRACTS. <span className="sv-red">NO EXCUSES.</span></h2>
+                  <Reveal text="NO CONTRACTS. NO EXCUSES." as="h2" className="sv-h2" />
                   <p className="sv-lead">Cancel anytime. Freeze anytime. Train always.</p>
                 </motion.div>
 
@@ -803,14 +981,22 @@ export default function Savage() {
                   viewport={{ once: true, margin: "-60px" }}
                 >
                   <p className="sv-kicker">Before You Ask</p>
-                  <h2 className="sv-h2">STRAIGHT <span className="sv-red">ANSWERS</span></h2>
+                  <Reveal text="STRAIGHT ANSWERS" as="h2" className="sv-h2" />
                 </motion.div>
 
                 <div className="sv-faq-list">
                   {FAQS.map((f, i) => {
                     const open = openFaq === i;
                     return (
-                      <div className={`sv-faq ${open ? "sv-faq-open" : ""}`} key={f.q}>
+                      <motion.div
+                        className={`sv-faq ${open ? "sv-faq-open" : ""}`}
+                        key={f.q}
+                        variants={cardPop}
+                        initial="hidden"
+                        whileInView="show"
+                        viewport={{ once: true, margin: "-40px" }}
+                        custom={i}
+                      >
                         <button
                           type="button"
                           className="sv-faq-q"
@@ -840,7 +1026,7 @@ export default function Savage() {
                             </motion.div>
                           )}
                         </AnimatePresence>
-                      </div>
+                      </motion.div>
                     );
                   })}
                 </div>
@@ -857,7 +1043,7 @@ export default function Savage() {
                 whileInView="show"
                 viewport={{ once: true, margin: "-60px" }}
               >
-                <h2>Your first week is on us.</h2>
+                <Reveal text="Your first week is on us." as="h2" />
                 <p>Seven days. Every class. Every coach. Zero dollars. Bring shoes, we bring the suffering.</p>
                 <button type="button" className="sv-btn sv-btn-dark" onClick={() => go("membership")}>
                   <span>Claim Free Week</span> <ArrowRight size={17} />
@@ -873,7 +1059,7 @@ export default function Savage() {
             <section className="sv-page-hero">
               <div className="sv-wrap">
                 <p className="sv-kicker"><CalendarDays size={15} /> Full Week Schedule</p>
-                <h1 className="sv-page-title">EVERY DAY. <span className="sv-outline">EVERY LEVEL.</span></h1>
+                <Reveal text="EVERY DAY. EVERY LEVEL." as="h1" className="sv-page-title" />
                 <p className="sv-lead sv-page-lead">
                   Pick a day, pick your fight. Flames show intensity — one is technique and
                   mobility, three is full send. Every class is coach-led and capped at 18.
@@ -943,6 +1129,18 @@ export default function Savage() {
                   </p>
                 </div>
 
+                <div className="sv-class-visuals">
+                  <Parallax className="sv-class-visual" speed={0.12}>
+                    <img src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=1200&q=80&auto=format&fit=crop" alt="Member training with dumbbells" loading="lazy" />
+                  </Parallax>
+                  <Parallax className="sv-class-visual" speed={0.14}>
+                    <img src="https://images.unsplash.com/photo-1526506118085-60ce8714f8c5?w=1200&q=80&auto=format&fit=crop" alt="Barbell deadlift" loading="lazy" />
+                  </Parallax>
+                  <Parallax className="sv-class-visual" speed={0.1}>
+                    <img src="https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?w=1200&q=80&auto=format&fit=crop" alt="Battle ropes workout" loading="lazy" />
+                  </Parallax>
+                </div>
+
                 <div className="sv-section-cta">
                   <button type="button" className="sv-btn sv-btn-red" onClick={() => go("membership")}>
                     <span>Claim Free Week</span> <ArrowRight size={16} />
@@ -959,7 +1157,7 @@ export default function Savage() {
             <section className="sv-page-hero">
               <div className="sv-wrap">
                 <p className="sv-kicker"><Trophy size={15} /> The Coaching Staff</p>
-                <h1 className="sv-page-title">COACHES WHO <span className="sv-outline">COMPETE.</span></h1>
+                <Reveal text="COACHES WHO COMPETE." as="h1" className="sv-page-title" />
                 <p className="sv-lead sv-page-lead">
                   Six specialists, zero clipboard tourists. Book a 60-minute session and get a
                   written program in the Savage app the same day.
@@ -973,17 +1171,21 @@ export default function Savage() {
                   {TRAINERS_FULL.map((t, i) => {
                     const booked = bookedIds.includes(t.id);
                     return (
-                      <motion.article
+                      <TiltCard
+                        as="article"
                         className="sv-trainer-full"
                         key={t.id}
-                        variants={fadeUp}
+                        max={6}
+                        variants={cardPop}
                         initial="hidden"
                         whileInView="show"
                         viewport={{ once: true, margin: "-40px" }}
                         custom={i % 3}
                       >
                         <div className="sv-trainer-img sv-trainer-img-full">
-                          <img src={t.img} alt={`${t.name}, ${t.specialty} coach`} loading="lazy" />
+                          <Parallax className="sv-parallax-fill" speed={0.12}>
+                            <img src={t.img} alt={`${t.name}, ${t.specialty} coach`} loading="lazy" />
+                          </Parallax>
                           <span className="sv-trainer-tag">{t.tag}</span>
                           <span className="sv-trainer-years">{t.years} yrs coaching</span>
                         </div>
@@ -1001,7 +1203,7 @@ export default function Savage() {
                           </button>
                         </div>
                         <div className="sv-trainer-bar" />
-                      </motion.article>
+                      </TiltCard>
                     );
                   })}
                 </div>
@@ -1030,7 +1232,7 @@ export default function Savage() {
             <section className="sv-page-hero">
               <div className="sv-wrap">
                 <p className="sv-kicker"><Dumbbell size={15} /> Membership</p>
-                <h1 className="sv-page-title">JOIN THE <span className="sv-outline">CLUB.</span></h1>
+                <Reveal text="JOIN THE CLUB." as="h1" className="sv-page-title" />
                 <p className="sv-lead sv-page-lead">
                   First week free on every plan. No joining fee, no contract, cancel in one tap.
                   Pick a plan, drop your details, walk in tomorrow.
@@ -1047,7 +1249,7 @@ export default function Savage() {
                 <div className="sv-join" id="join">
                   <div className="sv-join-head">
                     <p className="sv-kicker">Start Your Free Week</p>
-                    <h2 className="sv-h2 sv-join-title">CLAIM YOUR <span className="sv-red">SPOT</span></h2>
+                    <Reveal text="CLAIM YOUR SPOT" as="h2" className="sv-h2 sv-join-title" />
                     <p className="sv-lead">Takes 30 seconds. Your member ID is generated instantly — show it at the front desk.</p>
                   </div>
 

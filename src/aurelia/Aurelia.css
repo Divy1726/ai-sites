@@ -1628,3 +1628,244 @@
   .au-mobile-nav { gap: 16px; }
   .au-mobile-nav .au-nav-btn { font-size: 10px; letter-spacing: 0.14em; }
 }
+
+/* ===== Scroll FX additions ===== */
+
+/* Parallax fill frames (frame height comes from the parent) */
+.au-parallax-fill {
+  width: 100%;
+  height: 100%;
+}
+.au-page .fx-parallax-inner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.au-story-image,
+.au-article-image {
+  aspect-ratio: 16 / 9;
+}
+
+/* Hero parallax wrappers (float animation stays on the inner arch) */
+.au-hero-arch-wrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  will-change: transform;
+}
+.au-hero-head-wrap {
+  will-change: transform, opacity;
+}
+
+/* Slow maison marquee band */
+.au-marquee {
+  background: var(--au-ivory-deep);
+  border-top: 1px solid var(--au-line);
+  border-bottom: 1px solid var(--au-line);
+  padding: 20px 0;
+}
+.au-marquee-chunk {
+  align-items: center;
+}
+.au-marquee-item {
+  font-family: var(--au-serif);
+  font-size: 15px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--au-charcoal-soft);
+  padding: 0 22px;
+  white-space: nowrap;
+}
+.au-marquee-item--italic {
+  font-family: "Cormorant Garamond", var(--au-serif);
+  font-style: italic;
+  text-transform: none;
+  letter-spacing: 0.08em;
+  font-size: 19px;
+  color: var(--au-gold);
+}
+.au-marquee-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--au-gold);
+  flex-shrink: 0;
+}
+
+/* Pinned perfume story */
+.au-pinned {
+  position: relative;
+  height: 250vh;
+  background: var(--au-ivory-deep);
+  border-top: 1px solid var(--au-line);
+  border-bottom: 1px solid var(--au-line);
+}
+.au-pinned-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+.au-pinned-inner {
+  width: 100%;
+  max-width: 1184px;
+  margin: 0 auto;
+  padding: 0 48px;
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 72px;
+  align-items: center;
+}
+.au-pinned-media {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.au-pinned-img-wrap {
+  width: min(380px, 100%);
+  aspect-ratio: 3 / 4;
+  border-radius: 999px 999px 24px 24px;
+  overflow: hidden;
+  background: var(--au-cream);
+  box-shadow: 0 40px 80px rgba(29, 26, 22, 0.16);
+  will-change: transform;
+}
+.au-pinned-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.au-pinned-line {
+  position: absolute;
+  top: 0;
+  right: -36px;
+  width: 1px;
+  height: 100%;
+  background: var(--au-gold);
+  transform-origin: top;
+}
+.au-pinned-caption {
+  margin-top: 22px;
+  font-family: "Cormorant Garamond", var(--au-serif);
+  font-style: italic;
+  font-size: 18px;
+  color: var(--au-gold);
+  letter-spacing: 0.04em;
+}
+.au-pinned-title {
+  font-family: var(--au-serif);
+  font-weight: 500;
+  font-size: clamp(32px, 3.8vw, 48px);
+  line-height: 1.1;
+  margin: 18px 0 8px;
+  color: var(--au-charcoal);
+}
+.au-pinned-title em {
+  font-style: italic;
+  font-family: "Cormorant Garamond", var(--au-serif);
+  font-weight: 500;
+  color: var(--au-gold);
+}
+.au-pinned-note {
+  display: flex;
+  gap: 22px;
+  align-items: flex-start;
+  padding: 24px 0;
+  border-top: 1px solid var(--au-line);
+  will-change: transform, opacity;
+}
+.au-pinned-note-num {
+  font-family: var(--au-serif);
+  font-size: 30px;
+  line-height: 1.1;
+  font-weight: 500;
+  color: var(--au-gold);
+  flex-shrink: 0;
+}
+.au-pinned-note-title {
+  font-family: var(--au-serif);
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+  color: var(--au-charcoal);
+}
+.au-pinned-note-title span {
+  font-family: "Cormorant Garamond", var(--au-serif);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 19px;
+  color: var(--au-gold);
+  margin-left: 8px;
+}
+.au-pinned-note-items {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--au-charcoal-soft);
+  margin: 8px 0 0;
+}
+.au-pinned-note-desc {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--au-muted);
+  margin: 8px 0 0;
+  max-width: 440px;
+}
+
+/* Big serif background word in the Ritual section */
+.au-bg-word {
+  position: absolute;
+  top: 34%;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  text-align: center;
+  font-family: var(--au-serif);
+  font-size: clamp(110px, 20vw, 300px);
+  line-height: 1;
+  letter-spacing: 0.08em;
+  color: rgba(201, 168, 106, 0.1);
+  white-space: nowrap;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* Tilt cards: the spring tilt replaces the CSS hover lift */
+.au-product-card.fx-tilt:hover {
+  transform: none;
+}
+
+/* Scroll FX responsive */
+@media (max-width: 1024px) {
+  .au-pinned-inner { gap: 48px; padding: 0 32px; }
+}
+@media (max-width: 860px) {
+  .au-story-image,
+  .au-article-image { aspect-ratio: 4 / 3; }
+}
+@media (max-width: 768px) {
+  .au-pinned { height: auto; }
+  .au-pinned-sticky {
+    position: static;
+    height: auto;
+    overflow: visible;
+    padding: 72px 0;
+  }
+  .au-pinned-inner {
+    grid-template-columns: 1fr;
+    gap: 44px;
+    padding: 0 24px;
+  }
+  .au-pinned-line { display: none; }
+  .au-pinned-note {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .au-pinned-img-wrap { transform: none !important; }
+  .au-pinned-title { font-size: 32px; }
+  .au-bg-word { top: 22%; }
+}
