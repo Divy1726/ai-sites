@@ -623,19 +623,26 @@
   fill: #0a0a0a;
 }
 
-/* winding switchback road: shoulder, asphalt, dashed centre line */
+/* the road — quay run, one gentle curve, straight descent. The band
+   is wide (truck is ~341 units across) so the upright truck always
+   sits on the asphalt: shoulder, asphalt, dashed centre line */
 .ge-road-shoulder {
   fill: none;
   stroke: #232327;
-  stroke-width: 96;
+  stroke-width: 392;
   stroke-linecap: round;
 }
 
 .ge-road-asphalt {
   fill: none;
   stroke: #161618;
-  stroke-width: 84;
+  stroke-width: 360;
   stroke-linecap: round;
+}
+
+/* road truck moves by transform only — promote it to its own layer */
+.ge-sea-truck {
+  will-change: transform;
 }
 
 .ge-sea-dashes {
