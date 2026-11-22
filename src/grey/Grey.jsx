@@ -536,8 +536,10 @@ function FlatbedTruck({ wheelRotate }) {
 /* (rotation = path tangent: 0deg east -> 90deg nose-down), descends */
 /* a long straight vertical road, takes one quarter-curve back to    */
 /* horizontal, and parks upright at the warehouse, then the customer.*/
-/* Rotation is spring-smoothed, transform-only, single direction     */
-/* (0 -> 90 -> 0) — no flips, no mirroring. All transforms px/unit.  */
+/* Rotation follows the path tangent, transform-only, single        */
+/* direction (0 -> 90 -> 0) — no flips, no mirroring. Motion is      */
+/* driven by RAW scroll progress (Lenis smooths the input; springs  */
+/* here only made the truck trail behind on fast scroll).           */
 /* ------------------------------------------------------------------ */
 
 // Camera keyframes: progress -> fraction of (sceneH - stageH) panned.
@@ -577,7 +579,14 @@ function SeaToGateScene() {
     target: sectionRef,
     offset: ["start start", "end end"],
   });
-  const progress = useSpring(scrollYProgress, SCROLL_SPRING);
+  // RAW scroll progress — deliberately NOT sprung. Lenis already
+  // smooths the scroll input itself; adding a spring here (plus more
+  // springs on the truck below) stacked three overdamped springs in
+  // series, so on fast scroll the camera ran ahead and the truck
+  // trailed up to ~75% of the path behind, settling ~1.5s late.
+  // Everything in this scene (camera, ship, crane, truck, stamps)
+  // derives from this one value, so nothing can desync.
+  const progress = scrollYProgress;
 
   // Measure the tall world vs the stage window (px) for the camera pan.
   useEffect(() => {
@@ -680,14 +689,16 @@ function SeaToGateScene() {
   // Driving starts at 0.52, right after the flatbed -> road-truck
   // handover crossfade (both stationary then). Piecewise slices: the
   // first turn gets 0.52-0.58, the descent 0.58-0.62, the bottom
-  // turn + run to the QC park 0.62-0.68. A spring on the fraction
-  // smooths the speed changes so the truck never lurches.
+  // turn + run to the QC park 0.62-0.68. NO spring on the fraction:
+  // the descent slice is steep, so even a stiff spring lags visibly
+  // on fast scroll; Lenis already smooths the input velocity, which
+  // is what keeps the truck's motion smooth without trailing.
   const truckFracRaw = useTransform(
     progress,
     [0.52, 0.58, 0.62, 0.68, 0.84, 0.92],
     [0, park.fDescent, park.fBottom, park.fQc, park.fQc, park.fEnd]
   );
-  const truckFrac = useSpring(truckFracRaw, { stiffness: 140, damping: 32, mass: 0.4 });
+  const truckFrac = truckFracRaw;
   // Pose from the path. Rotation = FULL path tangent (the standard
   // vehicle-follows-path technique): 0deg heading east on the quay,
   // rotating smoothly to 90deg nose-down through the first curve,
@@ -715,9 +726,12 @@ function SeaToGateScene() {
   const truckX = useTransform(truckFrac, (f) => poseAt(f).x);
   const truckY = useTransform(truckFrac, (f) => poseAt(f).y);
   const truckRotateRaw = useTransform(truckFrac, (f) => poseAt(f).rotate);
-  // Spring-smooth the heading so it can never snap or jitter frame
-  // to frame (unit-based spring, degrees).
-  const truckRotate = useSpring(truckRotateRaw, { stiffness: 90, damping: 24, mass: 0.4 });
+  // No spring on the heading either: the tangent is sampled over a
+  // ±30-unit window, which already smooths the angle spatially, and
+  // a time-based spring would leave the truck pointing the wrong way
+  // briefly on fast scroll. Rotation stays exactly in sync with
+  // position (both are pure functions of the same scroll progress).
+  const truckRotate = truckRotateRaw;
   // Wheel spin from distance travelled (scene units): angle = dist /
   // (wheel radius in scene units 13*1.55) in degrees.
   const truckWheelRotate = useTransform(truckFrac, (f) => poseAt(f).dist * 2.84);
