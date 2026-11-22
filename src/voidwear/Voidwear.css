@@ -1,0 +1,908 @@
+/* ==========================================================================
+   VOIDWEAR — brutalist streetwear
+   Black #0a0a0a / white / acid #d9ff3d. Anton display, JetBrains Mono labels.
+   All classes prefixed vw- to avoid collisions with sibling sites.
+   ========================================================================== */
+
+.vw-root {
+  --vw-bg: #0a0a0a;
+  --vw-panel: #1a1a1a;
+  --vw-white: #f5f5f0;
+  --vw-acid: #d9ff3d;
+  --vw-dim: #9a9a94;
+  background: var(--vw-bg);
+  color: var(--vw-white);
+  font-family: "Archivo", "Inter", sans-serif;
+  min-height: 100vh;
+  overflow-x: clip;
+}
+
+.vw-root ::selection {
+  background: var(--vw-acid);
+  color: #0a0a0a;
+}
+
+/* ------------------------------------------------------------------ NAV */
+
+.vw-nav {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  /* Left padding clears the fixed Back pill rendered by the parent App */
+  padding: 18px 32px 18px 118px;
+  background: rgba(10, 10, 10, 0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 2px solid var(--vw-white);
+}
+
+.vw-logo {
+  font-family: "Anton", sans-serif;
+  font-size: 28px;
+  letter-spacing: 0.04em;
+  color: var(--vw-white);
+  text-decoration: none;
+  line-height: 1;
+}
+
+.vw-logo span {
+  color: var(--vw-acid);
+}
+
+.vw-nav-links {
+  display: flex;
+  gap: 34px;
+}
+
+.vw-nav-links a {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--vw-white);
+  text-decoration: none;
+  position: relative;
+  padding: 4px 0;
+}
+
+.vw-nav-links a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--vw-acid);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.25s ease;
+}
+
+.vw-nav-links a:hover {
+  color: var(--vw-acid);
+}
+
+.vw-nav-links a:hover::after {
+  transform: scaleX(1);
+}
+
+.vw-cart {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  background: transparent;
+  color: var(--vw-white);
+  border: 2px solid var(--vw-white);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.vw-cart:hover {
+  background: var(--vw-acid);
+  color: #0a0a0a;
+  border-color: var(--vw-acid);
+}
+
+.vw-cart-badge {
+  position: absolute;
+  top: -11px;
+  right: -11px;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--vw-acid);
+  color: #0a0a0a;
+  border: 2px solid #0a0a0a;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* ------------------------------------------------------------------ HERO */
+
+.vw-hero {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 48px;
+  align-items: center;
+  padding: 72px 32px 96px;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.vw-hero-kicker {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  color: var(--vw-acid);
+  margin: 0 0 22px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.vw-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  background: var(--vw-acid);
+  animation: vw-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes vw-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+
+.vw-hero-title {
+  margin: 0;
+  font-family: "Anton", sans-serif;
+  text-transform: uppercase;
+  line-height: 0.88;
+}
+
+.vw-hero-line {
+  display: block;
+  font-size: clamp(120px, 17vw, 260px);
+  letter-spacing: 0.01em;
+}
+
+.vw-hero-line-outline {
+  color: transparent;
+  -webkit-text-stroke: 3px var(--vw-white);
+}
+
+.vw-hero-sub {
+  max-width: 480px;
+  font-size: 18px;
+  line-height: 1.6;
+  color: var(--vw-dim);
+  margin: 30px 0 36px;
+}
+
+.vw-hero-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.vw-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 16px 28px;
+  border: 2px solid var(--vw-white);
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.2s ease, color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.vw-btn-acid {
+  background: var(--vw-acid);
+  border-color: var(--vw-acid);
+  color: #0a0a0a;
+}
+
+.vw-btn-acid:hover {
+  background: var(--vw-white);
+  border-color: var(--vw-white);
+  transform: translate(-3px, -3px);
+}
+
+.vw-btn-outline {
+  background: transparent;
+  color: var(--vw-white);
+}
+
+.vw-btn-outline:hover {
+  background: var(--vw-white);
+  color: #0a0a0a;
+  transform: translate(-3px, -3px);
+}
+
+.vw-hero-stats {
+  display: flex;
+  gap: 36px;
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 2px solid #2c2c2c;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: var(--vw-dim);
+}
+
+.vw-hero-stats strong {
+  display: block;
+  font-size: 26px;
+  color: var(--vw-white);
+  letter-spacing: 0;
+  margin-bottom: 4px;
+}
+
+.vw-hero-media {
+  position: relative;
+}
+
+.vw-hero-imgwrap {
+  position: relative;
+  background: var(--vw-panel);
+  border: 2px solid var(--vw-white);
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+}
+
+.vw-hero-imgwrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: grayscale(1) contrast(1.18) brightness(0.95);
+  transition: transform 0.6s ease;
+}
+
+.vw-hero-imgwrap:hover img {
+  transform: scale(1.05);
+}
+
+/* Acid duotone tint over the grayscale photo */
+.vw-hero-tint {
+  position: absolute;
+  inset: 0;
+  background: var(--vw-acid);
+  mix-blend-mode: multiply;
+  opacity: 0.32;
+  pointer-events: none;
+}
+
+.vw-hero-tag {
+  position: absolute;
+  left: 0;
+  bottom: 24px;
+  background: #0a0a0a;
+  color: var(--vw-acid);
+  border: 2px solid var(--vw-acid);
+  border-left: none;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  padding: 8px 14px;
+}
+
+/* Rotating circular badge */
+.vw-badge {
+  position: absolute;
+  left: -56px;
+  bottom: -40px;
+  width: 168px;
+  height: 168px;
+  background: #0a0a0a;
+  border: 2px solid var(--vw-acid);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vw-badge-ring {
+  position: absolute;
+  inset: 6px;
+  animation: vw-spin 12s linear infinite;
+}
+
+.vw-badge-text {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 15.5px;
+  letter-spacing: 2.5px;
+  fill: var(--vw-acid);
+}
+
+.vw-badge-core {
+  color: var(--vw-acid);
+  display: flex;
+}
+
+@keyframes vw-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ------------------------------------------------------------------ MARQUEE */
+
+.vw-marquee {
+  background: var(--vw-acid);
+  color: #0a0a0a;
+  border-top: 2px solid #0a0a0a;
+  border-bottom: 2px solid #0a0a0a;
+  transform: rotate(-2deg) scale(1.03);
+  overflow: hidden;
+  padding: 14px 0;
+  margin: 24px 0 8px;
+}
+
+.vw-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: vw-marquee 22s linear infinite;
+}
+
+.vw-marquee-track span {
+  font-family: "Anton", sans-serif;
+  font-size: 26px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  padding-right: 8px;
+}
+
+@keyframes vw-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* ------------------------------------------------------------------ SECTIONS */
+
+.vw-countdown,
+.vw-shop,
+.vw-lookbook,
+.vw-manifesto {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 96px 32px;
+  scroll-margin-top: 90px;
+}
+
+.vw-section-head {
+  margin-bottom: 44px;
+}
+
+.vw-section-head-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.vw-eyebrow {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13px;
+  letter-spacing: 0.18em;
+  color: var(--vw-acid);
+  margin: 0 0 14px;
+}
+
+.vw-h2 {
+  font-family: "Anton", sans-serif;
+  font-size: clamp(44px, 6vw, 84px);
+  line-height: 0.95;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+/* ------------------------------------------------------------------ COUNTDOWN */
+
+.vw-countdown {
+  text-align: left;
+}
+
+.vw-clock {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  max-width: 860px;
+}
+
+.vw-clock-box {
+  border: 2px solid var(--vw-white);
+  background: var(--vw-panel);
+  padding: 28px 12px 20px;
+  text-align: center;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.vw-clock-box:hover {
+  border-color: var(--vw-acid);
+  transform: translateY(-4px);
+}
+
+.vw-clock-num {
+  display: block;
+  font-family: "JetBrains Mono", monospace;
+  font-size: clamp(44px, 6vw, 76px);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--vw-white);
+}
+
+.vw-clock-label {
+  display: block;
+  margin-top: 12px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  color: var(--vw-acid);
+}
+
+.vw-countdown-note {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 14px;
+  color: var(--vw-dim);
+  margin-top: 28px;
+}
+
+/* ------------------------------------------------------------------ SHOP */
+
+.vw-shop-count,
+.vw-scroll-hint {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  color: var(--vw-dim);
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vw-scroll-hint {
+  color: var(--vw-acid);
+}
+
+.vw-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.vw-card {
+  border: 2px solid var(--vw-white);
+  background: var(--vw-panel);
+  transition: border-color 0.2s ease;
+}
+
+.vw-card:hover {
+  border-color: var(--vw-acid);
+  animation: vw-glitch 0.32s steps(2) 1;
+}
+
+@keyframes vw-glitch {
+  0% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-3px);
+  }
+  50% {
+    transform: translateX(3px);
+  }
+  75% {
+    transform: translateX(-2px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.vw-card-media {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: #1a1a1a;
+}
+
+.vw-card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: grayscale(0.35) contrast(1.08);
+  transition: transform 0.55s ease, filter 0.55s ease;
+}
+
+.vw-card:hover .vw-card-media img {
+  transform: scale(1.08);
+  filter: grayscale(0) contrast(1.1);
+}
+
+/* Acid sweep overlay on hover */
+.vw-card-sweep {
+  position: absolute;
+  inset: 0;
+  background: var(--vw-acid);
+  mix-blend-mode: multiply;
+  opacity: 0;
+  transform: translateX(-101%);
+  transition: transform 0.45s ease, opacity 0.45s ease;
+  pointer-events: none;
+}
+
+.vw-card:hover .vw-card-sweep {
+  transform: translateX(0);
+  opacity: 0.28;
+}
+
+.vw-card-tag {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  padding: 6px 10px;
+  border: 2px solid #0a0a0a;
+  background: var(--vw-white);
+  color: #0a0a0a;
+}
+
+.vw-tag-hot {
+  background: var(--vw-acid);
+}
+
+.vw-tag-last {
+  background: #0a0a0a;
+  color: var(--vw-acid);
+  border-color: var(--vw-acid);
+}
+
+.vw-add {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 12px 18px;
+  background: #0a0a0a;
+  color: var(--vw-white);
+  border: 2px solid var(--vw-white);
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.25s ease, transform 0.25s ease, background 0.2s ease,
+    color 0.2s ease, border-color 0.2s ease;
+}
+
+.vw-card:hover .vw-add,
+.vw-add.vw-added {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.vw-add:hover {
+  background: var(--vw-acid);
+  color: #0a0a0a;
+  border-color: var(--vw-acid);
+}
+
+.vw-add.vw-added {
+  background: var(--vw-acid);
+  color: #0a0a0a;
+  border-color: var(--vw-acid);
+}
+
+.vw-card-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px;
+  border-top: 2px solid var(--vw-white);
+  background: #0a0a0a;
+}
+
+.vw-card-info h3 {
+  font-family: "Anton", sans-serif;
+  font-size: 19px;
+  letter-spacing: 0.04em;
+  margin: 0;
+}
+
+.vw-price {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--vw-acid);
+}
+
+/* ------------------------------------------------------------------ LOOKBOOK */
+
+.vw-look-row {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 18px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--vw-acid) #1a1a1a;
+}
+
+.vw-look-row::-webkit-scrollbar {
+  height: 8px;
+}
+
+.vw-look-row::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+.vw-look-row::-webkit-scrollbar-thumb {
+  background: var(--vw-acid);
+}
+
+.vw-look {
+  flex: 0 0 300px;
+  margin: 0;
+  scroll-snap-align: start;
+  border: 2px solid var(--vw-white);
+  background: var(--vw-panel);
+  transition: border-color 0.2s ease, transform 0.25s ease;
+}
+
+.vw-look:hover {
+  border-color: var(--vw-acid);
+  transform: translateY(-6px);
+}
+
+.vw-look img {
+  width: 100%;
+  height: 440px;
+  object-fit: cover;
+  display: block;
+  filter: grayscale(0.6) contrast(1.1);
+  transition: filter 0.4s ease;
+}
+
+.vw-look:hover img {
+  filter: grayscale(0) contrast(1.1);
+}
+
+.vw-look figcaption {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  padding: 14px 16px;
+  border-top: 2px solid var(--vw-white);
+  background: #0a0a0a;
+  color: var(--vw-dim);
+}
+
+/* ------------------------------------------------------------------ MANIFESTO */
+
+.vw-manifesto {
+  border-top: 2px solid #2c2c2c;
+}
+
+.vw-manifesto-lines {
+  font-family: "Anton", sans-serif;
+  text-transform: uppercase;
+  line-height: 1;
+  margin: 0 0 36px;
+}
+
+.vw-manifesto-line {
+  display: block;
+  font-size: clamp(40px, 6.4vw, 96px);
+}
+
+.vw-line-acid {
+  color: var(--vw-acid);
+}
+
+.vw-manifesto-copy {
+  max-width: 640px;
+  font-size: 18px;
+  line-height: 1.7;
+  color: var(--vw-dim);
+  margin: 0 0 40px;
+}
+
+/* ------------------------------------------------------------------ FOOTER */
+
+.vw-footer {
+  border-top: 2px solid var(--vw-white);
+  padding: 64px 32px 0;
+  overflow: hidden;
+}
+
+.vw-footer-top {
+  max-width: 1440px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 36px;
+}
+
+.vw-footer-col h4 {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13px;
+  letter-spacing: 0.18em;
+  color: var(--vw-acid);
+  margin: 0 0 16px;
+}
+
+.vw-footer-col p,
+.vw-footer-col a {
+  display: block;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--vw-dim);
+  text-decoration: none;
+  margin: 0 0 8px;
+}
+
+.vw-footer-col a:hover {
+  color: var(--vw-acid);
+}
+
+.vw-footer-giant {
+  font-family: "Anton", sans-serif;
+  font-size: clamp(72px, 14.5vw, 220px);
+  line-height: 0.9;
+  text-align: center;
+  color: transparent;
+  -webkit-text-stroke: 2px #3a3a3a;
+  margin: 56px 0 0;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.vw-footer-bottom {
+  max-width: 1440px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 22px 0 28px;
+  border-top: 2px solid #2c2c2c;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: var(--vw-dim);
+}
+
+/* ------------------------------------------------------------------ RESPONSIVE */
+
+@media (max-width: 1024px) {
+  .vw-hero {
+    grid-template-columns: 1fr;
+    padding-top: 48px;
+  }
+
+  .vw-badge {
+    left: auto;
+    right: 16px;
+    bottom: -32px;
+  }
+
+  .vw-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .vw-nav {
+    padding: 14px 20px 14px 104px;
+  }
+
+  .vw-nav-links {
+    display: none;
+  }
+
+  .vw-logo {
+    font-size: 23px;
+  }
+
+  .vw-hero {
+    padding: 40px 20px 72px;
+    gap: 40px;
+  }
+
+  .vw-hero-line {
+    font-size: clamp(96px, 26vw, 160px);
+  }
+
+  .vw-hero-stats {
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .vw-countdown,
+  .vw-shop,
+  .vw-lookbook,
+  .vw-manifesto {
+    padding: 64px 20px;
+  }
+
+  .vw-clock {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .vw-look {
+    flex-basis: 240px;
+  }
+
+  .vw-look img {
+    height: 350px;
+  }
+
+  .vw-footer {
+    padding: 48px 20px 0;
+  }
+
+  .vw-footer-top {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Add button stays visible on touch devices (no hover) */
+  .vw-add {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .vw-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .vw-hero-ctas .vw-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .vw-badge {
+    width: 128px;
+    height: 128px;
+  }
+
+  .vw-footer-top {
+    grid-template-columns: 1fr;
+  }
+}
