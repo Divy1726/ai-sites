@@ -21,7 +21,9 @@
   color: var(--kb-ink);
   font-family: var(--kb-sans);
   line-height: 1.6;
-  overflow-x: hidden;
+  /* clip (not hidden): hidden would make this root a scroll container
+     and break every position:sticky section inside the site. */
+  overflow-x: clip;
   -webkit-font-smoothing: antialiased;
 }
 

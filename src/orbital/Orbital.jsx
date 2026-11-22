@@ -153,10 +153,11 @@ const fadeUp = {
   }),
 };
 
+// Opacity only: a transform here would break sticky children.
 const pageFade = {
-  hidden: { opacity: 0, y: 10 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: "easeOut" } },
-  exit: { opacity: 0, y: -8, transition: { duration: 0.2, ease: "easeIn" } },
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { duration: 0.35, ease: "easeOut" } },
+  exit: { opacity: 0, transition: { duration: 0.2, ease: "easeIn" } },
 };
 
 /* Boarding passes deal in like printed cards: slight tilt + scale. */

@@ -37,7 +37,7 @@
     radial-gradient(700px 500px at 60% 110%, rgba(255, 45, 45, 0.07), transparent 60%),
     #050505;
   color: #f5f5f5;
-  overflow: hidden;
+  overflow-x: clip;
   padding: 0 24px 0;
 }
 .home-noise {

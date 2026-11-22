@@ -111,8 +111,9 @@ function HomeCard({ site, index, onOpen }) {
     target: ref,
     offset: ["start end", "end start"],
   });
-  const imgYRaw = useTransform(scrollYProgress, [0, 1], ["-9%", "9%"]);
-  const imgY = useSpring(imgYRaw, { stiffness: 90, damping: 26, mass: 0.4 });
+  // No spring on a "%" transform: useSpring drops the unit and the
+  // image would drift only 9px. Lenis already smooths the scroll.
+  const imgY = useTransform(scrollYProgress, [0, 1], ["-9%", "9%"]);
 
   // Subtle tilt toward the cursor.
   const px = useMotionValue(0.5);
@@ -218,10 +219,23 @@ function App() {
     };
   }, []);
 
-  // Scroll to top whenever the page changes.
+  // Scroll to top whenever the page changes, then force framer-motion
+  // and Lenis to re-measure (fonts/images settling can leave useScroll
+  // targets stale, which made pinned sections fire at the wrong place).
   useEffect(() => {
     scrollTopInstant();
+    const t = setTimeout(() => {
+      window.dispatchEvent(new Event("resize"));
+    }, 450);
+    return () => clearTimeout(t);
   }, [page]);
+
+  // One more re-measure once every asset has loaded.
+  useEffect(() => {
+    const onLoad = () => window.dispatchEvent(new Event("resize"));
+    window.addEventListener("load", onLoad);
+    return () => window.removeEventListener("load", onLoad);
+  }, []);
 
   // Home hero drifts/scales/fades slightly as it scrolls out.
   const { scrollYProgress: heroProgress } = useScroll({
@@ -245,11 +259,13 @@ function App() {
         </button>
 
         <AnimatePresence mode="wait">
+          {/* Opacity-only page transition: a transform on this wrapper
+              would break position:sticky / fixed inside the sites. */}
           <motion.main
             key={page}
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -16 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
           >
             {page === "voidwear" && <Voidwear />}

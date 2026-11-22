@@ -17,7 +17,9 @@
   background: var(--or-paper);
   color: var(--or-ink);
   font-family: var(--or-font-body);
-  overflow-x: hidden;
+  /* clip (not hidden): hidden would make this root a scroll container
+     and break every position:sticky section inside the site. */
+  overflow-x: clip;
   min-height: 100vh;
 }
 
@@ -1310,6 +1312,7 @@
 /* ---------- Trajectory: scroll-drawn flight path ---------- */
 
 .or-traj {
+  position: relative;
   height: 230vh;
   border-top: 2px solid var(--or-ink);
   border-bottom: 2px solid var(--or-ink);

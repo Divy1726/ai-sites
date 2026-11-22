@@ -23,6 +23,16 @@ export function scrollTopInstant() {
   }
   if (typeof window !== "undefined") {
     window.scrollTo({ top: 0, behavior: "instant" });
+    // After the new page settles, force scroll-linked animations
+    // (framer-motion useScroll) and Lenis to re-measure their targets.
+    setTimeout(() => {
+      try {
+        if (lenisInstance) lenisInstance.resize();
+      } catch (e) {
+        // Ignore: native measurements still apply.
+      }
+      window.dispatchEvent(new Event("resize"));
+    }, 450);
   }
 }
 

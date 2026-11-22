@@ -17,7 +17,9 @@
   color: var(--au-charcoal);
   font-family: var(--au-sans);
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+  /* clip (not hidden): hidden would make this root a scroll container
+     and break every position:sticky section inside the site. */
+  overflow-x: clip;
 }
 
 .au-page *,

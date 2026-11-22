@@ -226,10 +226,11 @@ const lineReveal = {
   }),
 };
 
+// Opacity only: a transform here would break sticky/fixed children.
 const pageTransition = {
-  initial: { opacity: 0, y: 28 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] } },
-  exit: { opacity: 0, y: -18, transition: { duration: 0.28, ease: "easeIn" } },
+  initial: { opacity: 0 },
+  animate: { opacity: 1, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] } },
+  exit: { opacity: 0, transition: { duration: 0.28, ease: "easeIn" } },
 };
 
 // ---------------------------------------------------------------------------
@@ -376,8 +377,11 @@ function ProductCard({ product, isAdded, onAdd, index = 0, layoutMode = false })
 
 function PinnedLookbook({ goTo }) {
   const sectionRef = useRef(null);
+  const viewportRef = useRef(null);
+  const trackRef = useRef(null);
   const [isMobile, setIsMobile] = useState(false);
   const [activeLook, setActiveLook] = useState(1);
+  const [travel, setTravel] = useState(0);
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 768px)");
@@ -392,10 +396,30 @@ function PinnedLookbook({ goTo }) {
     offset: ["start start", "end end"],
   });
 
-  // 6 panels at 44vw + 20px gaps + side padding ≈ 275vw of track.
-  // Shifting by (275 - 100) / 275 ≈ 64% of the track width lands the
-  // last panel flush against the right edge of the viewport.
-  const trackXRaw = useTransform(scrollYProgress, [0, 1], ["0%", "-64%"]);
+  // Measure how far the track must travel in PIXELS so the last panel
+  // lands flush against the right edge of the viewport.
+  // (The old version sprang a "-64%" string: useSpring only animates
+  // numbers, so the unit was dropped and the track moved just 64px.)
+  useEffect(() => {
+    const measure = () => {
+      if (trackRef.current && viewportRef.current) {
+        setTravel(
+          Math.max(0, trackRef.current.scrollWidth - viewportRef.current.clientWidth)
+        );
+      }
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    if (trackRef.current) ro.observe(trackRef.current);
+    if (viewportRef.current) ro.observe(viewportRef.current);
+    window.addEventListener("resize", measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, []);
+
+  const trackXRaw = useTransform(scrollYProgress, [0, 1], [0, -travel]);
   const trackX = useSpring(trackXRaw, SCROLL_SPRING);
   const progressScaleX = useSpring(scrollYProgress, SCROLL_SPRING);
 
@@ -421,8 +445,9 @@ function PinnedLookbook({ goTo }) {
           </button>
         </div>
 
-        <div className="vw-hscroll-viewport">
+        <div className="vw-hscroll-viewport" ref={viewportRef}>
           <motion.div
+            ref={trackRef}
             className="vw-hscroll-track"
             style={isMobile ? undefined : { x: trackX }}
           >

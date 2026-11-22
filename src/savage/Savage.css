@@ -12,7 +12,9 @@
   background: var(--sv-bg);
   color: var(--sv-text);
   font-family: "Inter", system-ui, sans-serif;
-  overflow-x: hidden;
+  /* clip (not hidden): hidden would make this root a scroll container
+     and break every position:sticky section inside the site. */
+  overflow-x: clip;
 }
 
 .sv-root * { box-sizing: border-box; }

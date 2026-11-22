@@ -952,12 +952,13 @@ export default function Aurelia() {
 
       {/* Pages */}
       <AnimatePresence mode="wait">
+        {/* Opacity only: a transform here would break sticky children. */}
         <motion.main
           key={page}
           className="au-main"
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -12 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
           transition={{ duration: 0.7, ease: "easeOut" }}
         >
           {page === "home" && renderHome()}
