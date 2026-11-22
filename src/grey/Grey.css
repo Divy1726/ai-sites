@@ -623,20 +623,53 @@
   fill: #0a0a0a;
 }
 
-/* vertical road band: port -> warehouse -> customer */
-.ge-sea-road {
-  fill: #161616;
+/* winding switchback road: shoulder, asphalt, dashed centre line */
+.ge-road-shoulder {
+  fill: none;
+  stroke: #232327;
+  stroke-width: 96;
+  stroke-linecap: round;
 }
 
-.ge-sea-road-edge {
-  stroke: rgba(242, 240, 235, 0.28);
-  stroke-width: 2;
+.ge-road-asphalt {
+  fill: none;
+  stroke: #161618;
+  stroke-width: 84;
+  stroke-linecap: round;
 }
 
 .ge-sea-dashes {
+  fill: none;
   stroke: rgba(242, 240, 235, 0.55);
   stroke-width: 3;
   stroke-dasharray: 36 30;
+}
+
+/* distant factory skyline (parallax layer behind the road) */
+.ge-skyline {
+  fill: #10131a;
+}
+
+/* roadside sign + trees */
+.ge-road-sign {
+  fill: #101010;
+  stroke: rgba(242, 240, 235, 0.35);
+  stroke-width: 1.2;
+}
+
+.ge-road-sign-text {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  fill: #f2f0eb;
+}
+
+.ge-tree-top {
+  fill: #16241b;
+}
+
+.ge-tree-trunk {
+  fill: #1d1712;
 }
 
 .ge-bldg {

@@ -369,7 +369,7 @@ const TRUCK_CHASSIS_PATH =
   "M4 56 L182 56 L182 62 L168.5 62 A14.5 14.5 0 0 0 139.5 62 " +
   "L82.5 62 A14.5 14.5 0 0 0 53.5 62 L52.5 62 A14.5 14.5 0 0 0 23.5 62 L4 62 Z";
 
-function TruckArtInner({ wheelRotate, bagOpacities, dustOpacity, small = false }) {
+function TruckArtInner({ wheelRotate, bagOpacities, dustOpacity, small = false, mirrorText = false }) {
   return (
     <g>
       <defs>
@@ -431,18 +431,25 @@ function TruckArtInner({ wheelRotate, bagOpacities, dustOpacity, small = false }
           <line x1={14 + i * 34} y1="35" x2={42 + i * 34} y2="35" className="ge-truck-bagline" />
         </motion.g>
       ))}
-      <text x="62" y="26" textAnchor="middle" className="ge-truck-brand">
-        GREY
-      </text>
-      <text x="62" y="36" textAnchor="middle" className="ge-truck-brand-sub">
-        ENTERPRISE
-      </text>
+      {/* brand + plate text — counter-mirrored when the truck group is
+          flipped (heading left on a switchback) so lettering always
+          reads correctly, like the truck's other side */}
+      <g transform={mirrorText ? "translate(124 0) scale(-1 1)" : undefined}>
+        <text x="62" y="26" textAnchor="middle" className="ge-truck-brand">
+          GREY
+        </text>
+        <text x="62" y="36" textAnchor="middle" className="ge-truck-brand-sub">
+          ENTERPRISE
+        </text>
+      </g>
       {/* hazard stripe + plate on the container's lower edge */}
       <rect x="6" y="47" width="10" height="9" fill="url(#geHazard)" />
       <rect x="82" y="47" width="36" height="8" rx="1" className="ge-truck-plate" />
-      <text x="100" y="52.6" textAnchor="middle" className="ge-truck-plate-text">
-        GJ-01-GE-2026
-      </text>
+      <g transform={mirrorText ? "translate(200 0) scale(-1 1)" : undefined}>
+        <text x="100" y="52.6" textAnchor="middle" className="ge-truck-plate-text">
+          GJ-01-GE-2026
+        </text>
+      </g>
 
       {/* cab */}
       <path d="M126 58 L126 26 L150 26 L168 42 L176 46 L176 58 Z" className="ge-truck-cab" />
@@ -526,26 +533,50 @@ function FlatbedTruck({ wheelRotate }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* SEA TO GATE — ONE vertical mega-journey: ocean -> port crane ->    */
-/* road -> warehouse QC -> customer gate. Pinned 520vh; a tall scene  */
-/* (1200x2800) pans upward through the stage as you scroll, so the    */
-/* camera travels DOWN the scene. All transforms are px/unit based.   */
+/* SEA TO GATE — ONE mega-journey: ocean -> port crane -> WINDING    */
+/* serpentine road -> warehouse QC -> customer gate. Pinned 520vh;   */
+/* a tall scene (1200x2800) pans upward through the stage as you     */
+/* scroll, so the camera travels DOWN the scene. The ship sails in   */
+/* horizontally at the top; the truck then follows the switchback    */
+/* road (horizontal runs + curves combined), tilting on bends and    */
+/* flipping cleanly on hairpins. All transforms are px/unit based.   */
 /* ------------------------------------------------------------------ */
 
 // Camera keyframes: progress -> fraction of (sceneH - stageH) panned.
 // Tuned so the active action (ship, crane, truck, warehouse, gate)
 // stays inside the stage window at every phase.
-const SEA_CAM_IN = [0, 0.16, 0.34, 0.44, 0.5, 0.68, 0.84, 0.94, 1];
-const SEA_CAM_FRAC = [0, 0.03, 0.1, 0.2, 0.4, 0.82, 0.84, 1, 1];
+const SEA_CAM_IN = [0, 0.16, 0.34, 0.44, 0.5, 0.59, 0.68, 0.84, 0.92, 1];
+const SEA_CAM_FRAC = [0, 0.03, 0.06, 0.2, 0.3, 0.53, 0.74, 0.75, 0.9, 0.92];
+
+// The winding road centreline (scene units). Starts on the quay at
+// the flatbed, switchbacks down (runs at y 1275 / 1500 / 1725), takes
+// one big left descent to the warehouse run (y 2150, warehouse above
+// it), then curves down to the customer run (y 2485, factory above).
+const SEA_ROAD_D =
+  "M 850 1055 L 945 1055 C 1025 1055, 1052 1132, 988 1198 C 928 1258, 820 1275, 688 1275 " +
+  "L 335 1275 C 218 1275, 170 1332, 185 1400 C 200 1468, 295 1500, 422 1500 " +
+  "L 798 1500 C 915 1500, 962 1557, 947 1625 C 932 1693, 837 1725, 705 1725 " +
+  "L 355 1725 C 230 1725, 175 1850, 200 1975 C 225 2100, 330 2150, 470 2150 " +
+  "L 820 2150 C 940 2150, 1000 2240, 982 2335 C 965 2430, 875 2485, 750 2485 " +
+  "L 360 2485";
+
+// Truck park points on the road (scene units): in front of the
+// warehouse dock during QC, in front of the customer gate at the end.
+const SEA_PARK_QC = { x: 820, y: 2150 };
+const SEA_PARK_END = { x: 560, y: 2485 };
 
 function SeaToGateScene() {
   const sectionRef = useRef(null);
   const stageRef = useRef(null);
   const worldRef = useRef(null);
+  const roadRef = useRef(null);
   const [maxPan, setMaxPan] = useState(0);
   const [phase, setPhase] = useState(0);
   const [qcStep, setQcStep] = useState(0);
   const [routePct, setRoutePct] = useState(0);
+  const [roadLen, setRoadLen] = useState(0);
+  const [park, setPark] = useState({ fQc: 0.82, fEnd: 0.97 });
+  const [truckFlipped, setTruckFlipped] = useState(false);
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -614,14 +645,79 @@ function SeaToGateScene() {
   // docking at 0.16, before the crane locks on), then follows the trolley.
   const containerX = useTransform([trolleyX, shipX], ([t, s]) => t + s);
 
-  // 04 ON THE ROAD -> 05 QC -> 06 DELIVERED — one truck drives down
-  // the vertical road, parks at the warehouse, then at the customer.
-  const truckY = useTransform(
+  // Measure the road path once: total length + the path fractions
+  // where the truck parks (warehouse dock, customer gate).
+  useEffect(() => {
+    const path = roadRef.current;
+    if (!path) return;
+    const total = path.getTotalLength();
+    const findFrac = (tx, ty) => {
+      let best = 0;
+      let bestD = Infinity;
+      const N = 600;
+      for (let i = 0; i <= N; i += 1) {
+        const p = path.getPointAtLength((i / N) * total);
+        const d = (p.x - tx) ** 2 + (p.y - ty) ** 2;
+        if (d < bestD) {
+          bestD = d;
+          best = i / N;
+        }
+      }
+      return best;
+    };
+    setRoadLen(total);
+    setPark({ fQc: findFrac(SEA_PARK_QC.x, SEA_PARK_QC.y), fEnd: findFrac(SEA_PARK_END.x, SEA_PARK_END.y) });
+  }, []);
+
+  // 04 ON THE ROAD -> 05 QC -> 06 DELIVERED — one truck follows the
+  // winding road: parked on the quay during LOAD, drives the
+  // switchbacks, parks at the warehouse for QC, then at the customer.
+  const truckFrac = useTransform(
     progress,
-    [0.5, 0.68, 0.84, 0.92, 1],
-    [1160, 2150, 2150, 2610, 2610]
+    [0.5, 0.68, 0.84, 0.92],
+    [0, park.fQc, park.fQc, park.fEnd]
   );
-  const truckWheelRotate = useTransform(truckY, (y) => (y - 1160) * 2.2);
+  // Pose from the path tangent. Heading angle drives rotate; when the
+  // truck heads left (switchback), it mirrors via scaleX. scaleX =
+  // sign(cos) * sqrt(|cos|) so the truck squishes edge-on exactly at
+  // each hairpin apex — the mirror flip is hidden inside the squish
+  // and the truck is never upside down. Each output is its own
+  // primitive MotionValue (an object-valued transform would read as
+  // "changed" on every recompute and loop renders via the flip state).
+  const poseAt = (f) => {
+    const path = roadRef.current;
+    if (!path || !roadLen) {
+      return { x: 900, y: 1055, rotate: 0, scaleX: 1, dist: 0 };
+    }
+    const len = Math.min(Math.max(f, 0), 1) * roadLen;
+    const p = path.getPointAtLength(len);
+    const p2 = path.getPointAtLength(Math.min(len + 4, roadLen));
+    const ang = Math.atan2(p2.y - p.y, p2.x - p.x);
+    const c = Math.cos(ang);
+    const deg = (ang * 180) / Math.PI;
+    const flipped = c < 0;
+    let rotate = flipped ? deg - 180 : deg;
+    if (rotate < -180) rotate += 360;
+    const scaleX = (flipped ? -1 : 1) * Math.sqrt(Math.abs(c) || 0.0001);
+    return { x: p.x, y: p.y, rotate, scaleX, dist: len };
+  };
+  const truckX = useTransform(truckFrac, (f) => poseAt(f).x);
+  const truckY = useTransform(truckFrac, (f) => poseAt(f).y);
+  const truckRotate = useTransform(truckFrac, (f) => poseAt(f).rotate);
+  const truckScaleX = useTransform(truckFrac, (f) => poseAt(f).scaleX);
+  // Wheel spin from distance travelled (scene units): angle = dist /
+  // (wheel radius in scene units 13*1.55) in degrees.
+  const truckWheelRotate = useTransform(truckFrac, (f) => poseAt(f).dist * 2.84);
+  useMotionValueEvent(truckScaleX, "change", (v) => {
+    const fl = v < 0;
+    setTruckFlipped((prev) => (prev === fl ? prev : fl));
+  });
+  // Crossfade at the quay: the flatbed (with the just-lowered
+  // container) hands over to the road truck as LOAD completes.
+  const flatbedOpacity = useTransform(progress, [0.5, 0.52], [1, 0]);
+  const truckOpacity = useTransform(progress, [0.5, 0.52], [0, 1]);
+  // Background skyline parallax: counter-pan slightly against camera.
+  const skylineY = useTransform(cameraY, (v) => -v * 0.14);
   const dustOpacity = useTransform(
     progress,
     [0.5, 0.53, 0.66, 0.69, 0.84, 0.86, 0.9, 0.93],
@@ -761,6 +857,32 @@ function SeaToGateScene() {
               {/* shoreline edge where sea meets land */}
               <rect x="0" y="656" width="1200" height="6" className="ge-quay-edge" />
 
+              {/* distant factory skyline — counter-pans against the
+                  camera for parallax depth behind the road */}
+              <motion.g className="ge-skyline" style={{ y: skylineY }} aria-hidden="true">
+                <rect x="60" y="1180" width="120" height="95" />
+                <rect x="196" y="1210" width="80" height="65" />
+                <rect x="238" y="1150" width="16" height="125" />
+                <rect x="880" y="1196" width="150" height="79" />
+                <rect x="1046" y="1222" width="90" height="53" />
+                <rect x="70" y="1420" width="150" height="80" />
+                <rect x="236" y="1392" width="14" height="108" />
+                <rect x="920" y="1412" width="170" height="88" />
+                <rect x="1096" y="1440" width="70" height="60" />
+                <rect x="56" y="1648" width="130" height="77" />
+                <rect x="960" y="1636" width="150" height="89" />
+                <rect x="1002" y="1588" width="15" height="137" />
+                <rect x="70" y="2052" width="140" height="98" />
+                <rect x="1060" y="2020" width="110" height="130" />
+                <rect x="1100" y="1968" width="15" height="182" />
+                <rect x="60" y="2360" width="120" height="90" />
+                <rect x="980" y="2340" width="160" height="110" />
+                <rect x="1030" y="2292" width="15" height="158" />
+                <rect x="120" y="2680" width="170" height="90" />
+                <rect x="900" y="2660" width="200" height="110" />
+                <rect x="960" y="2608" width="16" height="162" />
+              </motion.g>
+
               {/* port yard detail: container stacks + a low shed, so the
                   yard between sea and quay never reads as empty void */}
               <g aria-hidden="true">
@@ -832,9 +954,59 @@ function SeaToGateScene() {
                 </motion.g>
               </motion.g>
 
+              {/* ===== 04 THE ROAD — one winding switchback highway:
+                  quay -> horizontal runs + hairpin curves -> warehouse
+                  run -> customer run. Shoulder, asphalt, dashed centre
+                  line (dashes flow with scroll). ===== */}
+              <path d={SEA_ROAD_D} className="ge-road-shoulder" aria-hidden="true" />
+              <path ref={roadRef} d={SEA_ROAD_D} className="ge-road-asphalt" aria-hidden="true" />
+              <motion.path
+                d={SEA_ROAD_D}
+                className="ge-sea-dashes"
+                style={{ strokeDashoffset: dashOffset }}
+                aria-hidden="true"
+              />
+              {/* roadside lamps along the runs */}
+              {[
+                { x: 320, y: 1232 },
+                { x: 1012, y: 1457 },
+                { x: 320, y: 1682 },
+                { x: 1100, y: 2107 },
+                { x: 150, y: 2442 },
+              ].map((lamp, i) => (
+                <g key={i} className="ge-lamp" aria-hidden="true">
+                  <line x1={lamp.x} y1={lamp.y} x2={lamp.x} y2={lamp.y - 64} className="ge-lamp-pole" />
+                  <circle cx={lamp.x} cy={lamp.y - 68} r="20" fill="url(#geLampSea)" />
+                  <circle cx={lamp.x} cy={lamp.y - 68} r="3.4" className="ge-lamp-bulb" />
+                </g>
+              ))}
+              {/* road sign where the highway leaves the port */}
+              <g aria-hidden="true">
+                <line x1="1096" y1="1270" x2="1096" y2="1218" className="ge-lamp-pole" />
+                <rect x="1032" y="1186" width="128" height="32" rx="3" className="ge-road-sign" />
+                <text x="1096" y="1207" textAnchor="middle" className="ge-road-sign-text">
+                  AHMEDABAD →
+                </text>
+              </g>
+              {/* small roadside trees in the switchback bays */}
+              {[
+                { x: 150, y: 1362 },
+                { x: 1085, y: 1588 },
+                { x: 150, y: 2052 },
+                { x: 1085, y: 2362 },
+              ].map((tree, i) => (
+                <g key={i} aria-hidden="true">
+                  <rect x={tree.x - 2} y={tree.y} width="4" height="16" className="ge-tree-trunk" />
+                  <circle cx={tree.x} cy={tree.y - 8} r="13" className="ge-tree-top" />
+                  <circle cx={tree.x - 9} cy={tree.y - 2} r="9" className="ge-tree-top" />
+                  <circle cx={tree.x + 9} cy={tree.y - 2} r="9" className="ge-tree-top" />
+                </g>
+              ))}
+
               {/* the lifted GREY container (sway rotates about its own
-                  top-centre via .ge-lift-box transform-origin) */}
-              <motion.g style={{ x: containerX, y: containerY }} aria-hidden="true">
+                  top-centre via .ge-lift-box transform-origin); fades
+                  out with the flatbed once the road truck takes over */}
+              <motion.g style={{ x: containerX, y: containerY, opacity: flatbedOpacity }} aria-hidden="true">
                 <motion.g className="ge-lift-box" style={{ rotate: containerSway, originX: 0.5, originY: 0 }}>
                   <rect x="-70" y="0" width="140" height="34" className="ge-lift-box-body" />
                   {[-46, -16, 14, 44].map((dx) => (
@@ -846,39 +1018,17 @@ function SeaToGateScene() {
                 </motion.g>
               </motion.g>
 
-              {/* flatbed truck waiting on the quay (wheels on y=1060) */}
-              <g transform="translate(800 1003)" aria-hidden="true">
-                <FlatbedTruck />
-              </g>
-
-              {/* ===== 04 THE ROAD — vertical band, port to customer ===== */}
-              <rect x="400" y="1120" width="400" height="1620" className="ge-sea-road" />
-              <line x1="400" y1="1120" x2="400" y2="2740" className="ge-sea-road-edge" />
-              <line x1="800" y1="1120" x2="800" y2="2740" className="ge-sea-road-edge" />
-              <motion.line
-                x1="600"
-                y1="1140"
-                x2="600"
-                y2="2720"
-                className="ge-sea-dashes"
-                style={{ strokeDashoffset: dashOffset }}
-              />
-              {[
-                { x: 372, y: 1300 },
-                { x: 828, y: 1580 },
-                { x: 372, y: 1860 },
-                { x: 828, y: 2140 },
-                { x: 372, y: 2420 },
-                { x: 828, y: 2680 },
-              ].map((lamp, i) => (
-                <g key={i} className="ge-lamp" aria-hidden="true">
-                  <line x1={lamp.x} y1={lamp.y} x2={lamp.x} y2={lamp.y - 64} className="ge-lamp-pole" />
-                  <circle cx={lamp.x} cy={lamp.y - 68} r="20" fill="url(#geLampSea)" />
-                  <circle cx={lamp.x} cy={lamp.y - 68} r="3.4" className="ge-lamp-bulb" />
+              {/* flatbed truck waiting on the quay (wheels on y=1060);
+                  fades out as the loaded road truck takes over */}
+              <motion.g style={{ opacity: flatbedOpacity }} aria-hidden="true">
+                <g transform="translate(800 1003)">
+                  <FlatbedTruck />
                 </g>
-              ))}
+              </motion.g>
 
-              {/* ===== 05 GREY WAREHOUSE ===== */}
+              {/* ===== 05 GREY WAREHOUSE — above the warehouse run;
+                  building drawn in original coords, shifted into place */}
+              <g transform="translate(190 -170)">
               <text x="330" y="1952" className="ge-scene-label">GREY WAREHOUSE</text>
               <text x="330" y="1972" className="ge-scene-sub">AHMEDABAD — QC BAY</text>
               <g className="ge-building">
@@ -931,8 +1081,11 @@ function SeaToGateScene() {
                   <circle cx="458" cy="2270" r="4.6" className="ge-forklift-wheel" />
                 </motion.g>
               </g>
+              </g>
 
-              {/* ===== 06 CUSTOMER FACTORY ===== */}
+              {/* ===== 06 CUSTOMER FACTORY — above the final run;
+                  building drawn in original coords, shifted into place */}
+              <g transform="translate(-90 -250)">
               <text x="330" y="2452" className="ge-scene-label">CUSTOMER FACTORY</text>
               <text x="330" y="2472" className="ge-scene-sub">POINT B</text>
               <g className="ge-building">
@@ -942,8 +1095,8 @@ function SeaToGateScene() {
                   className="ge-bldg-roof"
                   fill="none"
                 />
-                <rect x="790" y="2400" width="22" height="80" className="ge-bldg" />
-                <rect x="786" y="2392" width="30" height="10" className="ge-bldg-top" />
+                <rect x="790" y="2460" width="22" height="20" className="ge-bldg" />
+                <rect x="786" y="2452" width="30" height="10" className="ge-bldg-top" />
                 <rect x="360" y="2520" width="22" height="16" className="ge-bldg-win-lit" />
                 <rect x="394" y="2520" width="22" height="16" className="ge-bldg-win" />
                 <rect x="428" y="2520" width="22" height="16" className="ge-bldg-win-lit" />
@@ -959,12 +1112,53 @@ function SeaToGateScene() {
                 </motion.g>
                 <rect x="356" y="2656" width="96" height="88" className="ge-dock-frame" fill="none" />
               </g>
+              </g>
 
-              {/* the road truck — one unit, wheels attached, drives down */}
-              <motion.g style={{ y: truckY }} aria-hidden="true">
-                <g transform="translate(430 0) scale(1.55)">
-                  <TruckArtInner wheelRotate={truckWheelRotate} dustOpacity={dustOpacity} />
-                </g>
+              {/* bottom-of-scene detail so the final camera window
+                  never reads as empty ground */}
+              <g aria-hidden="true">
+                {[
+                  { x: 930, y: 2706, c: "#2e7cf6" },
+                  { x: 930, y: 2672, c: "#e05236" },
+                  { x: 930, y: 2638, c: "#8f8f8a" },
+                ].map((box, i) => (
+                  <g key={i}>
+                    <rect x={box.x} y={box.y} width="130" height="34" fill={box.c} className="ge-ship-box" />
+                    {[20, 48, 76, 104].map((dx) => (
+                      <line
+                        key={dx}
+                        x1={box.x + dx}
+                        y1={box.y + 3}
+                        x2={box.x + dx}
+                        y2={box.y + 31}
+                        className="ge-ship-box-rib"
+                      />
+                    ))}
+                  </g>
+                ))}
+                <rect x="120" y="2620" width="34" height="120" className="ge-bldg" />
+                <path d="M120 2620 L137 2602 L154 2620" className="ge-bldg-roof" fill="none" />
+                <rect x="168" y="2650" width="34" height="90" className="ge-bldg" />
+                <path d="M168 2650 L185 2634 L202 2650" className="ge-bldg-roof" fill="none" />
+              </g>
+
+              {/* the road truck — one unit, wheels attached, follows
+                  the winding road. Nested groups: translate along the
+                  path -> rotate about the road-contact centre -> mirror
+                  on leftward legs. Truck art is centred so its road
+                  contact point sits at local (0,0). */}
+              <motion.g style={{ x: truckX, y: truckY, opacity: truckOpacity }} aria-hidden="true">
+                <motion.g style={{ rotate: truckRotate, originX: 0.51, originY: 0.96 }}>
+                  <motion.g style={{ scaleX: truckScaleX, originX: 0.5 }}>
+                    <g transform="translate(-170.5 -130.2) scale(1.55)">
+                      <TruckArtInner
+                        wheelRotate={truckWheelRotate}
+                        dustOpacity={dustOpacity}
+                        mirrorText={truckFlipped}
+                      />
+                    </g>
+                  </motion.g>
+                </motion.g>
               </motion.g>
             </svg>
           </motion.div>
