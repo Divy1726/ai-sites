@@ -5,10 +5,13 @@ import {
   useScroll,
   useTransform,
   useSpring,
+  useMotionValue,
   useMotionValueEvent,
+  useVelocity,
 } from "framer-motion";
 import Parallax from "../fx/Parallax";
 import Reveal from "../fx/Reveal";
+import ScrubWords from "../fx/ScrubWords";
 import ProgressBar from "../fx/ProgressBar";
 import VelocityMarquee from "../fx/VelocityMarquee";
 import Magnetic from "../fx/Magnetic";
@@ -56,28 +59,28 @@ const KB_SPRING = { stiffness: 80, damping: 28, mass: 0.45 };
 
 const menuData = {
   espresso: [
-    { name: "KOBO Espresso", desc: "Double shot, Brazil Cerrado base — dark chocolate, toasted hazelnut.", price: "¥550", tag: "POPULAR" },
-    { name: "Cortado", desc: "Equal parts espresso and silky steamed milk, served in glass.", price: "¥620" },
-    { name: "Flat White", desc: "Velvet micro-foam over a ristretto pull. Quiet, balanced, warm.", price: "¥680", tag: "POPULAR" },
-    { name: "Tokyo Latte", desc: "Our signature — espresso, milk, and a whisper of kuromitsu syrup.", price: "¥720" },
-    { name: "Cappuccino", desc: "Classic thirds — espresso, steamed milk, airy foam, dusted with cocoa.", price: "¥660" },
-    { name: "Espresso Romano", desc: "Double shot with a twist of lemon peel. Bright, sharp, old-school.", price: "¥600", tag: "NEW" },
+    { name: "KOBO Espresso", desc: "Double shot, Brazil Cerrado base — dark chocolate, toasted hazelnut.", price: "¥550", tag: "POPULAR", img: "https://images.unsplash.com/photo-1511920170033-f8396924c348?w=600&q=80&auto=format&fit=crop" },
+    { name: "Cortado", desc: "Equal parts espresso and silky steamed milk, served in glass.", price: "¥620", img: "https://images.unsplash.com/photo-1541167760496-1628856ab772?w=600&q=80&auto=format&fit=crop" },
+    { name: "Flat White", desc: "Velvet micro-foam over a ristretto pull. Quiet, balanced, warm.", price: "¥680", tag: "POPULAR", img: "https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=600&q=80&auto=format&fit=crop" },
+    { name: "Tokyo Latte", desc: "Our signature — espresso, milk, and a whisper of kuromitsu syrup.", price: "¥720", img: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=600&q=80&auto=format&fit=crop" },
+    { name: "Cappuccino", desc: "Classic thirds — espresso, steamed milk, airy foam, dusted with cocoa.", price: "¥660", img: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&q=80&auto=format&fit=crop" },
+    { name: "Espresso Romano", desc: "Double shot with a twist of lemon peel. Bright, sharp, old-school.", price: "¥600", tag: "NEW", img: "https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?w=600&q=80&auto=format&fit=crop" },
   ],
   filter: [
-    { name: "V60 — Ethiopia", desc: "Yirgacheffe, washed. Jasmine, bergamot, white peach. 92°C pour.", price: "¥780", tag: "POPULAR" },
-    { name: "V60 — Colombia", desc: "Huila, honey process. Red plum, panela sweetness, soft acidity.", price: "¥750" },
-    { name: "Aeropress", desc: "Full immersion, paper filtered. Round body, cocoa finish.", price: "¥700" },
-    { name: "Cold Brew", desc: "18-hour slow steep. Served over clear ice, no sugar needed.", price: "¥650" },
-    { name: "Chemex — Kenya", desc: "Nyeri AA, thick paper filter. Blackcurrant, grapefruit, clean sweetness.", price: "¥800", tag: "NEW" },
-    { name: "Iced Filter", desc: "Flash-chilled V60 over clear ice. Crisp, floral, never diluted.", price: "¥720" },
+    { name: "V60 — Ethiopia", desc: "Yirgacheffe, washed. Jasmine, bergamot, white peach. 92°C pour.", price: "¥780", tag: "POPULAR", img: "https://images.unsplash.com/photo-1524350876685-274059332603?w=600&q=80&auto=format&fit=crop" },
+    { name: "V60 — Colombia", desc: "Huila, honey process. Red plum, panela sweetness, soft acidity.", price: "¥750", img: "https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=600&q=80&auto=format&fit=crop" },
+    { name: "Aeropress", desc: "Full immersion, paper filtered. Round body, cocoa finish.", price: "¥700", img: "https://images.unsplash.com/photo-1512568400610-62da28bc8a13?w=600&q=80&auto=format&fit=crop" },
+    { name: "Cold Brew", desc: "18-hour slow steep. Served over clear ice, no sugar needed.", price: "¥650", img: "https://images.unsplash.com/photo-1497636577773-f1231844b336?w=600&q=80&auto=format&fit=crop" },
+    { name: "Chemex — Kenya", desc: "Nyeri AA, thick paper filter. Blackcurrant, grapefruit, clean sweetness.", price: "¥800", tag: "NEW", img: "https://images.unsplash.com/photo-1498804103079-a6351b050096?w=600&q=80&auto=format&fit=crop" },
+    { name: "Iced Filter", desc: "Flash-chilled V60 over clear ice. Crisp, floral, never diluted.", price: "¥720", img: "https://images.unsplash.com/photo-1517705008128-361805f42e86?w=600&q=80&auto=format&fit=crop" },
   ],
   seasonal: [
-    { name: "Sakura Latte", desc: "Cherry blossom syrup, steamed milk, espresso. Spring only.", price: "¥820", tag: "NEW" },
-    { name: "Yuzu Espresso Tonic", desc: "Double shot over yuzu tonic and ice. Bright, bitter, electric.", price: "¥850", tag: "POPULAR" },
-    { name: "Matcha Espresso", desc: "Uji matcha whisked fresh, layered over espresso and milk.", price: "¥800" },
-    { name: "Chestnut Mont Blanc", desc: "Chestnut cream, espresso, steamed milk. Autumn in a cup.", price: "¥880" },
-    { name: "Hojicha Latte", desc: "Roasted green tea, steamed milk, brown sugar. Toasty and calm.", price: "¥780", tag: "NEW" },
-    { name: "Strawberry Matcha", desc: "Fresh strawberry milk under whisked Uji matcha. Sweet, green, photogenic.", price: "¥840", tag: "NEW" },
+    { name: "Sakura Latte", desc: "Cherry blossom syrup, steamed milk, espresso. Spring only.", price: "¥820", tag: "NEW", img: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&q=80&auto=format&fit=crop" },
+    { name: "Yuzu Espresso Tonic", desc: "Double shot over yuzu tonic and ice. Bright, bitter, electric.", price: "¥850", tag: "POPULAR", img: "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=600&q=80&auto=format&fit=crop" },
+    { name: "Matcha Espresso", desc: "Uji matcha whisked fresh, layered over espresso and milk.", price: "¥800", img: "https://images.unsplash.com/photo-1515823064-d6e0c04616a7?w=600&q=80&auto=format&fit=crop" },
+    { name: "Chestnut Mont Blanc", desc: "Chestnut cream, espresso, steamed milk. Autumn in a cup.", price: "¥880", img: "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=600&q=80&auto=format&fit=crop" },
+    { name: "Hojicha Latte", desc: "Roasted green tea, steamed milk, brown sugar. Toasty and calm.", price: "¥780", tag: "NEW", img: "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=600&q=80&auto=format&fit=crop" },
+    { name: "Strawberry Matcha", desc: "Fresh strawberry milk under whisked Uji matcha. Sweet, green, photogenic.", price: "¥840", tag: "NEW", img: "https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=600&q=80&auto=format&fit=crop" },
   ],
 };
 
@@ -251,6 +254,7 @@ function BeanCard({ bean, index, added, onToggle, grind, onGrind, showGrind }) {
   return (
     <motion.article
       className="kb-bean-card"
+      data-cursor="TASTE"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: "-60px" }}
@@ -376,7 +380,7 @@ function BrewGuidePage() {
           variants={fadeUp}
         >
           <p className="kb-label">— Brew Guide</p>
-          <Reveal as="h1" className="kb-section-title" text="Brew it the slow way." />
+          <Reveal as="h1" className="kb-section-title" text="Brew it the *slow* way." />
           <p className="kb-section-sub">
             Pick your method, follow the steps, and let the timer keep you honest.
             Same recipes we use at the pour-over bar in Shibuya.
@@ -482,9 +486,52 @@ export default function Kobo() {
   const [addedBeans, setAddedBeans] = useState({});
   const [grindByBean, setGrindByBean] = useState({});
 
+  // ---- Floating menu preview (desktop fine-pointer only): a fixed
+  // image card trails the cursor with spring lag while a menu row
+  // is hovered. px motion values only — never "%" strings. ----
+  const [isFinePointer, setIsFinePointer] = useState(false);
+  const [hoveredItem, setHoveredItem] = useState(null);
+  // Last hovered item, kept mounted so the card can fade out with
+  // its image still showing instead of going blank on mouse-leave.
+  const [previewItem, setPreviewItem] = useState(null);
+  const previewX = useMotionValue(0);
+  const previewY = useMotionValue(0);
+  const previewSpringX = useSpring(previewX, { stiffness: 180, damping: 24 });
+  const previewSpringY = useSpring(previewY, { stiffness: 180, damping: 24 });
+  const previewVelocityX = useVelocity(previewSpringX);
+  const previewRotateRaw = useTransform(previewVelocityX, [-900, 900], [-8, 8]);
+  const previewRotate = useSpring(previewRotateRaw, { stiffness: 200, damping: 24 });
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return undefined;
+    const fine = window.matchMedia("(pointer: fine)");
+    setIsFinePointer(fine.matches);
+    const onChange = (event) => setIsFinePointer(event.matches);
+    if (fine.addEventListener) fine.addEventListener("change", onChange);
+    return () => {
+      if (fine.removeEventListener) fine.removeEventListener("change", onChange);
+    };
+  }, []);
+
   useEffect(() => {
     scrollTopInstant();
+    setHoveredItem(null);
   }, [page]);
+
+  useEffect(() => {
+    setHoveredItem(null);
+  }, [activeTab]);
+
+  const handleMenuMouseMove = (event) => {
+    previewX.set(event.clientX);
+    previewY.set(event.clientY);
+  };
+
+  const handleMenuItemEnter = (item) => {
+    if (!isFinePointer) return;
+    setHoveredItem(item);
+    setPreviewItem(item);
+  };
 
   // ---- Hero parallax: arch image drifts slow, copy moves faster
   // and fades, vertical Japanese text travels the other way. ----
@@ -570,9 +617,16 @@ export default function Kobo() {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -10 }}
         transition={{ duration: 0.35, ease: "easeOut" }}
+        onMouseMove={isFinePointer ? handleMenuMouseMove : undefined}
+        onMouseLeave={isFinePointer ? () => setHoveredItem(null) : undefined}
       >
         {items.map((item) => (
-          <li key={item.name} className="kb-menu-item">
+          <li
+            key={item.name}
+            className="kb-menu-item"
+            data-cursor="TASTE"
+            onMouseEnter={isFinePointer ? () => handleMenuItemEnter(item) : undefined}
+          >
             <div className="kb-menu-line">
               <span className="kb-menu-name">
                 {item.name}
@@ -683,7 +737,7 @@ export default function Kobo() {
           <div className="kb-container kb-pinned-inner">
             <div className="kb-section-head kb-pinned-head">
               <p className="kb-label">— From Bean to Cup</p>
-              <Reveal className="kb-section-title" text="Four hands-on steps, zero shortcuts." />
+              <Reveal className="kb-section-title" text="Four hands-on steps, zero *shortcuts.*" />
               <p className="kb-pinned-hint">Keep scrolling — watch the cup fill.</p>
             </div>
 
@@ -736,6 +790,17 @@ export default function Kobo() {
         </div>
       </section>
 
+      {/* SCRUB STATEMENT — words fill in as the block scrolls past */}
+      <section className="kb-statement-section">
+        <div className="kb-container">
+          <ScrubWords
+            as="p"
+            className="kb-statement"
+            text="Coffee is not *fast.* Coffee is a *ritual* you repeat until it *repeats* you."
+          />
+        </div>
+      </section>
+
       {/* MENU PREVIEW */}
       <section className="kb-section kb-menu-section">
         <ScrollVertical className="kb-vertical kb-vertical-edge">メニュー</ScrollVertical>
@@ -748,7 +813,7 @@ export default function Kobo() {
             variants={fadeUp}
           >
             <p className="kb-label">— The Menu</p>
-            <Reveal className="kb-section-title" text="Poured to order, never rushed." />
+            <Reveal className="kb-section-title" text="Poured to order, never *rushed.*" />
           </motion.div>
 
           {renderMenuTabs()}
@@ -774,7 +839,7 @@ export default function Kobo() {
             variants={fadeUp}
           >
             <p className="kb-label">— Fresh Beans</p>
-            <Reveal className="kb-section-title" text="Six origins, one small roaster." />
+            <Reveal className="kb-section-title" text="Six origins, one small *roaster.*" />
             <p className="kb-section-sub">
               Roasted every Tuesday in Shibuya. Whole bean or ground to your brewer.
             </p>
@@ -815,7 +880,7 @@ export default function Kobo() {
             variants={fadeUp}
           >
             <p className="kb-label">— Brew Guide</p>
-            <Reveal className="kb-section-title" text="Four quiet steps to a better cup." />
+            <Reveal className="kb-section-title" text="Four quiet steps to a better *cup.*" />
           </motion.div>
 
           <div className="kb-brew-grid">
@@ -856,7 +921,7 @@ export default function Kobo() {
             variants={fadeUp}
           >
             <p className="kb-label">— Visit Us</p>
-            <Reveal className="kb-section-title" text="Find us in Shibuya." />
+            <Reveal className="kb-section-title" text="Find us in *Shibuya.*" />
             <p className="kb-visit-note">
               A small twelve-seat lab tucked behind the station. No reservations —
               just walk in, take a breath, and let us pour you something slow.
@@ -912,7 +977,7 @@ export default function Kobo() {
           variants={fadeUp}
         >
           <p className="kb-label">— The Menu</p>
-          <Reveal as="h1" className="kb-section-title" text="Everything we pour, all day." />
+          <Reveal as="h1" className="kb-section-title" text="Everything we pour, all *day.*" />
           <p className="kb-section-sub">
             Espresso pulled to order, filters brewed one at a time, and a small
             seasonal board that changes with the weather. Oat milk on request.
@@ -947,7 +1012,7 @@ export default function Kobo() {
           variants={fadeUp}
         >
           <p className="kb-label">— Fresh Beans</p>
-          <Reveal as="h1" className="kb-section-title" text="Six origins, one small roaster." />
+          <Reveal as="h1" className="kb-section-title" text="Six origins, one small *roaster.*" />
           <p className="kb-section-sub">
             Roasted every Tuesday in Shibuya and rested for seven days before
             they ship. Pick your grind, add a bag to your order, and we will
@@ -1032,6 +1097,46 @@ export default function Kobo() {
           {page === "brew" && <BrewGuidePage />}
         </motion.main>
       </AnimatePresence>
+
+      {/* FLOATING MENU PREVIEW — fixed card trailing the cursor
+          (fine-pointer only; rendered outside the page wrapper so
+          fixed positioning stays viewport-relative). */}
+      {isFinePointer && (
+        <motion.div
+          className="kb-float-preview"
+          style={{
+            x: previewSpringX,
+            y: previewSpringY,
+            xPercent: -50,
+            yPercent: -110,
+            rotate: previewRotate,
+          }}
+          animate={{
+            opacity: hoveredItem ? 1 : 0,
+            scale: hoveredItem ? 1 : 0.92,
+          }}
+          transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+          aria-hidden="true"
+        >
+          <AnimatePresence>
+            {previewItem && (
+              <motion.img
+                key={previewItem.name}
+                src={previewItem.img}
+                alt=""
+                className="kb-float-preview-img"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
+              />
+            )}
+          </AnimatePresence>
+          {previewItem && (
+            <span className="kb-float-preview-label">{previewItem.name}</span>
+          )}
+        </motion.div>
+      )}
 
       {/* FOOTER */}
       <footer className="kb-footer">

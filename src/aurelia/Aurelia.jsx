@@ -8,6 +8,7 @@ import {
 } from "framer-motion";
 import Parallax from "../fx/Parallax";
 import Reveal from "../fx/Reveal";
+import ScrubWords from "../fx/ScrubWords";
 import ProgressBar from "../fx/ProgressBar";
 import VelocityMarquee from "../fx/VelocityMarquee";
 import Magnetic from "../fx/Magnetic";
@@ -59,7 +60,7 @@ function ClipReveal({ children, className = "", ...rest }) {
   });
   const clipPath = useTransform(smooth, (v) => {
     const t = 1 - Math.min(1, Math.max(0, v));
-    return `inset(${(14 * t).toFixed(2)}% ${(10 * t).toFixed(2)}% ${(14 * t).toFixed(2)}% ${(10 * t).toFixed(2)}%)`;
+    return `inset(${(12 * t).toFixed(2)}% ${(8 * t).toFixed(2)}% ${(12 * t).toFixed(2)}% ${(8 * t).toFixed(2)}%)`;
   });
   return (
     <motion.div ref={ref} className={className} style={{ clipPath }} {...rest}>
@@ -476,11 +477,17 @@ export default function Aurelia() {
         <span className="au-marquee-dot" />
       </VelocityMarquee>
 
+      {/* Manifesto — the house philosophy, scrubbed in word by word */}
+      <section className="au-manifesto-section">
+        <motion.span className="au-label au-manifesto-eyebrow" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}>The House</motion.span>
+        <ScrubWords text="We compose *fragrance* the way light composes a room — quietly, and then *all* at once." className="au-manifesto" as="p" />
+      </section>
+
       {/* Notes */}
       <section className="au-section">
         <div className="au-section-head">
           <motion.span className="au-label" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}>The Composition</motion.span>
-          <Reveal text="Composed in Three Acts" as="h2" className="au-section-title" duration={1.1} />
+          <Reveal text="Composed in *Three* Acts" as="h2" className="au-section-title" duration={1.1} />
           <motion.p className="au-section-sub" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={2}>
             Like a piece of music, every AURELIA fragrance unfolds in time —
             an opening, a heart, and a lingering final note.
@@ -554,7 +561,7 @@ export default function Aurelia() {
       <section className="au-section au-ingredients-section">
         <div className="au-section-head">
           <motion.span className="au-label" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}>Rare Ingredients</motion.span>
-          <Reveal text="Sourced at Dawn" as="h2" className="au-section-title" duration={1.1} />
+          <Reveal text="Sourced at *Dawn*" as="h2" className="au-section-title" duration={1.1} />
           <motion.p className="au-section-sub" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={2}>
             Thirty-eight essences, gathered from growers we have known for decades.
             Four of them define the maison.
@@ -576,7 +583,7 @@ export default function Aurelia() {
       <section className="au-section au-section--alt">
         <div className="au-section-head">
           <motion.span className="au-label" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}>The Collection</motion.span>
-          <Reveal text="Three Signatures" as="h2" className="au-section-title" duration={1.1} />
+          <Reveal text="Three *Signatures*" as="h2" className="au-section-title" duration={1.1} />
           <motion.p className="au-section-sub" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={2}>
             Each extrait is macerated for six weeks, then hand-poured
             and sealed with wax in our Grasse atelier.
@@ -585,7 +592,7 @@ export default function Aurelia() {
         <div className="au-collection-grid">
           {perfumes.slice(0, 3).map((p, idx) => (
             <TiltCard key={p.id} as="article" max={4} className="au-product-card" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={idx}>
-              <ClipReveal className="au-product-media au-product-media--click" onClick={() => { setPage("collection"); openPerfume(p); }}>
+              <ClipReveal className="au-product-media au-product-media--click" data-cursor="DISCOVER" onClick={() => { setPage("collection"); openPerfume(p); }}>
                 <img src={p.img} alt={`${p.name} ${p.edition}`} />
                 <span className="au-product-tag">{p.tag}</span>
               </ClipReveal>
@@ -614,7 +621,7 @@ export default function Aurelia() {
       <section className="au-section au-press-section">
         <div className="au-section-head">
           <motion.span className="au-label" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}>In the Press</motion.span>
-          <Reveal text="Quietly Acclaimed" as="h2" className="au-section-title" duration={1.1} />
+          <Reveal text="Quietly *Acclaimed*" as="h2" className="au-section-title" duration={1.1} />
         </div>
         <div className="au-press-grid">
           {pressQuotes.map((q, idx) => (
@@ -668,7 +675,7 @@ export default function Aurelia() {
       <section className="au-newsletter">
         <motion.div className="au-newsletter-inner" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}>
           <span className="au-label">Correspondence</span>
-          <Reveal text="Letters from the Maison" as="h2" className="au-newsletter-title" duration={1.1} />
+          <Reveal text="Letters from the *Maison*" as="h2" className="au-newsletter-title" duration={1.1} />
           <p className="au-newsletter-copy">Seasonal notes, private releases, and stories from the atelier — delivered once a month, never more.</p>
           {subscribed ? (
             <motion.div className="au-success" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, ease: "easeOut" }}>
@@ -753,7 +760,7 @@ export default function Aurelia() {
       <section className="au-section">
         <div className="au-section-head">
           <motion.span className="au-label" variants={fadeUp} initial="hidden" animate="visible">The Collection</motion.span>
-          <Reveal text="Six Extraits" as="h1" className="au-section-title" duration={1.1} />
+          <Reveal text="Six *Extraits*" as="h1" className="au-section-title" duration={1.1} />
           <motion.p className="au-section-sub" variants={fadeUp} initial="hidden" animate="visible" custom={2}>
             Each extrait is macerated for six weeks, then hand-poured and sealed
             with wax in our Grasse atelier. Select a fragrance to discover its story.
@@ -762,7 +769,7 @@ export default function Aurelia() {
         <div className="au-collection-grid au-collection-grid--six">
           {perfumes.map((p, idx) => (
             <TiltCard key={p.id} as="article" max={4} className="au-product-card" variants={fadeUp} initial="hidden" animate="visible" custom={idx % 3}>
-              <ClipReveal className="au-product-media au-product-media--click" onClick={() => openPerfume(p)}>
+              <ClipReveal className="au-product-media au-product-media--click" data-cursor="DISCOVER" onClick={() => openPerfume(p)}>
                 <img src={p.img} alt={`${p.name} ${p.edition}`} />
                 <span className="au-product-tag">{p.tag}</span>
               </ClipReveal>
@@ -811,7 +818,7 @@ export default function Aurelia() {
       <section className="au-section au-timeline-section">
         <div className="au-section-head">
           <motion.span className="au-label" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}>The Journey</motion.span>
-          <Reveal text="Four Decades of Craft" as="h2" className="au-section-title" duration={1.1} />
+          <Reveal text="Four Decades of *Craft*" as="h2" className="au-section-title" duration={1.1} />
         </div>
         <div className="au-timeline">
           {timeline.map((t, idx) => (
@@ -879,7 +886,7 @@ export default function Aurelia() {
       <section className="au-section">
         <div className="au-section-head">
           <motion.span className="au-label" variants={fadeUp} initial="hidden" animate="visible">The Journal</motion.span>
-          <Reveal text="Letters from the Atelier" as="h1" className="au-section-title" duration={1.1} />
+          <Reveal text="Letters from the *Atelier*" as="h1" className="au-section-title" duration={1.1} />
           <motion.p className="au-section-sub" variants={fadeUp} initial="hidden" animate="visible" custom={2}>
             Notes on harvests, maceration, and the quiet discipline of wearing scent well.
           </motion.p>

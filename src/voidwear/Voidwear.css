@@ -11,6 +11,7 @@
   --vw-white: #f5f5f0;
   --vw-acid: #d9ff3d;
   --vw-dim: #9a9a94;
+  --reveal-accent: #d9ff3d;
   background: var(--vw-bg);
   color: var(--vw-white);
   font-family: "Archivo", "Inter", sans-serif;
@@ -416,6 +417,7 @@
 
 .vw-countdown,
 .vw-shop,
+.vw-drops,
 .vw-lookbook,
 .vw-manifesto,
 .vw-featured,
@@ -1336,6 +1338,7 @@
 
   .vw-countdown,
   .vw-shop,
+  .vw-drops,
   .vw-lookbook,
   .vw-manifesto,
   .vw-quotes,
@@ -1784,5 +1787,156 @@
   .vw-bg-word-mani {
     font-size: 110px;
     top: 60px;
+  }
+}
+
+/* ==========================================================================
+   LEVEL-UP ROUND: hero cursor parallax, product image swap, drops stack
+   ========================================================================== */
+
+/* ---------------------------------------------------------- Hero cursor layers */
+
+/* Inner wrappers moved by mouse (px transforms via framer-motion).
+   Kept inside the scroll-transformed parents so the two systems
+   never fight over the same element. */
+.vw-hero-cursor-copy,
+.vw-hero-cursor-media {
+  will-change: transform;
+}
+
+.vw-hero-cursor-media {
+  position: relative;
+}
+
+/* ---------------------------------------------------------- Product second-image swap */
+
+/* Second photo sits over the first inside the parallax inner
+   (the transformed inner is its containing block). Fades + settles
+   in on card hover; pointer events stay on the card. */
+.vw-card-media .fx-parallax-inner .vw-card-img2 {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  opacity: 0;
+  transform: scale(1.12);
+  transition: opacity 0.45s ease, transform 0.55s ease, filter 0.55s ease;
+  pointer-events: none;
+}
+
+.vw-card:hover .vw-card-media .fx-parallax-inner .vw-card-img2 {
+  opacity: 1;
+  transform: scale(1.06);
+}
+
+/* ---------------------------------------------------------- The Drops (stacking cards) */
+
+.vw-drops-stack {
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.vw-drop-card {
+  will-change: transform, filter;
+}
+
+.vw-drop-inner {
+  border: 2px solid var(--vw-white);
+  background: var(--vw-panel);
+  overflow: hidden;
+}
+
+.vw-drop-media {
+  position: relative;
+  height: 340px;
+  overflow: hidden;
+  background: #1a1a1a;
+  border-bottom: 2px solid var(--vw-white);
+}
+
+.vw-drop-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: grayscale(0.5) contrast(1.12);
+  transition: transform 0.6s ease, filter 0.5s ease;
+}
+
+.vw-drop-inner:hover .vw-drop-media img {
+  transform: scale(1.05);
+  filter: grayscale(0) contrast(1.1);
+}
+
+.vw-drop-body {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding: 28px 32px;
+  background: #0a0a0a;
+}
+
+.vw-drop-num {
+  font-family: "Anton", sans-serif;
+  font-size: clamp(64px, 8vw, 110px);
+  line-height: 0.9;
+  color: transparent;
+  -webkit-text-stroke: 2px var(--vw-acid);
+  flex-shrink: 0;
+}
+
+.vw-drop-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.vw-drop-name {
+  font-family: "Anton", sans-serif;
+  font-size: clamp(26px, 3.4vw, 44px);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  margin: 0 0 8px;
+}
+
+.vw-drop-sub {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  color: var(--vw-dim);
+  margin: 0;
+}
+
+.vw-drop-tag {
+  flex-shrink: 0;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  padding: 8px 14px;
+  border: 2px solid #3a3a3a;
+  color: var(--vw-dim);
+}
+
+.vw-drop-tag-live {
+  background: var(--vw-acid);
+  border-color: var(--vw-acid);
+  color: #0a0a0a;
+}
+
+@media (max-width: 768px) {
+  .vw-drop-media {
+    height: 240px;
+  }
+
+  .vw-drop-body {
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 22px;
+  }
+
+  .vw-drop-num {
+    font-size: 56px;
   }
 }

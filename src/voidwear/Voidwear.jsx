@@ -5,6 +5,7 @@ import {
   useScroll,
   useTransform,
   useSpring,
+  useMotionValue,
   useMotionValueEvent,
 } from "framer-motion";
 import {
@@ -22,6 +23,9 @@ import ProgressBar from "../fx/ProgressBar";
 import VelocityMarquee from "../fx/VelocityMarquee";
 import Magnetic from "../fx/Magnetic";
 import TiltCard from "../fx/TiltCard";
+import Scramble from "../fx/Scramble";
+import StackCards from "../fx/StackCards";
+import RollLink from "../fx/RollLink";
 import { scrollTopInstant, getLenis } from "../lenis";
 import "./Voidwear.css";
 
@@ -35,6 +39,9 @@ const IMG = (id) =>
 const HERO_IMG = IMG("photo-1529139574466-a303027c1d8b");
 const FEATURED_IMG = IMG("photo-1524504388940-b1c1722653e1");
 
+const IMG900 = (id) =>
+  `https://images.unsplash.com/${id}?w=900&q=80&auto=format&fit=crop`;
+
 const PRODUCTS = [
   {
     id: "p1",
@@ -43,6 +50,7 @@ const PRODUCTS = [
     tag: "NEW",
     category: "Hoodies",
     img: IMG("photo-1552374196-c4e7ffc6e126"),
+    img2: IMG900("photo-1556821840-3a63f95609a7"),
   },
   {
     id: "p2",
@@ -51,6 +59,7 @@ const PRODUCTS = [
     tag: "HOT",
     category: "Tees",
     img: IMG("photo-1521572163474-6864f9cf17ab"),
+    img2: IMG900("photo-1503342217505-b0a15ec3261c"),
   },
   {
     id: "p3",
@@ -59,6 +68,7 @@ const PRODUCTS = [
     tag: "LAST",
     category: "Hoodies",
     img: IMG("photo-1551028719-00167b16eac5"),
+    img2: IMG900("photo-1521223890158-f9f7c3d5d504"),
   },
   {
     id: "p4",
@@ -67,6 +77,7 @@ const PRODUCTS = [
     tag: "NEW",
     category: "Hoodies",
     img: IMG("photo-1591047139829-d91aecb6caea"),
+    img2: IMG900("photo-1543076447-215ad9ba6923"),
   },
   {
     id: "p5",
@@ -75,6 +86,7 @@ const PRODUCTS = [
     tag: "HOT",
     category: "Accessories",
     img: IMG("photo-1552346154-21d32810aba3"),
+    img2: IMG900("photo-1549298916-b41d501d3772"),
   },
   {
     id: "p6",
@@ -83,6 +95,7 @@ const PRODUCTS = [
     tag: "LAST",
     category: "Accessories",
     img: IMG("photo-1600185365926-3a2ce3cdb9eb"),
+    img2: IMG900("photo-1606107557195-0e29a4b5b4aa"),
   },
   {
     id: "p7",
@@ -91,6 +104,7 @@ const PRODUCTS = [
     tag: "NEW",
     category: "Tees",
     img: IMG("photo-1503341504253-dff4815485f1"),
+    img2: IMG900("photo-1576566588028-4147f3842f27"),
   },
   {
     id: "p8",
@@ -99,6 +113,7 @@ const PRODUCTS = [
     tag: "HOT",
     category: "Tees",
     img: IMG("photo-1583743814966-8936f5b7be1a"),
+    img2: IMG900("photo-1618354691373-d851c5c3a990"),
   },
   {
     id: "p9",
@@ -107,6 +122,37 @@ const PRODUCTS = [
     tag: "LAST",
     category: "Accessories",
     img: IMG("photo-1588850561407-ed78c282e89b"),
+    img2: IMG900("photo-1521369909029-2afed882baee"),
+  },
+];
+
+const DROPS = [
+  {
+    id: "drop-004",
+    num: "004",
+    name: "CONCRETE",
+    date: "SS26 — LIVE NOW",
+    pieces: "9 PIECES",
+    tag: "LIVE",
+    img: IMG("photo-1529139574466-a303027c1d8b"),
+  },
+  {
+    id: "drop-003",
+    num: "003",
+    name: "STATIC",
+    date: "FW25 — DELETED",
+    pieces: "7 PIECES",
+    tag: "GONE",
+    img: IMG("photo-1552374196-c4e7ffc6e126"),
+  },
+  {
+    id: "drop-002",
+    num: "002",
+    name: "VOID",
+    date: "SS25 — DELETED",
+    pieces: "5 PIECES",
+    tag: "GONE",
+    img: IMG("photo-1515886657613-9f3515b0c78f"),
   },
 ];
 
@@ -333,11 +379,20 @@ function ProductCard({ product, isAdded, onAdd, index = 0, layoutMode = false })
       };
 
   return (
-    <motion.article className="vw-card" {...motionProps}>
+    <motion.article className="vw-card" data-cursor="ADD +" {...motionProps}>
       <TiltCard as="div" className="vw-card-tilt" max={6}>
         <div className="vw-card-media">
           <Parallax className="vw-parallax-fill" speed={0.1}>
             <img src={product.img} alt={product.name} loading="lazy" />
+            {product.img2 ? (
+              <img
+                className="vw-card-img2"
+                src={product.img2}
+                alt=""
+                aria-hidden="true"
+                loading="lazy"
+              />
+            ) : null}
           </Parallax>
           <span className="vw-card-sweep" />
           <span className={`vw-card-tag vw-tag-${product.tag.toLowerCase()}`}>
@@ -433,8 +488,8 @@ function PinnedLookbook({ goTo }) {
       <div className="vw-hscroll-sticky">
         <div className="vw-hscroll-head">
           <div>
-            <p className="vw-eyebrow">03 — LOOKBOOK</p>
-            <Reveal text="SHOT ON CONCRETE" as="h2" className="vw-h2" />
+            <Scramble text="03 — LOOKBOOK" className="vw-eyebrow" as="p" />
+            <Reveal text="SHOT ON *CONCRETE*" as="h2" className="vw-h2" />
           </div>
           <button
             type="button"
@@ -452,7 +507,7 @@ function PinnedLookbook({ goTo }) {
             style={isMobile ? undefined : { x: trackX }}
           >
             {LOOKS.map((look, i) => (
-              <figure className="vw-hscroll-panel" key={look.cap}>
+              <figure className="vw-hscroll-panel" key={look.cap} data-cursor="VIEW">
                 <span className="vw-hscroll-num" aria-hidden="true">
                   {String(i + 1).padStart(2, "0")}
                 </span>
@@ -586,14 +641,56 @@ function HomePage({ cartCount, added, onAdd, goTo }) {
     SCROLL_SPRING
   );
 
+  // Hero cursor parallax: normalized mouse position (-0.5..0.5) drives
+  // px transforms on INNER wrappers, so it never fights the scroll
+  // transforms above. Media drifts with the cursor, copy drifts against.
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const CURSOR_SPRING = { stiffness: 60, damping: 18, mass: 0.6 };
+  const mediaCursorX = useSpring(
+    useTransform(mouseX, [-0.5, 0.5], [-18, 18]),
+    CURSOR_SPRING
+  );
+  const mediaCursorY = useSpring(
+    useTransform(mouseY, [-0.5, 0.5], [-12, 12]),
+    CURSOR_SPRING
+  );
+  const copyCursorX = useSpring(
+    useTransform(mouseX, [-0.5, 0.5], [10, -10]),
+    CURSOR_SPRING
+  );
+  const copyCursorY = useSpring(
+    useTransform(mouseY, [-0.5, 0.5], [8, -8]),
+    CURSOR_SPRING
+  );
+
+  const handleHeroMouse = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    mouseX.set((e.clientX - rect.left) / rect.width - 0.5);
+    mouseY.set((e.clientY - rect.top) / rect.height - 0.5);
+  };
+  const resetHeroMouse = () => {
+    mouseX.set(0);
+    mouseY.set(0);
+  };
+
   return (
     <>
       {/* ---------------------------------------------------------- HERO */}
-      <section className="vw-hero" ref={heroRef}>
+      <section
+        className="vw-hero"
+        ref={heroRef}
+        onMouseMove={handleHeroMouse}
+        onMouseLeave={resetHeroMouse}
+      >
         <motion.div
           className="vw-hero-copy"
           style={{ y: heroCopyY, opacity: heroOpacity, scale: heroScale }}
         >
+          <motion.div
+            className="vw-hero-cursor-copy"
+            style={{ x: copyCursorX, y: copyCursorY }}
+          >
           <motion.p
             className="vw-hero-kicker"
             variants={fadeUp}
@@ -651,6 +748,7 @@ function HomePage({ cartCount, added, onAdd, goTo }) {
               <button
                 type="button"
                 className="vw-btn vw-btn-acid"
+                data-cursor="SHOP"
                 onClick={() => goTo("shop")}
               >
                 Shop the drop <ArrowRight size={18} strokeWidth={2.5} />
@@ -684,6 +782,7 @@ function HomePage({ cartCount, added, onAdd, goTo }) {
               <strong>48H</strong> TO GONE
             </span>
           </motion.div>
+          </motion.div>
         </motion.div>
 
         <motion.div
@@ -693,14 +792,19 @@ function HomePage({ cartCount, added, onAdd, goTo }) {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.9, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
         >
-          <div className="vw-hero-imgwrap">
-            <Parallax className="vw-parallax-fill" speed={0.14}>
-              <img src={HERO_IMG} alt="VOIDWEAR Drop 004 editorial" />
-            </Parallax>
-            <span className="vw-hero-tint" />
-            <span className="vw-hero-tag">DROP 004 / SS26</span>
-          </div>
-          <SpinBadge />
+          <motion.div
+            className="vw-hero-cursor-media"
+            style={{ x: mediaCursorX, y: mediaCursorY }}
+          >
+            <div className="vw-hero-imgwrap">
+              <Parallax className="vw-parallax-fill" speed={0.14}>
+                <img src={HERO_IMG} alt="VOIDWEAR Drop 004 editorial" />
+              </Parallax>
+              <span className="vw-hero-tint" />
+              <span className="vw-hero-tag">DROP 004 / SS26</span>
+            </div>
+            <SpinBadge />
+          </motion.div>
         </motion.div>
       </section>
 
@@ -722,8 +826,8 @@ function HomePage({ cartCount, added, onAdd, goTo }) {
           whileInView="show"
           viewport={{ once: true, margin: "-80px" }}
         >
-          <p className="vw-eyebrow">01 — THE CLOCK</p>
-          <Reveal text="DROP 004 ENDS IN" as="h2" className="vw-h2" />
+          <Scramble text="01 — THE CLOCK" className="vw-eyebrow" as="p" />
+          <Reveal text="DROP 004 *ENDS* IN" as="h2" className="vw-h2" />
         </motion.div>
 
         <motion.div
@@ -784,7 +888,7 @@ function HomePage({ cartCount, added, onAdd, goTo }) {
           viewport={{ once: true, margin: "-80px" }}
           custom={1}
         >
-          <p className="vw-eyebrow">FEATURED DROP</p>
+          <Scramble text="FEATURED DROP" className="vw-eyebrow" as="p" />
           <h2 className="vw-featured-title">
             DROP 004<span>ACID RAIN</span>
           </h2>
@@ -827,8 +931,8 @@ function HomePage({ cartCount, added, onAdd, goTo }) {
           viewport={{ once: true, margin: "-80px" }}
         >
           <div>
-            <p className="vw-eyebrow">02 — THE DROP</p>
-            <Reveal text="SHOP DROP 004" as="h2" className="vw-h2" />
+            <Scramble text="02 — THE DROP" className="vw-eyebrow" as="p" />
+            <Reveal text="SHOP DROP *004*" as="h2" className="vw-h2" />
           </div>
           <p className="vw-shop-count">
             CART ({cartCount}) — 9 PIECES — ALL FINAL
@@ -857,11 +961,56 @@ function HomePage({ cartCount, added, onAdd, goTo }) {
           <button
             type="button"
             className="vw-btn vw-btn-outline"
+            data-cursor="SHOP"
             onClick={() => goTo("shop")}
           >
             View all 9 pieces <ArrowRight size={18} strokeWidth={2.5} />
           </button>
         </motion.div>
+      </section>
+
+      {/* ---------------------------------------------------------- THE DROPS (STACKING CARDS) */}
+      <section className="vw-drops">
+        <motion.div
+          className="vw-section-head"
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-80px" }}
+        >
+          <Scramble text="02B — THE ARCHIVE" className="vw-eyebrow" as="p" />
+          <Reveal text="THE *DROPS*" as="h2" className="vw-h2" />
+        </motion.div>
+
+        <StackCards
+          items={DROPS}
+          className="vw-drops-stack"
+          cardClassName="vw-drop-card"
+          topOffset={96}
+          step={14}
+          renderItem={(drop) => (
+            <article className="vw-drop-inner" data-cursor="VIEW">
+              <div className="vw-drop-media">
+                <img src={drop.img} alt={`DROP ${drop.num} ${drop.name}`} loading="lazy" />
+                <span className="vw-hero-tint" />
+              </div>
+              <div className="vw-drop-body">
+                <span className="vw-drop-num" aria-hidden="true">
+                  {drop.num}
+                </span>
+                <div className="vw-drop-meta">
+                  <h3 className="vw-drop-name">DROP {drop.num} — {drop.name}</h3>
+                  <p className="vw-drop-sub">
+                    {drop.date} / {drop.pieces}
+                  </p>
+                </div>
+                <span className={`vw-drop-tag${drop.tag === "LIVE" ? " vw-drop-tag-live" : ""}`}>
+                  {drop.tag}
+                </span>
+              </div>
+            </article>
+          )}
+        />
       </section>
 
       {/* ---------------------------------------------------------- LOOKBOOK (PINNED HORIZONTAL) */}
@@ -876,8 +1025,8 @@ function HomePage({ cartCount, added, onAdd, goTo }) {
           whileInView="show"
           viewport={{ once: true, margin: "-80px" }}
         >
-          <p className="vw-eyebrow">04 — STREET TALK</p>
-          <Reveal text="WORD ON THE STREET" as="h2" className="vw-h2" />
+          <Scramble text="04 — STREET TALK" className="vw-eyebrow" as="p" />
+          <Reveal text="WORD ON THE *STREET*" as="h2" className="vw-h2" />
         </motion.div>
 
         <div className="vw-quotes-grid">
@@ -906,7 +1055,7 @@ function HomePage({ cartCount, added, onAdd, goTo }) {
       {/* ---------------------------------------------------------- MANIFESTO TEASER */}
       <section className="vw-manifesto">
         <BgWord text="VOID" className="vw-bg-word-manifesto" from={90} to={-90} />
-        <p className="vw-eyebrow">05 — MANIFESTO</p>
+        <Scramble text="05 — MANIFESTO" className="vw-eyebrow" as="p" />
         <h2 className="vw-manifesto-lines">
           {[
             "WE DON'T DO SEASONS.",
@@ -977,8 +1126,8 @@ function ShopPage({ cartCount, added, onAdd }) {
         animate="show"
       >
         <div>
-          <p className="vw-eyebrow">DROP 004 — FULL RANGE</p>
-          <Reveal text="SHOP ALL" as="h2" className="vw-h2" />
+          <Scramble text="DROP 004 — FULL RANGE" className="vw-eyebrow" as="p" />
+          <Reveal text="SHOP *ALL*" as="h2" className="vw-h2" />
         </div>
         <p className="vw-shop-count">
           {visible.length} PRODUCTS — CART ({cartCount}) — ALL FINAL
@@ -1044,8 +1193,8 @@ function LookbookPage() {
         animate="show"
       >
         <div>
-          <p className="vw-eyebrow">DROP 004 — EDITORIAL</p>
-          <Reveal text="LOOKBOOK" as="h2" className="vw-h2" />
+          <Scramble text="DROP 004 — EDITORIAL" className="vw-eyebrow" as="p" />
+          <Reveal text="*LOOKBOOK*" as="h2" className="vw-h2" />
         </div>
         <p className="vw-shop-count">{LOOKBOOK_FULL.length} LOOKS — SHOT ON CONCRETE</p>
       </motion.div>
@@ -1055,6 +1204,7 @@ function LookbookPage() {
           <motion.figure
             className="vw-lb-item"
             key={look.cap}
+            data-cursor="VIEW"
             variants={fadeUp}
             initial="hidden"
             whileInView="show"
@@ -1087,7 +1237,7 @@ function ManifestoPage({ goTo }) {
   return (
     <section className="vw-manifesto-page">
       <BgWord text="NO RESTOCK" className="vw-bg-word-mani" from={-90} to={90} />
-      <p className="vw-eyebrow">THE VOIDWEAR MANIFESTO</p>
+      <Scramble text="THE VOIDWEAR MANIFESTO" className="vw-eyebrow" as="p" />
 
       <h2 className="vw-mani-hero">
         {[
@@ -1235,11 +1385,11 @@ export default function Voidwear() {
             <button
               key={item.id}
               type="button"
-              className={`vw-nav-btn${page === item.id ? " vw-nav-active" : ""}`}
+              className={`vw-nav-btn fx-roll-parent${page === item.id ? " vw-nav-active" : ""}`}
               onClick={() => goTo(item.id)}
               aria-current={page === item.id ? "page" : undefined}
             >
-              {item.label}
+              <RollLink as="span" text={item.label.toUpperCase()} />
             </button>
           ))}
         </nav>

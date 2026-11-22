@@ -15,6 +15,8 @@ import ProgressBar from "../fx/ProgressBar";
 import VelocityMarquee from "../fx/VelocityMarquee";
 import Magnetic from "../fx/Magnetic";
 import TiltCard from "../fx/TiltCard";
+import StackCards from "../fx/StackCards";
+import ScrubWords from "../fx/ScrubWords";
 import { scrollTopInstant } from "../lenis";
 import {
   ArrowRight,
@@ -67,6 +69,42 @@ const STATS = [
   { end: 40, suffix: "+", label: "Elite Trainers" },
   { end: 120, suffix: "+", label: "Weekly Classes" },
   { end: 12, suffix: "", label: "Years Strong" },
+];
+
+/* Home — stacking program cards */
+const PROGRAMS = [
+  {
+    id: "strength",
+    title: "STRENGTH",
+    meta: "60 MIN · INTENSITY 4/5 · BARBELL FIRST",
+    desc: "Squat, press, pull, repeat. Coached barbell work with progressive loading and a logbook that does not lie.",
+    img: "https://images.unsplash.com/photo-1526506118085-60ce8714f8c5?w=1200&q=80&auto=format&fit=crop",
+    alt: "Barbell deadlift",
+  },
+  {
+    id: "cardio",
+    title: "CARDIO",
+    meta: "45 MIN · INTENSITY 5/5 · ENGINE BUILDER",
+    desc: "Sleds, ropes, assault bikes and intervals that build an engine you can actually use outside the gym.",
+    img: "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?w=1200&q=80&auto=format&fit=crop",
+    alt: "Battle ropes workout",
+  },
+  {
+    id: "combat",
+    title: "COMBAT",
+    meta: "60 MIN · INTENSITY 4/5 · GLOVES ON",
+    desc: "Boxing fundamentals, heavy bag rounds and fight-camp conditioning. Technique first, ego last.",
+    img: "https://images.unsplash.com/photo-1594381898411-846e7d193883?w=1200&q=80&auto=format&fit=crop",
+    alt: "Boxing training",
+  },
+  {
+    id: "yoga",
+    title: "YOGA",
+    meta: "50 MIN · INTENSITY 2/5 · MOVE BETTER",
+    desc: "Mobility, breath and deep stretch to keep joints honest and recovery on schedule between heavy days.",
+    img: "https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?w=1200&q=80&auto=format&fit=crop",
+    alt: "Yoga and mobility training",
+  },
 ];
 
 /* Home preview schedule — category tabs */
@@ -548,7 +586,7 @@ function PinnedTransformations() {
         <div className="sv-wrap sv-pin-content">
           <div className="sv-section-head sv-pin-head">
             <p className="sv-kicker">Member Results</p>
-            <Reveal text="PROOF, NOT PROMISES" as="h2" className="sv-h2" />
+            <Reveal text="PROOF, NOT *PROMISES*" as="h2" className="sv-h2" />
             <p className="sv-lead">
               Real members, real timelines. Keep scrolling — the numbers earn themselves.
             </p>
@@ -802,6 +840,47 @@ export default function Savage() {
               ))}
             </section>
 
+            {/* ---------- PROGRAMS (stacking cards) ---------- */}
+            <section className="sv-section sv-programs-section">
+              <div className="sv-wrap">
+                <motion.div
+                  className="sv-section-head"
+                  variants={fadeUp}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true, margin: "-60px" }}
+                >
+                  <p className="sv-kicker">Programs</p>
+                  <Reveal text="PICK YOUR *POISON*" as="h2" className="sv-h2" />
+                  <p className="sv-lead">Four tracks. One standard. Scroll — each program stacks on the last, just like training weeks do.</p>
+                </motion.div>
+
+                <StackCards
+                  items={PROGRAMS}
+                  className="sv-programs-stack"
+                  cardClassName="sv-program-card"
+                  topOffset={92}
+                  step={14}
+                  renderItem={(p, i) => (
+                    <article className={`sv-program sv-program-${i}`} data-cursor="TRAIN">
+                      <div className="sv-program-copy">
+                        <span className="sv-program-index" aria-hidden="true">0{i + 1}</span>
+                        <p className="sv-program-meta">{p.meta}</p>
+                        <h3 className="sv-program-title">{p.title}</h3>
+                        <p className="sv-program-desc">{p.desc}</p>
+                        <button type="button" className="sv-btn sv-btn-red sv-program-cta" onClick={() => go("classes")}>
+                          <span>Explore {p.title}</span> <ArrowRight size={16} />
+                        </button>
+                      </div>
+                      <div className="sv-program-media">
+                        <img src={p.img} alt={p.alt} loading="lazy" />
+                      </div>
+                    </article>
+                  )}
+                />
+              </div>
+            </section>
+
             {/* ---------- CLASSES PREVIEW ---------- */}
             <section className="sv-section">
               <div className="sv-wrap">
@@ -813,7 +892,7 @@ export default function Savage() {
                   viewport={{ once: true, margin: "-60px" }}
                 >
                   <p className="sv-kicker">Weekly Timetable</p>
-                  <Reveal text="PICK YOUR POISON" as="h2" className="sv-h2" />
+                  <Reveal text="TRAIN THIS *WEEK*" as="h2" className="sv-h2" />
                   <p className="sv-lead">120+ classes a week. Every session coached, every rep counted.</p>
                 </motion.div>
 
@@ -884,7 +963,7 @@ export default function Savage() {
                   viewport={{ once: true, margin: "-60px" }}
                 >
                   <p className="sv-kicker">The Coaching Staff</p>
-                  <Reveal text="MEET THE SAVAGES" as="h2" className="sv-h2" />
+                  <Reveal text="MEET THE *SAVAGES*" as="h2" className="sv-h2" />
                   <p className="sv-lead">Competitors, fighters and movement nerds. They will push you further than you push yourself.</p>
                 </motion.div>
 
@@ -893,6 +972,7 @@ export default function Savage() {
                     <TiltCard
                       as="article"
                       className="sv-trainer"
+                      data-cursor="TRAIN"
                       key={t.name}
                       max={6}
                       variants={cardPop}
@@ -943,6 +1023,18 @@ export default function Savage() {
               </div>
             </section>
 
+            {/* ---------- STATEMENT (scrub words) ---------- */}
+            <section className="sv-statement-section">
+              <div className="sv-wrap">
+                <p className="sv-kicker">The Savage Standard</p>
+                <ScrubWords
+                  text="Nobody cares about your *feelings* — the *iron* only counts what you *lift*"
+                  as="p"
+                  className="sv-statement"
+                />
+              </div>
+            </section>
+
             {/* ---------- TRANSFORMATIONS (pinned scrub) ---------- */}
             <PinnedTransformations />
 
@@ -962,7 +1054,7 @@ export default function Savage() {
                   viewport={{ once: true, margin: "-60px" }}
                 >
                   <p className="sv-kicker">Membership</p>
-                  <Reveal text="NO CONTRACTS. NO EXCUSES." as="h2" className="sv-h2" />
+                  <Reveal text="NO CONTRACTS. NO *EXCUSES*" as="h2" className="sv-h2" />
                   <p className="sv-lead">Cancel anytime. Freeze anytime. Train always.</p>
                 </motion.div>
 
@@ -982,7 +1074,7 @@ export default function Savage() {
                   viewport={{ once: true, margin: "-60px" }}
                 >
                   <p className="sv-kicker">Before You Ask</p>
-                  <Reveal text="STRAIGHT ANSWERS" as="h2" className="sv-h2" />
+                  <Reveal text="STRAIGHT *ANSWERS*" as="h2" className="sv-h2" />
                 </motion.div>
 
                 <div className="sv-faq-list">
@@ -1044,7 +1136,7 @@ export default function Savage() {
                 whileInView="show"
                 viewport={{ once: true, margin: "-60px" }}
               >
-                <Reveal text="Your first week is on us." as="h2" />
+                <Reveal text="Your first week is on *us*" as="h2" />
                 <p>Seven days. Every class. Every coach. Zero dollars. Bring shoes, we bring the suffering.</p>
                 <button type="button" className="sv-btn sv-btn-dark" onClick={() => go("membership")}>
                   <span>Claim Free Week</span> <ArrowRight size={17} />
@@ -1060,7 +1152,7 @@ export default function Savage() {
             <section className="sv-page-hero">
               <div className="sv-wrap">
                 <p className="sv-kicker"><CalendarDays size={15} /> Full Week Schedule</p>
-                <Reveal text="EVERY DAY. EVERY LEVEL." as="h1" className="sv-page-title" />
+                <Reveal text="EVERY DAY. EVERY *LEVEL*" as="h1" className="sv-page-title" />
                 <p className="sv-lead sv-page-lead">
                   Pick a day, pick your fight. Flames show intensity — one is technique and
                   mobility, three is full send. Every class is coach-led and capped at 18.
@@ -1158,7 +1250,7 @@ export default function Savage() {
             <section className="sv-page-hero">
               <div className="sv-wrap">
                 <p className="sv-kicker"><Trophy size={15} /> The Coaching Staff</p>
-                <Reveal text="COACHES WHO COMPETE." as="h1" className="sv-page-title" />
+                <Reveal text="COACHES WHO *COMPETE*" as="h1" className="sv-page-title" />
                 <p className="sv-lead sv-page-lead">
                   Six specialists, zero clipboard tourists. Book a 60-minute session and get a
                   written program in the Savage app the same day.
@@ -1175,6 +1267,7 @@ export default function Savage() {
                       <TiltCard
                         as="article"
                         className="sv-trainer-full"
+                        data-cursor="TRAIN"
                         key={t.id}
                         max={6}
                         variants={cardPop}
@@ -1233,7 +1326,7 @@ export default function Savage() {
             <section className="sv-page-hero">
               <div className="sv-wrap">
                 <p className="sv-kicker"><Dumbbell size={15} /> Membership</p>
-                <Reveal text="JOIN THE CLUB." as="h1" className="sv-page-title" />
+                <Reveal text="JOIN THE *CLUB*" as="h1" className="sv-page-title" />
                 <p className="sv-lead sv-page-lead">
                   First week free on every plan. No joining fee, no contract, cancel in one tap.
                   Pick a plan, drop your details, walk in tomorrow.
@@ -1250,7 +1343,7 @@ export default function Savage() {
                 <div className="sv-join" id="join">
                   <div className="sv-join-head">
                     <p className="sv-kicker">Start Your Free Week</p>
-                    <Reveal text="CLAIM YOUR SPOT" as="h2" className="sv-h2 sv-join-title" />
+                    <Reveal text="CLAIM YOUR *SPOT*" as="h2" className="sv-h2 sv-join-title" />
                     <p className="sv-lead">Takes 30 seconds. Your member ID is generated instantly — show it at the front desk.</p>
                   </div>
 

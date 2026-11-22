@@ -16,6 +16,7 @@
   --kb-sans: "Inter", -apple-system, "Segoe UI", sans-serif;
   --kb-jp: "Noto Serif JP", "Cormorant Garamond", serif;
   --kb-mono: "JetBrains Mono", monospace;
+  --reveal-accent: #c47b3a;
 
   background: var(--kb-bg);
   color: var(--kb-ink);
@@ -1922,5 +1923,110 @@
   }
   .kb-marquee-item {
     font-size: 17px;
+  }
+}
+
+/* ============================================================
+   KOBO level-up round — scrub statement, Reveal accents,
+   floating menu preview (desktop fine-pointer only)
+   ============================================================ */
+
+/* Amber italic key words in Reveal headings + ScrubWords
+   (colour comes from --reveal-accent in fx.css). */
+.kb-root .fx-reveal-accent {
+  font-style: italic;
+}
+
+/* ---------- Scrub statement (Home, after pinned process) ---------- */
+
+.kb-statement-section {
+  padding: 96px 0;
+  border-bottom: 1px solid var(--kb-line-soft);
+}
+
+.kb-statement {
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+  font-family: var(--kb-serif);
+  font-size: clamp(32px, 4.6vw, 56px);
+  font-weight: 500;
+  line-height: 1.28;
+  letter-spacing: -0.01em;
+  color: var(--kb-ink);
+}
+
+/* ---------- Floating menu preview ---------- */
+
+/* Fixed card that trails the cursor above the hovered menu row.
+   Position is driven entirely by framer-motion x/y (px springs)
+   with xPercent/yPercent -50/-110 in Kobo.jsx. */
+.kb-float-preview {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 50;
+  width: 220px;
+  aspect-ratio: 4 / 3;
+  pointer-events: none;
+  border: 1px solid var(--kb-line);
+  border-radius: 18px;
+  overflow: hidden;
+  background: var(--kb-img-bg);
+  box-shadow: 0 28px 56px rgba(43, 29, 18, 0.28);
+  will-change: transform, opacity;
+}
+
+.kb-float-preview-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.kb-float-preview-label {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  max-width: calc(100% - 24px);
+  padding: 7px 13px;
+  border-radius: 999px;
+  background: rgba(250, 244, 230, 0.94);
+  border: 1px solid var(--kb-line-soft);
+  font-family: var(--kb-serif);
+  font-size: 14.5px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--kb-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Gentle cue on the hovered row while its preview is up. */
+.kb-menu-item {
+  transition: border-color 0.25s ease;
+}
+
+.kb-menu-item .kb-menu-name {
+  transition: color 0.25s ease;
+}
+
+.kb-menu-item:hover .kb-menu-name {
+  color: var(--kb-amber);
+}
+
+/* ---------- Level-up responsive ---------- */
+
+@media (pointer: coarse) {
+  .kb-float-preview {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .kb-statement-section {
+    padding: 64px 0;
   }
 }

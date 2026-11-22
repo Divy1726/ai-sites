@@ -69,3 +69,204 @@
   will-change: transform;
   transform-style: preserve-3d;
 }
+
+/* ------------------------------------------------------------------ */
+/* Level-up round: preloader, cursor, grain, scrub, stack, roll       */
+/* ------------------------------------------------------------------ */
+
+.fx-reveal-accent {
+  color: var(--reveal-accent, inherit);
+}
+
+/* Preloader */
+.fx-preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: #050505;
+  color: #f5f5f0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 28px 32px;
+  font-family: "JetBrains Mono", monospace;
+  overflow: hidden;
+}
+
+.fx-preloader-top {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  color: rgba(245, 245, 240, 0.55);
+}
+
+.fx-preloader-word {
+  align-self: center;
+  font-family: "Anton", "Archivo", sans-serif;
+  font-size: clamp(44px, 9vw, 120px);
+  line-height: 1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  animation: fx-pre-word 0.28s ease both;
+}
+
+@keyframes fx-pre-word {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fx-preloader-line {
+  height: 2px;
+  background: rgba(245, 245, 240, 0.14);
+  overflow: hidden;
+}
+
+.fx-preloader-line > span {
+  display: block;
+  height: 100%;
+  background: #f5f5f0;
+  transform-origin: 0 50%;
+}
+
+.fx-preloader-count {
+  position: absolute;
+  right: 24px;
+  bottom: 8px;
+  font-family: "Anton", "Archivo", sans-serif;
+  font-size: clamp(90px, 18vw, 220px);
+  line-height: 0.9;
+  color: rgba(245, 245, 240, 0.16);
+  pointer-events: none;
+}
+
+/* Custom cursor */
+.fx-cursor-dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #fff;
+  mix-blend-mode: difference;
+  pointer-events: none;
+  z-index: 10001;
+}
+
+.fx-cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  border-radius: 999px;
+  border: 1px solid #fff;
+  background: rgba(255, 255, 255, 0.08);
+  mix-blend-mode: difference;
+  pointer-events: none;
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fx-cursor-label {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  color: #fff;
+  transition: opacity 0.18s ease;
+  white-space: nowrap;
+}
+
+html.fx-cursor-on,
+html.fx-cursor-on a,
+html.fx-cursor-on button,
+html.fx-cursor-on [role="button"],
+html.fx-cursor-on label,
+html.fx-cursor-on select {
+  cursor: none;
+}
+
+html.fx-cursor-on input,
+html.fx-cursor-on textarea {
+  cursor: text;
+}
+
+/* Grain */
+.fx-grain {
+  position: fixed;
+  inset: -50%;
+  width: 200%;
+  height: 200%;
+  pointer-events: none;
+  z-index: 9998;
+  opacity: 0.055;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: fx-grain-shift 0.9s steps(4) infinite;
+}
+
+@keyframes fx-grain-shift {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-2%, 1.4%); }
+  50% { transform: translate(1.6%, -1%); }
+  75% { transform: translate(-1%, -1.8%); }
+  100% { transform: translate(0, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-grain { animation: none; }
+}
+
+/* Scrub words */
+.fx-scrub-word {
+  display: inline-block;
+  will-change: opacity;
+}
+
+/* Stacking cards */
+.fx-stack {
+  position: relative;
+}
+
+.fx-stack-sticky {
+  position: sticky;
+  margin-bottom: 28px;
+}
+
+.fx-stack-sticky:last-child {
+  margin-bottom: 0;
+}
+
+/* Roll link */
+.fx-roll {
+  display: inline-flex;
+  line-height: 1.15;
+  vertical-align: middle;
+}
+
+.fx-roll-inner {
+  display: block;
+  height: 1.15em;
+  overflow: hidden;
+}
+
+.fx-roll-track {
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.fx-roll-track > span {
+  display: block;
+  line-height: 1.15;
+  height: 1.15em;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.fx-roll:hover .fx-roll-track,
+.fx-roll-parent:hover .fx-roll-track {
+  transform: translateY(-50%);
+}

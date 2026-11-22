@@ -9,16 +9,21 @@ import {
 } from "framer-motion";
 import { ArrowLeft, ArrowUpRight, Sparkles } from "lucide-react";
 import Lenis from "lenis";
-import { setLenis, scrollTopInstant, prefersReducedMotion } from "./lenis";
+import { setLenis, getLenis, scrollTopInstant, prefersReducedMotion } from "./lenis";
 import ProgressBar from "./fx/ProgressBar";
+import Preloader from "./fx/Preloader";
+import Cursor from "./fx/Cursor";
+import Grain from "./fx/Grain";
+import RollLink from "./fx/RollLink";
 import "./App.css";
 
-// Import all 5 sites
+// Import all 6 sites
 import Voidwear from "./voidwear/Voidwear";
 import Aurelia from "./aurelia/Aurelia";
 import Orbital from "./orbital/Orbital";
 import Savage from "./savage/Savage";
 import Kobo from "./kobo/Kobo";
+import Noir from "./noir/Noir";
 
 const sites = [
   {
@@ -76,10 +81,22 @@ const sites = [
     pages: "4 pages",
     img: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=1200&q=80&auto=format&fit=crop",
   },
+  {
+    id: "noir",
+    num: "06",
+    name: "NOIR ATELIER",
+    tag: "Creative Studio",
+    desc: "A design studio that treats every pixel like it owes money.",
+    accent: "#ff5c28",
+    bg: "#0e0e0e",
+    pages: "4 pages",
+    img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200&q=80&auto=format&fit=crop",
+  },
 ];
 
 // Split a line into animated letters for the home hero title.
-function AnimatedLine({ text, delay = 0, className = "" }) {
+// `play` gates the entrance so it stages after the preloader curtain.
+function AnimatedLine({ text, delay = 0, className = "", play = true }) {
   return (
     <span className={className} aria-label={text}>
       {text.split("").map((ch, i) => (
@@ -88,7 +105,7 @@ function AnimatedLine({ text, delay = 0, className = "" }) {
           className="home-hero-char"
           aria-hidden="true"
           initial={{ y: "110%", rotate: 4 }}
-          animate={{ y: "0%", rotate: 0 }}
+          animate={play ? { y: "0%", rotate: 0 } : { y: "110%", rotate: 4 }}
           transition={{
             duration: 0.85,
             delay: delay + i * 0.045,
@@ -103,7 +120,7 @@ function AnimatedLine({ text, delay = 0, className = "" }) {
 }
 
 // One home card: 3D tilt on hover + inner image parallax on scroll.
-function HomeCard({ site, index, onOpen }) {
+function HomeCard({ site, index, onOpen, play = true }) {
   const ref = useRef(null);
 
   // Image parallax tied to this card travelling through the viewport.
@@ -144,13 +161,14 @@ function HomeCard({ site, index, onOpen }) {
   return (
     <motion.button
       ref={ref}
-      className="home-card"
+      className="home-card fx-roll-parent"
+      data-cursor="OPEN"
       style={{ "--accent": site.accent, rotateX, rotateY, transformPerspective: 1000 }}
       onClick={() => onOpen(site.id)}
       onMouseMove={handleMove}
       onMouseLeave={handleLeave}
       initial={{ opacity: 0, y: 36 }}
-      animate={{ opacity: 1, y: 0 }}
+      animate={play ? { opacity: 1, y: 0 } : { opacity: 0, y: 36 }}
       transition={{ duration: 0.65, delay: 0.12 + index * 0.09, ease: [0.22, 1, 0.36, 1] }}
       whileHover={{ y: -8 }}
       whileTap={{ scale: 0.98 }}
@@ -175,7 +193,7 @@ function HomeCard({ site, index, onOpen }) {
         <span className="home-card-desc">{site.desc}</span>
         <span className="home-card-enter">
           <span>
-            Enter site
+            <RollLink as="span" text="Enter site" />
             <em className="home-card-pages">{site.pages}</em>
           </span>
           <span className="home-card-arrow">
@@ -187,9 +205,29 @@ function HomeCard({ site, index, onOpen }) {
   );
 }
 
+function shouldSkipPreloader() {
+  if (typeof window === "undefined") return true;
+  if (prefersReducedMotion()) return true;
+  try {
+    return sessionStorage.getItem("ai-sites-loaded") === "1";
+  } catch (e) {
+    return false;
+  }
+}
+
 function App() {
   const [page, setPage] = useState("home");
+  const [preloaded, setPreloaded] = useState(shouldSkipPreloader);
   const heroRef = useRef(null);
+
+  const handlePreloaderDone = () => {
+    try {
+      sessionStorage.setItem("ai-sites-loaded", "1");
+    } catch (e) {
+      // Storage unavailable: preloader simply shows again next load.
+    }
+    setPreloaded(true);
+  };
 
   // Lenis smooth scrolling for the whole app (native scroll as fallback).
   useEffect(() => {
@@ -218,6 +256,33 @@ function App() {
       setLenis(null);
     };
   }, []);
+
+  // Freeze scrolling while the preloader curtain is up.
+  useEffect(() => {
+    const lenis = getLenis();
+    if (!preloaded) {
+      if (lenis) {
+        try {
+          lenis.stop();
+        } catch (e) {
+          // Native scroll lock below still applies.
+        }
+      }
+      document.body.style.overflow = "hidden";
+    } else {
+      if (lenis) {
+        try {
+          lenis.start();
+        } catch (e) {
+          // Ignore: native scroll continues either way.
+        }
+      }
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [preloaded]);
 
   // Scroll to top whenever the page changes, then force framer-motion
   // and Lenis to re-measure (fonts/images settling can leave useScroll
@@ -253,6 +318,8 @@ function App() {
   if (page !== "home") {
     return (
       <div className="site-shell">
+        <Cursor />
+        <Grain />
         <button className="global-back" onClick={() => setPage("home")} aria-label="Back to home">
           <ArrowLeft size={18} strokeWidth={2.5} />
           <span>Back</span>
@@ -273,6 +340,7 @@ function App() {
             {page === "orbital" && <Orbital />}
             {page === "savage" && <Savage />}
             {page === "kobo" && <Kobo />}
+            {page === "noir" && <Noir />}
           </motion.main>
         </AnimatePresence>
       </div>
@@ -281,13 +349,18 @@ function App() {
 
   return (
     <div className="home">
+      <AnimatePresence>
+        {!preloaded && <Preloader key="preloader" onDone={handlePreloaderDone} />}
+      </AnimatePresence>
+      <Cursor />
+      <Grain />
       <ProgressBar color="#ffffff" />
       <div className="home-noise" aria-hidden="true" />
 
       <header className="home-top">
         <span className="home-logo">AI—SITES</span>
         <span className="home-top-note">
-          <Sparkles size={14} /> Five original worlds. One app.
+          <Sparkles size={14} /> Six original worlds. One app.
         </span>
       </header>
 
@@ -299,33 +372,33 @@ function App() {
         <motion.p
           className="home-kicker"
           initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
+          animate={preloaded ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
           transition={{ duration: 0.6 }}
         >
           Select a world
         </motion.p>
         <h1>
           <span className="home-hero-line">
-            <AnimatedLine text="5 SITES." delay={0.1} />
+            <AnimatedLine text="6 SITES." delay={0.1} play={preloaded} />
           </span>
           <span className="home-hero-line home-hero-line-outline">
-            <AnimatedLine text="5 WORLDS." delay={0.45} />
+            <AnimatedLine text="6 WORLDS." delay={0.45} play={preloaded} />
           </span>
         </h1>
         <motion.p
           className="home-sub"
           initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          animate={preloaded ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.7, delay: 0.75 }}
         >
-          Streetwear, perfume, space, iron and coffee — each site has its own
-          language, motion and rules. Click one. Step inside.
+          Streetwear, perfume, space, iron, coffee and a design studio — each
+          site has its own language, motion and rules. Click one. Step inside.
         </motion.p>
       </motion.section>
 
       <section className="home-grid">
         {sites.map((site, i) => (
-          <HomeCard key={site.id} site={site} index={i} onOpen={setPage} />
+          <HomeCard key={site.id} site={site} index={i} onOpen={setPage} play={preloaded} />
         ))}
       </section>
 

@@ -12,6 +12,9 @@ import Reveal from "../fx/Reveal";
 import ProgressBar from "../fx/ProgressBar";
 import VelocityMarquee from "../fx/VelocityMarquee";
 import Magnetic from "../fx/Magnetic";
+import Scramble from "../fx/Scramble";
+import ScrubWords from "../fx/ScrubWords";
+import StackCards from "../fx/StackCards";
 import { scrollTopInstant } from "../lenis";
 import {
   ArrowRight,
@@ -95,6 +98,53 @@ const SAFETY_ITEMS = [
   ["04", "Recovery forces", "Navy recovery ships on station for every splashdown, with helicopter extraction on standby."],
   ["05", "Flown hardware", "Every ORB-1 airframe is flight-proven and inspected panel by panel between missions."],
 ];
+
+/* Stacking spec panels on the Vehicle page. Rows reuse VEHICLE_SPECS
+   values where they overlap so the dossier never contradicts itself. */
+const STACK_PANELS = [
+  {
+    id: "propulsion",
+    index: "01",
+    code: "SYS — PROP",
+    title: "PROPULSION",
+    note: "TWO-STAGE METHALOX. FULLY REUSABLE BOOSTER, FLIGHT-PROVEN AIRFRAME.",
+    rows: [
+      ["THRUST", "7,600 KN"],
+      ["PROPELLANT", "METHALOX"],
+      ["CONFIGURATION", "TWO-STAGE"],
+      ["HEIGHT", "62 M"],
+    ],
+  },
+  {
+    id: "cabin",
+    index: "02",
+    code: "SYS — CAB",
+    title: "CABIN",
+    note: "SIX SEATS, SEA-LEVEL PRESSURE. YOU FLY AS CREW, NOT CARGO.",
+    rows: [
+      ["CABIN VOLUME", "18 M3"],
+      ["CREW", "4 + 2"],
+      ["SEATS", "6 — RECUMBENT"],
+      ["RETURN", "PARACHUTE SPLASHDOWN"],
+    ],
+  },
+  {
+    id: "safety",
+    index: "03",
+    code: "SYS — SAFE",
+    title: "SAFETY",
+    note: "PUSHER ABORT FROM PAD TO ORBIT. ANY SINGLE FAILURE IS SURVIVABLE.",
+    rows: [
+      ["ABORT SYSTEM", "PUSHER, FULL ENVELOPE"],
+      ["REDUNDANCY", "TRIPLE — COMPUTERS + LIFE SUPPORT"],
+      ["SCREENING", "FLIGHT SURGEON, PRE-TRAINING"],
+      ["RECOVERY", "NAVY SHIPS ON STATION"],
+    ],
+  },
+];
+
+/* Vehicle spec labels that decode with Scramble (tasteful subset). */
+const VEHICLE_SCRAMBLE_LABELS = new Set(["HEIGHT", "THRUST", "PROPELLANT", "ABORT SYSTEM"]);
 
 const CREW = [
   {
@@ -258,12 +308,16 @@ function Ticker() {
   );
 }
 
-function SpecTable({ rows }) {
+function SpecTable({ rows, scrambleLabels }) {
   return (
     <div className="or-spec-table">
       {rows.map(([label, value]) => (
         <div className="or-spec-row" key={label}>
-          <span className="or-spec-label">{label}</span>
+          {scrambleLabels && scrambleLabels.has(label) ? (
+            <Scramble text={label} className="or-spec-label" as="span" />
+          ) : (
+            <span className="or-spec-label">{label}</span>
+          )}
           <span className="or-spec-value">{value}</span>
         </div>
       ))}
@@ -276,7 +330,7 @@ function SectionHead({ number, title, note }) {
     <div className="or-section-head">
       <span className="or-section-num">{number}</span>
       <Reveal text={title} as="h2" className="or-section-title" />
-      {note && <span className="or-section-note">{note}</span>}
+      {note && <Scramble text={note} className="or-section-note" as="span" />}
     </div>
   );
 }
@@ -304,7 +358,7 @@ function Countdown() {
   return (
     <div className="or-countdown" role="timer" aria-label="Countdown to next launch">
       <div className="or-countdown-label">
-        <span className="or-countdown-kicker">NEXT LAUNCH — ORB-1</span>
+        <Scramble text="NEXT LAUNCH — ORB-1" className="or-countdown-kicker" as="span" />
         <span className="or-countdown-sub">PAD 39A · CREW OF FOUR · STATION RENDEZVOUS</span>
       </div>
       <div className="or-countdown-boxes">
@@ -412,7 +466,7 @@ function TrajectorySection() {
     <section className="or-traj" ref={sectionRef} aria-label="ORB-1 flight trajectory">
       <div className="or-traj-sticky">
         <div className="or-traj-inner">
-          <SectionHead number="02" title="TRAJECTORY" note="SCROLL TO FLY — ASCENT PROFILE" />
+          <SectionHead number="02" title="*TRAJECTORY*" note="SCROLL TO FLY — ASCENT PROFILE" />
 
           <div className="or-traj-stage" ref={stageRef}>
             <span className="or-traj-gridline" style={{ top: "9.3%" }} aria-hidden="true">
@@ -465,19 +519,19 @@ function TrajectorySection() {
 
           <div className="or-telemetry or-traj-telemetry" aria-label="Ascent telemetry">
             <div className="or-telemetry-cell">
-              <span className="or-telemetry-label">ALTITUDE</span>
+              <Scramble text="ALTITUDE" className="or-telemetry-label" as="span" />
               <span className="or-telemetry-value">{altitude} KM</span>
             </div>
             <div className="or-telemetry-cell">
-              <span className="or-telemetry-label">VELOCITY</span>
+              <Scramble text="VELOCITY" className="or-telemetry-label" as="span" />
               <span className="or-telemetry-value">{velocity} KM/S</span>
             </div>
             <div className="or-telemetry-cell">
-              <span className="or-telemetry-label">DOWNRANGE</span>
+              <Scramble text="DOWNRANGE" className="or-telemetry-label" as="span" />
               <span className="or-telemetry-value">{downrange.toLocaleString("en-US")} KM</span>
             </div>
             <div className="or-telemetry-cell">
-              <span className="or-telemetry-label">FLIGHT PHASE</span>
+              <Scramble text="FLIGHT PHASE" className="or-telemetry-label" as="span" />
               <span className="or-telemetry-value or-telemetry-value--orange">{phase}</span>
             </div>
           </div>
@@ -513,7 +567,7 @@ function ProgrammePage({ onBook }) {
         <div className="or-hero-grid">
           <motion.div className="or-hero-copy" style={{ y: copyY, opacity: copyOpacity }}>
             <motion.p className="or-hero-kicker" variants={fadeUp} initial="hidden" animate="show" custom={0}>
-              CIVILIAN SPACE PROGRAMME — NOW BOARDING
+              <Scramble text="CIVILIAN SPACE PROGRAMME — NOW BOARDING" as="span" />
             </motion.p>
             <motion.h1 className="or-hero-title" variants={fadeUp} initial="hidden" animate="show" custom={1}>
               ORBITAL
@@ -544,23 +598,23 @@ function ProgrammePage({ onBook }) {
         {/* Telemetry strip */}
         <div className="or-telemetry" aria-label="Flight telemetry">
           <div className="or-telemetry-cell">
-            <span className="or-telemetry-label">ALTITUDE</span>
+            <Scramble text="ALTITUDE" className="or-telemetry-label" as="span" />
             <span className="or-telemetry-value">408 KM</span>
           </div>
           <div className="or-telemetry-cell">
-            <span className="or-telemetry-label">CREW</span>
+            <Scramble text="CREW" className="or-telemetry-label" as="span" />
             <span className="or-telemetry-value">4 + 2</span>
           </div>
           <div className="or-telemetry-cell">
-            <span className="or-telemetry-label">DURATION</span>
+            <Scramble text="DURATION" className="or-telemetry-label" as="span" />
             <span className="or-telemetry-value">3 DAYS</span>
           </div>
           <div className="or-telemetry-cell">
-            <span className="or-telemetry-label">VELOCITY</span>
+            <Scramble text="VELOCITY" className="or-telemetry-label" as="span" />
             <span className="or-telemetry-value">7.66 KM/S</span>
           </div>
           <div className="or-telemetry-cell or-telemetry-cell--status">
-            <span className="or-telemetry-label">STATUS</span>
+            <Scramble text="STATUS" className="or-telemetry-label" as="span" />
             <span className="or-telemetry-value or-telemetry-value--orange">MANIFEST OPEN</span>
           </div>
         </div>
@@ -572,7 +626,7 @@ function ProgrammePage({ onBook }) {
 
       {/* 01 / Mission */}
       <section className="or-section">
-        <SectionHead number="01" title="MISSION" note="SPECIFICATION SHEET" />
+        <SectionHead number="01" title="*MISSION*" note="SPECIFICATION SHEET" />
         <div className="or-mission-grid">
           <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }}>
             <SpecTable rows={MISSION_SPECS} />
@@ -609,9 +663,28 @@ function ProgrammePage({ onBook }) {
       {/* 02 / Trajectory — scroll-drawn flight path */}
       <TrajectorySection />
 
+      {/* Mission statement — scrubbed dossier manifesto */}
+      <section className="or-statement" aria-label="Mission statement">
+        <div className="or-statement-inner">
+          <div className="or-statement-head">
+            <Scramble text="MISSION STATEMENT" className="or-statement-label" as="span" />
+            <span className="or-statement-form">FORM ORB-00 / REV. C</span>
+          </div>
+          <ScrubWords
+            text="WE DO NOT SELL *SPACE* — WE PRINT THE *PAPERWORK* THAT GETS YOU THERE"
+            className="or-statement-text"
+            as="p"
+          />
+          <p className="or-statement-sub">
+            MEDICAL SCREENING. THREE DAYS OF TRAINING. TWO PROFESSIONAL PILOTS.
+            ONE SEAT WITH YOUR NAME ON THE MANIFEST.
+          </p>
+        </div>
+      </section>
+
       {/* 03 / Flights — boarding passes */}
       <section className="or-section">
-        <SectionHead number="03" title="FLIGHTS" note="SELECT A FLIGHT TO BOOK" />
+        <SectionHead number="03" title="*FLIGHTS*" note="SELECT A FLIGHT TO BOOK" />
         <div className="or-flights-grid">
           {FLIGHTS.map((f, i) => (
             <motion.article
@@ -678,7 +751,7 @@ function VehiclePage() {
   return (
     <div className="or-page">
       <section className="or-section or-section--top">
-        <SectionHead number="02" title="VEHICLE — ORB-1" note="TECHNICAL DOSSIER" />
+        <SectionHead number="02" title="VEHICLE — *ORB-1*" note="TECHNICAL DOSSIER" />
 
         <motion.figure className="or-figure or-figure--wide" variants={fadeUp} initial="hidden" animate="show" custom={0}>
           <div className="or-figure-media or-figure-media--wide">
@@ -696,8 +769,10 @@ function VehiclePage() {
 
         <div className="or-vehicle-grid">
           <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }}>
-            <h3 className="or-subhead">SPECIFICATION</h3>
-            <SpecTable rows={VEHICLE_SPECS} />
+            <h3 className="or-subhead">
+              <Scramble text="SPECIFICATION" as="span" />
+            </h3>
+            <SpecTable rows={VEHICLE_SPECS} scrambleLabels={VEHICLE_SCRAMBLE_LABELS} />
             <p className="or-body-text">
               ORB-1 is a fully reusable two-stage vehicle burning methalox. The capsule
               seats six, flies itself, and returns under parachute — the same engineering
@@ -707,7 +782,7 @@ function VehiclePage() {
 
           <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }} custom={1}>
             <h3 className="or-subhead">
-              <ShieldCheck size={16} /> SAFETY SYSTEM
+              <ShieldCheck size={16} /> <Scramble text="SAFETY SYSTEM" as="span" />
             </h3>
             <ol className="or-safety-list">
               {SAFETY_ITEMS.map(([num, title, desc]) => (
@@ -724,6 +799,40 @@ function VehiclePage() {
         </div>
       </section>
 
+      {/* Systems file — sticky stacking spec panels */}
+      <section className="or-section or-stack-section" aria-label="ORB-1 systems file">
+        <SectionHead number="02B" title="SYSTEMS *FILE*" note="STACKED DOSSIER — SCROLL" />
+        <StackCards
+          items={STACK_PANELS}
+          className="or-stack"
+          cardClassName="or-stack-card"
+          topOffset={72}
+          step={16}
+          renderItem={(panel) => (
+            <article className="or-stack-panel">
+              <div className="or-stack-panel-head">
+                <span className="or-stack-panel-index">{panel.index}</span>
+                <Scramble text={panel.code} className="or-stack-panel-code" as="span" />
+                <span className="or-stack-panel-status">FILED — ORB-1</span>
+              </div>
+              <h3 className="or-stack-panel-title">{panel.title}</h3>
+              <div className="or-stack-panel-rows">
+                {panel.rows.map(([label, value]) => (
+                  <div className="or-stack-panel-row" key={label}>
+                    <span className="or-stack-panel-label">{label}</span>
+                    <span className="or-stack-panel-value">{value}</span>
+                  </div>
+                ))}
+              </div>
+              <p className="or-stack-panel-note">{panel.note}</p>
+            </article>
+          )}
+        />
+        <p className="or-fineprint">
+          FULL SPECIFICATION ABOVE REMAINS THE CONTROLLING DOCUMENT. PANELS SUMMARISE FOR CREW BRIEFING.
+        </p>
+      </section>
+
       <Ticker />
     </div>
   );
@@ -735,7 +844,7 @@ function CrewPage() {
   return (
     <div className="or-page">
       <section className="or-section or-section--top">
-        <SectionHead number="03" title="CREW" note="FLIGHT CREW — ORB-1" />
+        <SectionHead number="03" title="*CREW*" note="FLIGHT CREW — ORB-1" />
         <p className="or-lede">
           Two professional pilots fly every mission. A flight surgeon rides along.
           You are the fourth seat — trained, screened, and part of the crew.
@@ -832,7 +941,7 @@ function BookPage({ selectedFlight, onSelectFlight }) {
   return (
     <div className="or-page">
       <section className="or-section or-section--top">
-        <SectionHead number="04" title="BOOK A SEAT" note="RESERVATION FORM — FORM ORB-04" />
+        <SectionHead number="04" title="BOOK A *SEAT*" note="RESERVATION FORM — FORM ORB-04" />
 
         <div className="or-book-grid">
           <motion.div className="or-book-form" variants={fadeUp} initial="hidden" animate="show" custom={0}>
