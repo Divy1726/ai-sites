@@ -17,7 +17,7 @@ import Grain from "./fx/Grain";
 import RollLink from "./fx/RollLink";
 import "./App.css";
 
-// Import all 7 sites
+// Import all 8 sites
 import Voidwear from "./voidwear/Voidwear";
 import Aurelia from "./aurelia/Aurelia";
 import Orbital from "./orbital/Orbital";
@@ -25,6 +25,7 @@ import Savage from "./savage/Savage";
 import Kobo from "./kobo/Kobo";
 import Noir from "./noir/Noir";
 import Grey from "./grey/Grey";
+import Chrome from "./chrome/Chrome";
 
 const sites = [
   {
@@ -103,6 +104,17 @@ const sites = [
     bg: "#080808",
     pages: "4 pages",
     img: "https://images.unsplash.com/photo-1553413077-190dd305871c?w=1600&q=80&auto=format&fit=crop",
+  },
+  {
+    id: "chrome",
+    num: "08",
+    name: "CHROME & THUNDER",
+    tag: "Classic Automobiles 1930–1970",
+    desc: "Twelve legends in noir and gold. The golden age of automobiles, parked in one garage.",
+    accent: "#c9a84c",
+    bg: "#0a0804",
+    pages: "4 pages",
+    img: "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9a/Bugatti_57_S_Atlantic_Best_Of_Show_Chantily.jpg/1280px-Bugatti_57_S_Atlantic_Best_Of_Show_Chantily.jpg",
   },
 ];
 
@@ -354,6 +366,7 @@ function App() {
             {page === "kobo" && <Kobo />}
             {page === "noir" && <Noir />}
             {page === "grey" && <Grey />}
+            {page === "chrome" && <Chrome />}
           </motion.main>
         </AnimatePresence>
       </div>
@@ -373,7 +386,7 @@ function App() {
       <header className="home-top">
         <span className="home-logo">AI—SITES</span>
         <span className="home-top-note">
-          <Sparkles size={14} /> Seven original worlds. One app.
+          <Sparkles size={14} /> Eight original worlds. One app.
         </span>
       </header>
 
@@ -392,10 +405,10 @@ function App() {
         </motion.p>
         <h1>
           <span className="home-hero-line">
-            <AnimatedLine text="7 SITES." delay={0.1} play={preloaded} />
+            <AnimatedLine text="8 SITES." delay={0.1} play={preloaded} />
           </span>
           <span className="home-hero-line home-hero-line-outline">
-            <AnimatedLine text="7 WORLDS." delay={0.45} play={preloaded} />
+            <AnimatedLine text="8 WORLDS." delay={0.45} play={preloaded} />
           </span>
         </h1>
         <motion.p
@@ -404,9 +417,9 @@ function App() {
           animate={preloaded ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.7, delay: 0.75 }}
         >
-          Streetwear, perfume, space, iron, coffee, a design studio and a
-          polymer trading floor — each site has its own language, motion and
-          rules. Click one. Step inside.
+          Streetwear, perfume, space, iron, coffee, a design studio, a
+          polymer trading floor and a golden-age garage — each site has its
+          own language, motion and rules. Click one. Step inside.
         </motion.p>
       </motion.section>
 

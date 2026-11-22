@@ -1,0 +1,1900 @@
+/* CHROME & THUNDER — classic automobile showcase, noir + gold.
+   HARD RULES honoured: overflow-x:clip (never hidden) so sticky pins
+   keep working; all classes ct- prefixed; English only. */
+
+.ct-root {
+  --reveal-accent: #f0d080;
+  --ct-bg: #0a0804;
+  --ct-bg2: #050402;
+  --ct-gold: #c9a84c;
+  --ct-gold-bright: #f0d080;
+  --ct-gold-dark: #997a2e;
+  --ct-cream: #f5e6c8;
+  --ct-chrome: #d4d8e0;
+  --ct-muted: #a89a7d;
+  --ct-line: rgba(201, 168, 76, 0.25);
+  --ct-line-soft: rgba(201, 168, 76, 0.12);
+  --ct-card: #100c05;
+  --ct-media: #171208;
+  --ct-red: #c0392b;
+  background: var(--ct-bg);
+  color: var(--ct-cream);
+  font-family: "Crimson Text", "Cormorant Garamond", Georgia, serif;
+  overflow-x: clip;
+  min-height: 100vh;
+}
+
+.ct-root *,
+.ct-root *::before,
+.ct-root *::after {
+  box-sizing: border-box;
+}
+
+.ct-root ::selection {
+  background: var(--ct-gold);
+  color: #0a0804;
+}
+
+/* ---------------- Nav ---------------- */
+
+.ct-nav {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding: 16px 28px 16px 118px; /* left clears the global Back pill */
+  background: rgba(10, 8, 4, 0.9);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--ct-line-soft);
+}
+
+.ct-logo {
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+  font-weight: 900;
+  font-size: 24px;
+  letter-spacing: 0.01em;
+  color: var(--ct-cream);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.ct-logo-amp {
+  color: var(--ct-gold);
+}
+
+.ct-nav-links {
+  display: flex;
+  gap: 24px;
+  margin-left: auto;
+  flex-wrap: wrap;
+}
+
+.ct-nav-link {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 16px;
+  letter-spacing: 0.22em;
+  color: var(--ct-cream);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 0;
+  text-transform: uppercase;
+}
+
+.ct-nav-link-active {
+  color: var(--ct-gold-bright);
+}
+
+.ct-nav-meta {
+  font-family: "Special Elite", monospace;
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  color: var(--ct-muted);
+  white-space: nowrap;
+}
+
+/* ---------------- Layout & shared ---------------- */
+
+.ct-page {
+  display: block;
+}
+
+.ct-section {
+  padding: 110px 28px;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.ct-section-head {
+  margin-bottom: 54px;
+}
+
+.ct-eyebrow {
+  font-family: "Special Elite", monospace;
+  font-size: 13px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ct-gold);
+  margin: 0 0 18px;
+}
+
+.ct-h2 {
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+  font-weight: 900;
+  font-size: clamp(42px, 6vw, 84px);
+  line-height: 1.02;
+  color: var(--ct-cream);
+  margin: 0;
+}
+
+.ct-section-sub {
+  font-family: "Cormorant Garamond", serif;
+  font-style: italic;
+  font-size: clamp(17px, 1.6vw, 21px);
+  color: var(--ct-muted);
+  margin: 18px 0 0;
+  max-width: 640px;
+  line-height: 1.5;
+}
+
+.ct-era-badge {
+  font-family: "Special Elite", monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--ct-chrome);
+  border: 1px solid rgba(212, 216, 224, 0.4);
+  padding: 3px 9px;
+  border-radius: 2px;
+  text-transform: uppercase;
+}
+
+.ct-rarity {
+  font-family: "Special Elite", monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  padding: 3px 9px;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  text-transform: uppercase;
+  color: var(--ct-gold-bright);
+  background: rgba(201, 168, 76, 0.08);
+}
+
+.ct-rarity-holy-grail {
+  color: #ff7a4d;
+  background: rgba(255, 90, 40, 0.08);
+}
+
+.ct-rarity-ultra-rare {
+  color: var(--ct-chrome);
+  background: rgba(212, 216, 224, 0.07);
+}
+
+.ct-rarity-iconic {
+  color: #7fd8b4;
+  background: rgba(80, 200, 150, 0.07);
+}
+
+.ct-rarity-collector {
+  color: #ffd23d;
+  background: rgba(255, 210, 61, 0.07);
+}
+
+.ct-btn-gold,
+.ct-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 17px;
+  letter-spacing: 0.24em;
+  padding: 15px 32px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: background 0.35s ease, color 0.35s ease, border-color 0.35s ease;
+}
+
+.ct-btn-gold {
+  background: var(--ct-gold);
+  color: #0a0804;
+  border: 1px solid var(--ct-gold);
+}
+
+.ct-btn-gold:hover {
+  background: var(--ct-gold-bright);
+  border-color: var(--ct-gold-bright);
+}
+
+.ct-btn-ghost {
+  background: transparent;
+  color: var(--ct-gold-bright);
+  border: 1px solid var(--ct-line);
+}
+
+.ct-btn-ghost:hover {
+  background: var(--ct-gold);
+  color: #0a0804;
+  border-color: var(--ct-gold);
+}
+
+.ct-era-chips {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
+}
+
+.ct-era-chip {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 15px;
+  letter-spacing: 0.2em;
+  color: var(--ct-muted);
+  background: transparent;
+  border: 1px solid var(--ct-line-soft);
+  padding: 9px 20px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.25s ease;
+}
+
+.ct-era-chip:hover {
+  color: var(--ct-cream);
+  border-color: var(--ct-line);
+}
+
+.ct-era-chip-active {
+  color: #0a0804;
+  background: var(--ct-gold);
+  border-color: var(--ct-gold);
+}
+
+.ct-garage-count {
+  font-family: "Special Elite", monospace;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  color: var(--ct-muted);
+  margin-left: auto;
+  text-transform: uppercase;
+}
+
+/* ---------------- Hero ---------------- */
+
+.ct-hero {
+  position: relative;
+  min-height: calc(100vh - 66px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.ct-hero-media {
+  position: absolute;
+  inset: 0;
+  background: var(--ct-media);
+}
+
+.ct-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 62%;
+  will-change: transform;
+}
+
+.ct-hero-shade {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at center, rgba(10, 8, 4, 0.25) 0%, rgba(10, 8, 4, 0.72) 78%),
+    linear-gradient(180deg, rgba(10, 8, 4, 0.55) 0%, rgba(10, 8, 4, 0.15) 40%, rgba(10, 8, 4, 0.92) 100%);
+}
+
+.ct-hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 90px 24px 110px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ct-hero-badge {
+  font-family: "Special Elite", monospace;
+  font-size: 13px;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--ct-gold-bright);
+  border: 1px solid rgba(201, 168, 76, 0.45);
+  padding: 10px 22px 10px 26px;
+  background: rgba(10, 8, 4, 0.55);
+  backdrop-filter: blur(6px);
+  margin-bottom: 34px;
+}
+
+.ct-hero-title {
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+  font-weight: 900;
+  font-size: clamp(52px, 9vw, 128px);
+  line-height: 1.02;
+  color: var(--ct-cream);
+  margin: 0;
+  text-shadow: 0 18px 50px rgba(0, 0, 0, 0.85);
+}
+
+.ct-hero-line {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.08em;
+}
+
+.ct-hero-line-inner {
+  display: block;
+  will-change: transform;
+}
+
+.ct-hero-line-gold {
+  color: var(--ct-gold-bright);
+}
+
+.ct-hero-sub {
+  font-family: "Cormorant Garamond", serif;
+  font-style: italic;
+  font-size: clamp(17px, 2vw, 24px);
+  letter-spacing: 0.14em;
+  color: var(--ct-chrome);
+  margin: 26px 0 0;
+}
+
+.ct-hero-rule {
+  width: min(420px, 70vw);
+  height: 1px;
+  margin-top: 38px;
+  background: linear-gradient(90deg, transparent, var(--ct-gold), transparent);
+  transform-origin: center;
+}
+
+.ct-hero-scroll {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.ct-hero-scroll-text {
+  font-family: "Special Elite", monospace;
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ct-gold);
+}
+
+.ct-hero-scroll-line {
+  width: 1px;
+  height: 58px;
+  background: linear-gradient(to bottom, var(--ct-gold), transparent);
+  animation: ct-scroll-pulse 2.2s ease-in-out infinite;
+  transform-origin: top;
+}
+
+@keyframes ct-scroll-pulse {
+  0% { transform: scaleY(0); opacity: 0; }
+  45% { transform: scaleY(1); opacity: 1; }
+  55% { transform: scaleY(1); opacity: 1; }
+  100% { transform: scaleY(0); opacity: 0; transform-origin: bottom; }
+}
+
+/* ---------------- Marquee ---------------- */
+
+.ct-marquee-wrap {
+  border-top: 1px solid var(--ct-line-soft);
+  border-bottom: 1px solid var(--ct-line-soft);
+  background: var(--ct-bg2);
+  padding: 18px 0;
+}
+
+.ct-marquee-item {
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: clamp(20px, 2.4vw, 30px);
+  color: var(--ct-cream);
+  white-space: nowrap;
+  padding-right: 8px;
+}
+
+.ct-marquee-sep {
+  color: var(--ct-gold);
+  font-size: 0.55em;
+  padding: 0 22px;
+  vertical-align: middle;
+}
+
+/* ---------------- Speed (pinned) ---------------- */
+
+.ct-speed {
+  position: relative;
+  height: 300vh;
+  background: linear-gradient(180deg, #030302, #0b0906 55%, #020202);
+}
+
+.ct-speed-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ct-speed-lines {
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0,
+      transparent 118px,
+      rgba(201, 168, 76, 0.05) 118px,
+      rgba(201, 168, 76, 0.05) 119px
+    );
+  pointer-events: none;
+}
+
+.ct-speed-head {
+  position: absolute;
+  top: 110px;
+  left: 28px;
+  max-width: 420px;
+  z-index: 3;
+}
+
+.ct-speed-copy {
+  font-family: "Cormorant Garamond", serif;
+  font-style: italic;
+  font-size: 19px;
+  line-height: 1.55;
+  color: var(--ct-muted);
+  margin: 0;
+}
+
+.ct-speed-flash {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  width: 100%;
+  text-align: center;
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+  font-weight: 900;
+  font-size: clamp(34px, 6vw, 84px);
+  letter-spacing: 0.06em;
+  color: var(--ct-cream);
+  text-shadow: 0 14px 40px rgba(0, 0, 0, 0.9);
+  margin: 0;
+  padding: 0 24px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.ct-speed-flash-b {
+  color: var(--ct-gold-bright);
+}
+
+.ct-speedo {
+  position: absolute;
+  right: 5vw;
+  bottom: 6vh;
+  width: min(300px, 62vw);
+  aspect-ratio: 1;
+  z-index: 4;
+  filter: drop-shadow(0 18px 45px rgba(0, 0, 0, 0.55));
+}
+
+.ct-speedo-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.ct-speedo-ring {
+  fill: rgba(5, 4, 2, 0.82);
+  stroke: rgba(201, 168, 76, 0.35);
+  stroke-width: 1.5;
+}
+
+.ct-speedo-ring-inner {
+  fill: none;
+  stroke: rgba(201, 168, 76, 0.5);
+  stroke-width: 1;
+  stroke-dasharray: 3 5;
+}
+
+.ct-speedo-tick {
+  stroke: rgba(245, 230, 200, 0.45);
+  stroke-width: 1;
+}
+
+.ct-speedo-tick-major {
+  stroke: var(--ct-gold-bright);
+  stroke-width: 2;
+}
+
+.ct-speedo-num {
+  fill: var(--ct-cream);
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 11px;
+  text-anchor: middle;
+  letter-spacing: 0.05em;
+}
+
+.ct-speedo-needle {
+  stroke: #e05236;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.ct-speedo-hub {
+  fill: var(--ct-gold);
+  stroke: #0a0804;
+  stroke-width: 1.5;
+}
+
+.ct-speedo-readout {
+  position: absolute;
+  left: 50%;
+  bottom: 13%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(5, 4, 2, 0.85);
+  border: 1px solid var(--ct-line);
+  padding: 4px 16px 6px;
+}
+
+.ct-speedo-mph {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 34px;
+  line-height: 1;
+  color: var(--ct-cream);
+}
+
+.ct-speedo-unit {
+  font-family: "Special Elite", monospace;
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  color: var(--ct-gold);
+}
+
+/* ---------------- Anatomy ---------------- */
+
+.ct-anatomy-stage {
+  display: grid;
+  grid-template-columns: 1.9fr 1fr;
+  gap: 28px;
+  align-items: stretch;
+}
+
+.ct-anatomy-frame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: var(--ct-media);
+  border: 1px solid var(--ct-line-soft);
+  overflow: hidden;
+}
+
+.ct-anatomy-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 58%;
+}
+
+.ct-anatomy-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(10, 8, 4, 0.12), rgba(10, 8, 4, 0.4));
+  pointer-events: none;
+}
+
+.ct-hotspot {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transform: translateY(-50%);
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+
+.ct-hotspot-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--ct-gold-bright);
+  box-shadow: 0 0 16px 3px rgba(240, 208, 128, 0.65);
+  flex-shrink: 0;
+}
+
+.ct-hotspot-text {
+  font-family: "Special Elite", monospace;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ct-cream);
+  background: linear-gradient(90deg, rgba(5, 4, 2, 0.92), rgba(15, 12, 5, 0.75));
+  padding: 7px 13px;
+  border-left: 1px solid var(--ct-gold);
+  white-space: nowrap;
+  box-shadow: 6px 6px 18px rgba(0, 0, 0, 0.6);
+}
+
+.ct-anatomy-detail {
+  margin: 0;
+  background: var(--ct-card);
+  border: 1px solid var(--ct-line-soft);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.ct-anatomy-detail img {
+  width: 100%;
+  height: 52%;
+  min-height: 180px;
+  object-fit: cover;
+  background: var(--ct-media);
+}
+
+.ct-anatomy-detail figcaption {
+  padding: 24px;
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--ct-muted);
+}
+
+.ct-anatomy-detail-label {
+  display: block;
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 18px;
+  letter-spacing: 0.24em;
+  color: var(--ct-gold-bright);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+/* ---------------- Stats ---------------- */
+
+.ct-stats {
+  position: relative;
+}
+
+.ct-stats-deco {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ct-deco-circle {
+  position: absolute;
+  border: 1px solid rgba(201, 168, 76, 0.1);
+  border-radius: 50%;
+}
+
+.ct-deco-1 {
+  width: 72vw;
+  height: 72vw;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: ct-deco-pulse 18s ease-in-out infinite alternate;
+}
+
+.ct-deco-2 {
+  width: 54vw;
+  height: 54vw;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-style: dashed;
+  animation: ct-deco-rotate 46s linear infinite;
+}
+
+.ct-deco-line {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(201, 168, 76, 0.18), transparent);
+}
+
+@keyframes ct-deco-pulse {
+  from { transform: translate(-50%, -50%) scale(1); opacity: 0.55; }
+  to { transform: translate(-50%, -50%) scale(1.08); opacity: 1; }
+}
+
+@keyframes ct-deco-rotate {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+.ct-stats-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 26px;
+}
+
+.ct-stat-card {
+  background: linear-gradient(180deg, rgba(18, 14, 6, 0.75), rgba(8, 6, 3, 0.9));
+  border: 1px solid var(--ct-line-soft);
+  border-top: 2px solid var(--ct-gold);
+  padding: 52px 24px 44px;
+  text-align: center;
+  box-shadow: 0 24px 44px rgba(0, 0, 0, 0.45);
+}
+
+.ct-stat-value {
+  display: block;
+  font-family: "Bebas Neue", sans-serif;
+  font-size: clamp(46px, 5vw, 72px);
+  line-height: 1;
+  color: var(--ct-cream);
+  text-shadow: 0 0 26px rgba(201, 168, 76, 0.25);
+  margin-bottom: 14px;
+}
+
+.ct-stat-label {
+  font-family: "Special Elite", monospace;
+  font-size: 13px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ct-gold);
+}
+
+/* ---------------- Hall of Fame ---------------- */
+
+.ct-hall {
+  background: radial-gradient(circle at 50% 38%, rgba(201, 168, 76, 0.08), transparent 55%);
+}
+
+.ct-hall-stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+}
+
+.ct-hall-card {
+  position: relative;
+  width: min(920px, 100%);
+  aspect-ratio: 16 / 9;
+  background: var(--ct-media);
+  border: 1px solid var(--ct-line);
+  overflow: hidden;
+  box-shadow: 0 40px 90px rgba(0, 0, 0, 0.6);
+}
+
+.ct-hall-figure {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+}
+
+.ct-hall-figure img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ct-hall-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 55%, rgba(5, 4, 2, 0.55));
+  pointer-events: none;
+}
+
+.ct-hall-num {
+  position: absolute;
+  top: 14px;
+  right: 20px;
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 54px;
+  line-height: 1;
+  color: rgba(240, 208, 128, 0.4);
+}
+
+.ct-hall-nav {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  border: 1px solid var(--ct-line);
+  background: rgba(201, 168, 76, 0.08);
+  color: var(--ct-gold-bright);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.25s ease;
+  z-index: 2;
+}
+
+.ct-hall-nav:hover {
+  background: var(--ct-gold);
+  color: #0a0804;
+  box-shadow: 0 0 24px rgba(201, 168, 76, 0.45);
+}
+
+.ct-hall-details {
+  text-align: center;
+  margin-top: 40px;
+}
+
+.ct-hall-name {
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+  font-weight: 900;
+  font-size: clamp(30px, 4vw, 50px);
+  color: var(--ct-cream);
+  margin: 0 0 14px;
+}
+
+.ct-hall-badges {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.ct-hall-tagline {
+  font-family: "Cormorant Garamond", serif;
+  font-style: italic;
+  font-size: clamp(18px, 2vw, 24px);
+  color: var(--ct-muted);
+  margin: 0 auto;
+  max-width: 640px;
+}
+
+.ct-hall-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 44px;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.ct-hall-counter {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 22px;
+  letter-spacing: 0.3em;
+  color: var(--ct-gold);
+}
+
+/* ---------------- Outro ---------------- */
+
+.ct-outro {
+  position: relative;
+  min-height: 92vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.ct-outro-media {
+  position: absolute;
+  inset: -60px 0;
+  background: var(--ct-media);
+}
+
+.ct-outro-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  will-change: transform;
+}
+
+.ct-outro-shade {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at center, rgba(10, 8, 4, 0.35), rgba(10, 8, 4, 0.82) 80%),
+    linear-gradient(180deg, rgba(10, 8, 4, 0.85), rgba(10, 8, 4, 0.3) 45%, rgba(10, 8, 4, 0.9));
+}
+
+.ct-outro-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 120px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 48px;
+}
+
+.ct-outro-text {
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: clamp(30px, 4.6vw, 60px);
+  line-height: 1.25;
+  color: var(--ct-cream);
+  max-width: 980px;
+  margin: 0;
+  text-shadow: 0 12px 36px rgba(0, 0, 0, 0.8);
+}
+
+/* ---------------- Garage ---------------- */
+
+.ct-garage-head {
+  padding-bottom: 0;
+}
+
+.ct-garage-head .ct-section-head {
+  margin-bottom: 34px;
+}
+
+.ct-garage-body {
+  display: grid;
+  grid-template-columns: 260px 1fr 380px;
+  gap: 26px;
+  align-items: stretch;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 10px 28px 110px;
+}
+
+.ct-garage-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 640px;
+  overflow-y: auto;
+  padding-right: 8px;
+  scrollbar-width: thin;
+}
+
+.ct-selector-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  background: transparent;
+  border: none;
+  border-left: 1px solid var(--ct-line-soft);
+  padding: 12px 16px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.25s ease;
+  position: relative;
+}
+
+.ct-selector-btn::before {
+  content: "";
+  position: absolute;
+  left: -1px;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  background: var(--ct-gold);
+  transform: scaleY(0);
+  transition: transform 0.25s ease;
+}
+
+.ct-selector-btn:hover {
+  background: rgba(201, 168, 76, 0.05);
+}
+
+.ct-selector-btn-active {
+  background: rgba(201, 168, 76, 0.09);
+}
+
+.ct-selector-btn-active::before {
+  transform: scaleY(1);
+}
+
+.ct-selector-year {
+  font-family: "Special Elite", monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--ct-muted);
+}
+
+.ct-selector-btn-active .ct-selector-year {
+  color: var(--ct-gold-bright);
+}
+
+.ct-selector-name {
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 19px;
+  line-height: 1.2;
+  color: var(--ct-chrome);
+}
+
+.ct-selector-btn-active .ct-selector-name {
+  color: var(--ct-cream);
+}
+
+.ct-garage-stage {
+  position: relative;
+  min-height: 520px;
+  background: var(--ct-media);
+  border: 1px solid var(--ct-line-soft);
+  overflow: hidden;
+}
+
+.ct-garage-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ct-garage-stage-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 60%, rgba(5, 4, 2, 0.5));
+  pointer-events: none;
+}
+
+.ct-garage-stage-year {
+  position: absolute;
+  right: 18px;
+  bottom: 6px;
+  font-family: "Bebas Neue", sans-serif;
+  font-size: clamp(70px, 9vw, 130px);
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(240, 208, 128, 0.45);
+  pointer-events: none;
+}
+
+.ct-garage-panel {
+  position: relative;
+}
+
+.ct-glass {
+  position: relative;
+  height: 100%;
+  background: linear-gradient(150deg, rgba(20, 16, 7, 0.92), rgba(8, 6, 3, 0.97));
+  border: 1px solid var(--ct-line);
+  padding: 36px 32px;
+  box-shadow: 0 34px 64px rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+}
+
+.ct-glass::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--ct-gold), transparent);
+}
+
+.ct-glass-badges {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.ct-glass-name {
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+  font-weight: 900;
+  font-size: clamp(28px, 2.6vw, 38px);
+  line-height: 1.12;
+  color: var(--ct-cream);
+  margin: 0 0 6px;
+}
+
+.ct-glass-year {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 26px;
+  letter-spacing: 0.14em;
+  color: var(--ct-gold-bright);
+  margin: 0 0 16px;
+}
+
+.ct-glass-tagline {
+  font-family: "Cormorant Garamond", serif;
+  font-style: italic;
+  font-size: 20px;
+  line-height: 1.45;
+  color: var(--ct-chrome);
+  margin: 0 0 28px;
+}
+
+.ct-glass-specs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 22px;
+  padding-bottom: 26px;
+  margin-bottom: 26px;
+  border-bottom: 1px solid var(--ct-line-soft);
+}
+
+.ct-glass-spec {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ct-glass-spec-label {
+  font-family: "Special Elite", monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ct-muted);
+}
+
+.ct-glass-spec-value {
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 600;
+  font-size: 19px;
+  line-height: 1.3;
+  color: var(--ct-cream);
+}
+
+.ct-glass-fact {
+  background: rgba(0, 0, 0, 0.35);
+  border-left: 2px solid var(--ct-gold);
+  padding: 16px 18px;
+}
+
+.ct-glass-fact-label {
+  display: block;
+  font-family: "Special Elite", monospace;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ct-gold);
+  margin-bottom: 8px;
+}
+
+.ct-glass-fact p {
+  margin: 0;
+  font-size: 16.5px;
+  line-height: 1.55;
+  color: var(--ct-chrome);
+}
+
+/* ---------------- Timeline (pinned horizontal) ---------------- */
+
+.ct-timeline {
+  position: relative;
+  height: 440vh;
+  background:
+    linear-gradient(rgba(201, 168, 76, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201, 168, 76, 0.045) 1px, transparent 1px),
+    var(--ct-bg);
+  background-size: 60px 60px;
+}
+
+.ct-timeline-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding-top: 86px;
+}
+
+.ct-timeline-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 0 28px 8px;
+  max-width: 1440px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.ct-timeline-head .ct-section-sub {
+  margin-top: 10px;
+}
+
+.ct-timeline-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "Special Elite", monospace;
+  font-size: 12px;
+  letter-spacing: 0.24em;
+  color: var(--ct-gold);
+  white-space: nowrap;
+  padding-bottom: 8px;
+}
+
+.ct-timeline-viewport {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  width: 100%;
+}
+
+.ct-timeline-track {
+  display: flex;
+  align-items: center;
+  gap: 44px;
+  padding: 0 8vw;
+  position: relative;
+  will-change: transform;
+}
+
+.ct-timeline-axis {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  transform: translateY(-50%);
+  background: linear-gradient(
+    90deg,
+    rgba(201, 168, 76, 0) 0%,
+    var(--ct-gold) 4%,
+    var(--ct-gold) 96%,
+    rgba(201, 168, 76, 0) 100%
+  );
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.ct-tl-marker {
+  position: relative;
+  flex-shrink: 0;
+  width: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  z-index: 1;
+}
+
+.ct-tl-marker-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--ct-gold-bright);
+  box-shadow: 0 0 22px 4px rgba(240, 208, 128, 0.55);
+  border: 2px solid #0a0804;
+}
+
+.ct-tl-marker-label {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 30px;
+  letter-spacing: 0.3em;
+  color: var(--ct-gold-bright);
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+
+.ct-tl-card {
+  position: relative;
+  flex-shrink: 0;
+  width: 380px;
+  background: linear-gradient(160deg, rgba(18, 14, 6, 0.97), rgba(8, 6, 3, 0.99));
+  border: 1px solid var(--ct-line);
+  padding: 26px 26px 30px;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+  z-index: 1;
+  text-align: center;
+}
+
+.ct-tl-card-img {
+  width: 100%;
+  height: 210px;
+  overflow: hidden;
+  border: 1px solid var(--ct-line-soft);
+  background: var(--ct-media);
+  margin-bottom: 22px;
+}
+
+.ct-tl-card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(0.45);
+  transition: filter 0.5s ease, transform 0.6s ease;
+}
+
+.ct-tl-card:hover .ct-tl-card-img img {
+  filter: grayscale(0);
+  transform: scale(1.07);
+}
+
+.ct-tl-card-year {
+  display: block;
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 64px;
+  line-height: 1;
+  color: var(--ct-gold-bright);
+  text-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+}
+
+.ct-tl-card-era {
+  display: block;
+  font-family: "Special Elite", monospace;
+  font-size: 12px;
+  letter-spacing: 0.34em;
+  color: var(--ct-muted);
+  margin: 8px 0 14px;
+}
+
+.ct-tl-card-name {
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+  font-weight: 900;
+  font-size: 25px;
+  line-height: 1.2;
+  color: var(--ct-cream);
+  margin: 0 0 10px;
+}
+
+.ct-tl-card-tagline {
+  font-family: "Cormorant Garamond", serif;
+  font-style: italic;
+  font-size: 17px;
+  line-height: 1.45;
+  color: var(--ct-muted);
+  margin: 0 0 18px;
+  min-height: 50px;
+}
+
+.ct-tl-card-index {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 26px;
+  color: rgba(240, 208, 128, 0.35);
+}
+
+.ct-timeline-progress {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 0 28px 34px;
+  max-width: 1440px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.ct-timeline-count {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 22px;
+  letter-spacing: 0.28em;
+  color: var(--ct-gold-bright);
+}
+
+.ct-timeline-line {
+  flex: 1;
+  height: 2px;
+  background: rgba(201, 168, 76, 0.18);
+  position: relative;
+  overflow: hidden;
+}
+
+.ct-timeline-line-fill {
+  position: absolute;
+  inset: 0;
+  background: var(--ct-gold);
+  transform-origin: left;
+}
+
+.ct-timeline-years {
+  font-family: "Special Elite", monospace;
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  color: var(--ct-muted);
+}
+
+/* Timeline mobile (vertical list) */
+
+.ct-timeline-mobile .ct-tl-mobile-list {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+
+.ct-timeline-mobile .ct-tl-card {
+  width: 100%;
+}
+
+.ct-tl-marker-mobile {
+  width: 100%;
+  flex-direction: row;
+  justify-content: center;
+  padding: 6px 0;
+}
+
+.ct-tl-marker-mobile span {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 26px;
+  letter-spacing: 0.34em;
+  color: var(--ct-gold-bright);
+}
+
+/* ---------------- Collection ---------------- */
+
+.ct-collection-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 26px;
+}
+
+.ct-collection-card {
+  height: 100%;
+}
+
+.ct-collection-btn {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--ct-card);
+  border: 1px solid var(--ct-line-soft);
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.ct-collection-btn:hover {
+  border-color: var(--ct-gold);
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.55), 0 0 30px rgba(201, 168, 76, 0.14);
+}
+
+.ct-collection-media {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: var(--ct-media);
+}
+
+.ct-collection-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(0.5) brightness(0.88);
+  transition: filter 0.55s ease, transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ct-collection-btn:hover .ct-collection-media img {
+  filter: grayscale(0) brightness(1);
+  transform: scale(1.09);
+}
+
+.ct-collection-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 55%, rgba(5, 4, 2, 0.55));
+  pointer-events: none;
+}
+
+.ct-collection-year {
+  position: absolute;
+  left: 16px;
+  bottom: 8px;
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 40px;
+  line-height: 1;
+  color: rgba(240, 208, 128, 0.85);
+}
+
+.ct-collection-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 22px 22px 24px;
+}
+
+.ct-collection-name {
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+  font-weight: 900;
+  font-size: 23px;
+  line-height: 1.2;
+  color: var(--ct-cream);
+}
+
+.ct-collection-sub {
+  font-family: "Special Elite", monospace;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ct-muted);
+  margin-bottom: 8px;
+}
+
+.ct-collection-meta .ct-rarity {
+  align-self: flex-start;
+}
+
+/* ---------------- Modal ---------------- */
+
+.ct-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(3, 2, 1, 0.82);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.ct-modal {
+  position: relative;
+  width: min(960px, 100%);
+  background: linear-gradient(160deg, #14100a, #070503);
+  border: 1px solid var(--ct-line);
+  box-shadow: 0 50px 120px rgba(0, 0, 0, 0.8);
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+}
+
+.ct-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 3;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid var(--ct-line);
+  background: rgba(10, 8, 4, 0.85);
+  color: var(--ct-gold-bright);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.ct-modal-close:hover {
+  background: var(--ct-gold);
+  color: #0a0804;
+}
+
+.ct-modal-media {
+  position: relative;
+  min-height: 340px;
+  background: var(--ct-media);
+}
+
+.ct-modal-media img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ct-modal-year {
+  position: absolute;
+  left: 18px;
+  bottom: 8px;
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 74px;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(240, 208, 128, 0.7);
+}
+
+.ct-modal-body {
+  padding: 38px 34px;
+}
+
+.ct-modal-name {
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+  font-weight: 900;
+  font-size: clamp(28px, 3vw, 40px);
+  line-height: 1.12;
+  color: var(--ct-cream);
+  margin: 0 0 12px;
+}
+
+.ct-modal-tagline {
+  font-family: "Cormorant Garamond", serif;
+  font-style: italic;
+  font-size: 21px;
+  line-height: 1.45;
+  color: var(--ct-chrome);
+  margin: 0 0 26px;
+}
+
+/* ---------------- Footer ---------------- */
+
+.ct-footer {
+  border-top: 1px solid var(--ct-line-soft);
+  background: var(--ct-bg2);
+  padding: 80px 28px 34px;
+}
+
+.ct-footer-cols {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+  max-width: 1440px;
+  margin: 0 auto 60px;
+}
+
+.ct-footer-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.ct-footer-label {
+  font-family: "Special Elite", monospace;
+  font-size: 12px;
+  letter-spacing: 0.28em;
+  color: var(--ct-gold);
+  margin-bottom: 8px;
+}
+
+.ct-footer-link {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 18px;
+  letter-spacing: 0.22em;
+  color: var(--ct-cream);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 0;
+  text-transform: uppercase;
+}
+
+.ct-footer-link:hover {
+  color: var(--ct-gold-bright);
+}
+
+.ct-footer-note {
+  font-family: "Cormorant Garamond", serif;
+  font-style: italic;
+  font-size: 17px;
+  color: var(--ct-muted);
+  line-height: 1.5;
+}
+
+.ct-top-btn {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 15px;
+  letter-spacing: 0.24em;
+  color: var(--ct-gold-bright);
+  background: transparent;
+  border: 1px solid var(--ct-line);
+  padding: 11px 24px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: all 0.25s ease;
+}
+
+.ct-top-btn:hover {
+  background: var(--ct-gold);
+  color: #0a0804;
+}
+
+.ct-footer-giant {
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+  font-weight: 900;
+  font-size: clamp(44px, 8.4vw, 132px);
+  line-height: 1;
+  text-align: center;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(201, 168, 76, 0.4);
+  max-width: 1440px;
+  margin: 0 auto 44px;
+  white-space: nowrap;
+}
+
+.ct-footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--ct-line-soft);
+  padding-top: 24px;
+  max-width: 1440px;
+  margin: 0 auto;
+  font-family: "Special Elite", monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--ct-muted);
+}
+
+/* ---------------- Responsive ---------------- */
+
+@media (max-width: 1100px) {
+  .ct-garage-body {
+    grid-template-columns: 220px 1fr;
+  }
+  .ct-garage-panel {
+    grid-column: 1 / -1;
+  }
+  .ct-collection-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .ct-anatomy-stage {
+    grid-template-columns: 1fr;
+  }
+  .ct-anatomy-detail img {
+    height: 240px;
+  }
+}
+
+@media (max-width: 768px) {
+  .ct-nav {
+    padding: 14px 16px 12px 104px;
+    gap: 10px 16px;
+    flex-wrap: wrap;
+  }
+  .ct-logo {
+    font-size: 19px;
+  }
+  .ct-nav-links {
+    gap: 16px;
+    margin-left: 0;
+    width: 100%;
+    order: 3;
+  }
+  .ct-nav-link {
+    font-size: 13px;
+    letter-spacing: 0.16em;
+  }
+  .ct-nav-meta {
+    display: none;
+  }
+
+  .ct-section {
+    padding: 72px 18px;
+  }
+
+  .ct-hero {
+    min-height: calc(100svh - 60px);
+  }
+  .ct-hero-content {
+    padding: 70px 18px 100px;
+  }
+
+  .ct-speed-head {
+    top: 86px;
+    left: 18px;
+    right: 18px;
+    max-width: none;
+  }
+  .ct-speed-copy {
+    font-size: 16px;
+  }
+  .ct-speedo {
+    right: 50%;
+    transform: translateX(50%);
+    bottom: 5vh;
+    width: min(240px, 58vw);
+  }
+  .ct-speed-flash {
+    top: 42%;
+  }
+
+  .ct-anatomy-frame {
+    aspect-ratio: 4 / 3;
+  }
+  .ct-hotspot-text {
+    font-size: 10px;
+    padding: 5px 9px;
+    letter-spacing: 0.12em;
+  }
+
+  .ct-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ct-hall-stage {
+    gap: 8px;
+  }
+  .ct-hall-nav {
+    width: 44px;
+    height: 44px;
+  }
+  .ct-hall-num {
+    font-size: 36px;
+  }
+
+  .ct-garage-body {
+    grid-template-columns: 1fr;
+    padding: 0 18px 72px;
+  }
+  .ct-garage-selector {
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    max-height: none;
+    padding-bottom: 8px;
+  }
+  .ct-selector-btn {
+    flex-shrink: 0;
+    border-left: none;
+    border-bottom: 1px solid var(--ct-line-soft);
+    min-width: 170px;
+  }
+  .ct-garage-stage {
+    min-height: 300px;
+  }
+
+  .ct-collection-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ct-modal {
+    grid-template-columns: 1fr;
+  }
+  .ct-modal-media {
+    min-height: 230px;
+  }
+  .ct-modal-body {
+    padding: 28px 22px;
+  }
+
+  .ct-footer-cols {
+    grid-template-columns: 1fr;
+  }
+  .ct-footer-giant {
+    white-space: normal;
+  }
+  .ct-footer-bottom {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .ct-footer-bottom-mid {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ct-hero-scroll-line,
+  .ct-deco-1,
+  .ct-deco-2 {
+    animation: none;
+  }
+}
