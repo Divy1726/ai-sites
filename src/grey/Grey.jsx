@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { PELLETS_IMG } from "./pellets.js";
 import {
   AnimatePresence,
   animate,
@@ -48,6 +49,7 @@ const MATERIALS = [
     name: "GPPS GRANULES 105",
     category: "General Purpose Polystyrene",
     family: "Styrenics",
+    color: "#EDEDEA",
     desc: "Sourced for a range of industrial and manufacturing applications.",
     chips: ["INDUSTRIAL", "MANUFACTURING"],
     detail:
@@ -59,6 +61,7 @@ const MATERIALS = [
     name: "HDPE PE100 GRANULES",
     category: "High-Density Polyethylene",
     family: "Polyethylene",
+    color: "#2E7CF6",
     desc: "Sourced for durability and performance in demanding environments.",
     chips: ["DURABILITY", "DEMANDING ENVIRONMENTS"],
     detail:
@@ -70,6 +73,7 @@ const MATERIALS = [
     name: "ABS PLASTIC GRANULES",
     category: "Acrylonitrile Butadiene Styrene",
     family: "Styrenics",
+    color: "#3A3A3A",
     desc: "Sourced thermoplastic polymer known for impact resistance and toughness.",
     chips: ["IMPACT RESISTANCE", "TOUGHNESS"],
     detail:
@@ -81,6 +85,7 @@ const MATERIALS = [
     name: "PP GRANULES 104",
     category: "Polypropylene",
     family: "Engineering",
+    color: "#9B9B96",
     desc: "Reliable material available for general purpose injection moulding and extrusion.",
     chips: ["INJECTION MOULDING", "EXTRUSION"],
     detail:
@@ -92,6 +97,7 @@ const MATERIALS = [
     name: "POM PLASTIC GRANULES",
     category: "Polyoxymethylene",
     family: "Engineering",
+    color: "#F5F5F0",
     desc: "Sourced engineering thermoplastic for precision parts requiring high stiffness.",
     chips: ["PRECISION PARTS", "HIGH STIFFNESS"],
     detail:
@@ -103,6 +109,7 @@ const MATERIALS = [
     name: "LDPE GRANULES",
     category: "Low-Density Polyethylene",
     family: "Polyethylene",
+    color: "#D8E6F2",
     desc: "Sourced for flexible film, liners and packaging applications.",
     chips: ["FLEXIBLE FILM", "PACKAGING"],
     detail:
@@ -114,6 +121,7 @@ const MATERIALS = [
     name: "RED GRANULES",
     category: "Coloured Polymer Granules",
     family: "Engineering",
+    color: "#D33A2C",
     desc: "Sourced for coloured moulded parts and visible product applications.",
     chips: ["COLOURED PARTS", "MOULDING"],
     detail:
@@ -125,6 +133,7 @@ const MATERIALS = [
     name: "GPPS GRANULES 108",
     category: "General Purpose Polystyrene",
     family: "Styrenics",
+    color: "#EDEDEA",
     desc: "Sourced for a range of industrial and manufacturing applications.",
     chips: ["INDUSTRIAL", "MANUFACTURING"],
     detail:
@@ -140,7 +149,7 @@ const APPLICATIONS = [
     num: "01",
     title: "AUTOMOTIVE",
     desc: "Polymer materials sourced for injection molded parts and durable interiors.",
-    img: "https://images.unsplash.com/photo-1503376710915-188ccdbb3e51?w=1200&q=80&auto=format&fit=crop",
+    img: "https://images.unsplash.com/photo-1565043666747-69f6646db940?w=1600&q=80&auto=format&fit=crop",
     wide: true,
   },
   {
@@ -148,7 +157,7 @@ const APPLICATIONS = [
     num: "02",
     title: "PACKAGING",
     desc: "Sourced for films, rigid containers, and protective wrapping.",
-    img: "https://images.unsplash.com/photo-1605273273873-500b1a646cfa?w=900&q=80&auto=format&fit=crop",
+    img: "https://images.unsplash.com/photo-1580674285054-bed31e145f59?w=1600&q=80&auto=format&fit=crop",
     wide: false,
   },
   {
@@ -156,7 +165,7 @@ const APPLICATIONS = [
     num: "03",
     title: "INDUSTRIAL",
     desc: "HDPE pipes and heavy-duty infrastructure applications.",
-    img: "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?w=900&q=80&auto=format&fit=crop",
+    img: "https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=1600&q=80&auto=format&fit=crop",
     wide: false,
   },
   {
@@ -164,7 +173,7 @@ const APPLICATIONS = [
     num: "04",
     title: "CONSUMER",
     desc: "Sourced for everyday household goods and appliances.",
-    img: "https://images.unsplash.com/photo-1611117765103-68d831dbcc85?w=1200&q=80&auto=format&fit=crop",
+    img: "https://images.unsplash.com/photo-1583394838336-acd977736f90?w=1600&q=80&auto=format&fit=crop",
     wide: true,
   },
 ];
@@ -295,52 +304,166 @@ function SectionHead({ index, eyebrow, title, note }) {
 /* The truck — detailed SVG used in the hero strip and the journey    */
 /* ------------------------------------------------------------------ */
 
-function TruckArt({ wheelRotate, bagOpacities, small = false }) {
-  const wheels = [36, 132];
+// One detailed wheel: tread ticks, tyre, rim, 6 spokes, hub cap.
+// Rotates as a group (transform-box: fill-box, origin center in CSS).
+function TruckWheel({ cx, cy, wheelRotate }) {
+  const spokes = [0, 60, 120, 180, 240, 300];
+  const ticks = [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330];
+  return (
+    <motion.g
+      className="ge-truck-wheel"
+      style={wheelRotate ? { rotate: wheelRotate } : undefined}
+    >
+      <circle cx={cx} cy={cy} r="13" className="ge-truck-tyre" />
+      {ticks.map((a) => {
+        const rad = (a * Math.PI) / 180;
+        const x1 = cx + Math.cos(rad) * 10.6;
+        const y1 = cy + Math.sin(rad) * 10.6;
+        const x2 = cx + Math.cos(rad) * 12.6;
+        const y2 = cy + Math.sin(rad) * 12.6;
+        return (
+          <line key={a} x1={x1} y1={y1} x2={x2} y2={y2} className="ge-truck-tread" />
+        );
+      })}
+      <circle cx={cx} cy={cy} r="7.4" className="ge-truck-rim" />
+      {spokes.map((a) => {
+        const rad = (a * Math.PI) / 180;
+        return (
+          <line
+            key={a}
+            x1={cx}
+            y1={cy}
+            x2={cx + Math.cos(rad) * 6.8}
+            y2={cy + Math.sin(rad) * 6.8}
+            className="ge-truck-spoke"
+          />
+        );
+      })}
+      <circle cx={cx} cy={cy} r="2.8" className="ge-truck-hub" />
+      <circle cx={cx} cy={cy} r="1.1" className="ge-truck-hubcap" />
+    </motion.g>
+  );
+}
+
+function TruckArt({ wheelRotate, bagOpacities, dustOpacity, small = false }) {
+  // Rear double axle + front steer wheel. Wheel bottoms sit at y=88,
+  // just above the viewBox floor (90) so the truck rests on the road.
+  const wheels = [38, 66, 152];
+  const wheelY = 75;
   return (
     <svg
       className="ge-truck-svg"
-      viewBox="0 0 184 88"
+      viewBox="0 0 220 90"
       role="img"
       aria-label="Grey Enterprise delivery truck"
     >
-      {/* container */}
-      <rect x="4" y="8" width="108" height="48" rx="3" className="ge-truck-body" />
-      <rect x="4" y="8" width="108" height="10" className="ge-truck-band" />
+      <defs>
+        <linearGradient id="geGlass" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#9db8c9" stopOpacity="0.9" />
+          <stop offset="55%" stopColor="#33424e" stopOpacity="0.95" />
+          <stop offset="100%" stopColor="#141c22" />
+        </linearGradient>
+        <linearGradient id="geBeam" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#ffd9a0" stopOpacity="0.5" />
+          <stop offset="100%" stopColor="#ffd9a0" stopOpacity="0" />
+        </linearGradient>
+        <pattern id="geHazard" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <rect width="4" height="8" fill="#e05236" />
+          <rect x="4" width="4" height="8" fill="#141414" />
+        </pattern>
+      </defs>
+
+      {/* soft shadow under the truck */}
+      <ellipse cx="102" cy="88" rx="98" ry="3.4" className="ge-truck-shadow" />
+
+      {/* dust puffs behind the rear wheels (transit phases) */}
+      {small ? null : (
+        <motion.g style={dustOpacity ? { opacity: dustOpacity } : undefined}>
+          <circle cx="16" cy="82" r="5" className="ge-dust ge-dust-1" />
+          <circle cx="6" cy="79" r="3.6" className="ge-dust ge-dust-2" />
+          <circle cx="24" cy="84" r="3" className="ge-dust ge-dust-3" />
+        </motion.g>
+      )}
+
+      {/* exhaust stack + smoke (behind cab) */}
+      <rect x="122" y="14" width="4.5" height="34" rx="2" className="ge-truck-exhaust" />
+      {small ? null : (
+        <g className="ge-smoke" aria-hidden="true">
+          <circle cx="124" cy="10" r="3" className="ge-smoke-puff ge-smoke-1" />
+          <circle cx="124" cy="10" r="4" className="ge-smoke-puff ge-smoke-2" />
+          <circle cx="124" cy="10" r="5" className="ge-smoke-puff ge-smoke-3" />
+        </g>
+      )}
+
+      {/* container with vertical ribs */}
+      <rect x="6" y="8" width="112" height="50" rx="3" className="ge-truck-body" />
+      {[20, 34, 48, 62, 76, 90, 104].map((x) => (
+        <line key={x} x1={x} y1="10" x2={x} y2="56" className="ge-truck-rib" />
+      ))}
+      <rect x="6" y="8" width="112" height="11" className="ge-truck-band" />
       {/* granule bags inside the container */}
       {[0, 1, 2].map((i) => (
         <motion.g
           key={i}
           style={bagOpacities ? { opacity: bagOpacities[i] } : undefined}
         >
-          <rect x={14 + i * 32} y="30" width="26" height="20" rx="4" className="ge-truck-bag" />
-          <line x1={14 + i * 32} y1="37" x2={40 + i * 32} y2="37" className="ge-truck-bagline" />
+          <rect x={14 + i * 34} y="32" width="28" height="20" rx="4" className="ge-truck-bag" />
+          <line x1={14 + i * 34} y1="39" x2={42 + i * 34} y2="39" className="ge-truck-bagline" />
         </motion.g>
       ))}
-      <text x="58" y="26" textAnchor="middle" className="ge-truck-brand">
+      <text x="62" y="27" textAnchor="middle" className="ge-truck-brand">
         GREY
       </text>
+      <text x="62" y="37" textAnchor="middle" className="ge-truck-brand-sub">
+        ENTERPRISE
+      </text>
+      {/* hazard stripe + plate at the rear */}
+      <rect x="6" y="50" width="10" height="8" fill="url(#geHazard)" />
+      <rect x="7" y="59" width="24" height="7" rx="1" className="ge-truck-plate" />
+      <text x="19" y="64.4" textAnchor="middle" className="ge-truck-plate-text">
+        GJ-01-GE-2026
+      </text>
+
       {/* cab */}
-      <path d="M116 56 L116 30 L138 30 L152 44 L152 56 Z" className="ge-truck-cab" />
-      <path d="M121 35 L136 35 L146 45 L121 45 Z" className="ge-truck-window" />
-      <rect x="150" y="48" width="6" height="6" rx="1" className="ge-truck-light" />
-      {/* chassis */}
-      <rect x="2" y="56" width="160" height="5" className="ge-truck-chassis" />
-      {/* wheels */}
-      {wheels.map((cx) => (
-        <motion.g
-          key={cx}
-          className="ge-truck-wheel"
-          style={wheelRotate ? { rotate: wheelRotate } : undefined}
-        >
-          <circle cx={cx} cy="70" r="11" className="ge-truck-tyre" />
-          <circle cx={cx} cy="70" r="4.5" className="ge-truck-hub" />
-          <line x1={cx - 8} y1="70" x2={cx + 8} y2="70" className="ge-truck-spoke" />
-          <line x1={cx} y1="62" x2={cx} y2="78" className="ge-truck-spoke" />
-        </motion.g>
-      ))}
+      <path d="M126 58 L126 26 L150 26 L168 42 L176 46 L176 58 Z" className="ge-truck-cab" />
+      {/* windshield + side window */}
+      <path d="M152 30 L166 43 L152 43 Z" fill="url(#geGlass)" className="ge-truck-glass" />
+      <path d="M131 30 L148 30 L148 43 L131 43 Z" fill="url(#geGlass)" className="ge-truck-glass" />
+      {/* door outline + handle */}
+      <path d="M129 46 L150 46 L150 57 L129 57 Z" className="ge-truck-door" fill="none" />
+      <line x1="143" y1="49.5" x2="148" y2="49.5" className="ge-truck-handle" />
+      {/* mirror */}
+      <line x1="168" y1="38" x2="174" y2="34" className="ge-truck-mirror-arm" />
+      <rect x="172" y="30" width="4" height="8" rx="1" className="ge-truck-mirror" />
+      {/* grille, bumper, headlight + beam */}
+      <rect x="168" y="50" width="8" height="5" className="ge-truck-grille" />
+      <rect x="170" y="56" width="10" height="4" rx="1" className="ge-truck-bumper" />
+      <rect x="171" y="44" width="5" height="5" rx="1" className="ge-truck-light" />
+      <rect x="165" y="44" width="4" height="3" rx="1" className="ge-truck-indicator" />
       {small ? null : (
-        <rect x="8" y="62" width="26" height="4" rx="2" className="ge-truck-mudflap" />
+        <polygon points="176,46 214,52 214,66 176,50" fill="url(#geBeam)" className="ge-truck-beam" />
+      )}
+
+      {/* chassis + fuel tank */}
+      <rect x="4" y="58" width="178" height="5" className="ge-truck-chassis" />
+      <rect x="84" y="63" width="30" height="7" rx="3" className="ge-truck-tank" />
+
+      {/* wheel-arch cutouts (dark discs behind wheels) */}
+      {wheels.map((cx) => (
+        <circle key={cx} cx={cx} cy={wheelY} r="15.5" className="ge-truck-arch" />
+      ))}
+
+      {/* wheels: rear double axle + front steer */}
+      {wheels.map((cx) => (
+        <TruckWheel key={cx} cx={cx} cy={wheelY} wheelRotate={wheelRotate} />
+      ))}
+
+      {/* mudflaps behind the rear axle */}
+      {small ? null : (
+        <>
+          <rect x="18" y="66" width="5" height="18" rx="1" className="ge-truck-mudflap" />
+          <rect x="82" y="66" width="5" height="18" rx="1" className="ge-truck-mudflap" />
+        </>
       )}
     </svg>
   );
@@ -376,6 +499,7 @@ function JourneyScene() {
   const [stageSize, setStageSize] = useState({ w: 1200, h: 520 });
   const [phase, setPhase] = useState(0);
   const [qcStep, setQcStep] = useState(0);
+  const [routePct, setRoutePct] = useState(0);
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -404,6 +528,8 @@ function JourneyScene() {
     const qc =
       v >= 0.58 ? 4 : v >= 0.54 ? 3 : v >= 0.5 ? 2 : v >= 0.46 ? 1 : 0;
     setQcStep((prev) => (prev === qc ? prev : qc));
+    const pct = Math.round(v * 100);
+    setRoutePct((prev) => (prev === pct ? prev : pct));
   });
 
   // Truck motion (offsetDistance is a "%" string transform — fine, it
@@ -452,6 +578,23 @@ function JourneyScene() {
     [0, 0.55, 0.55, 0]
   );
 
+  // Dust behind the wheels only while the truck is actually moving.
+  const dustOpacity = useTransform(
+    progress,
+    [0.14, 0.18, 0.38, 0.42, 0.64, 0.68, 0.83, 0.87],
+    [0, 0.6, 0.6, 0, 0, 0.6, 0.6, 0]
+  );
+
+  // Forklift drives out of the dock with a pallet during QC, then back.
+  const forkliftX = useTransform(
+    progress,
+    [0.44, 0.5, 0.56, 0.62],
+    [0, -62, -62, 0]
+  );
+
+  // Customer gate slides open as the truck arrives.
+  const gateScale = useTransform(progress, [0.84, 0.92], [1, 0.12]);
+
   const offsetPath = `path("${scalePath(
     ROAD_PATH,
     stageSize.w / 1200,
@@ -477,6 +620,34 @@ function JourneyScene() {
             preserveAspectRatio="none"
             aria-hidden="true"
           >
+            <defs>
+              <linearGradient id="geSky" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#141e2c" />
+                <stop offset="52%" stopColor="#232a36" />
+                <stop offset="82%" stopColor="#4a3226" />
+                <stop offset="100%" stopColor="#7a3b26" />
+              </linearGradient>
+              <radialGradient id="geLamp" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="#ffd9a0" stopOpacity="0.85" />
+                <stop offset="100%" stopColor="#ffd9a0" stopOpacity="0" />
+              </radialGradient>
+            </defs>
+
+            {/* dusk sky + drifting clouds */}
+            <rect x="0" y="0" width="1200" height="460" fill="url(#geSky)" />
+            <g className="ge-cloud ge-cloud-1" aria-hidden="true">
+              <ellipse cx="180" cy="70" rx="90" ry="16" />
+              <ellipse cx="230" cy="58" rx="60" ry="13" />
+            </g>
+            <g className="ge-cloud ge-cloud-2" aria-hidden="true">
+              <ellipse cx="640" cy="48" rx="110" ry="15" />
+              <ellipse cx="700" cy="38" rx="64" ry="11" />
+            </g>
+            <g className="ge-cloud ge-cloud-3" aria-hidden="true">
+              <ellipse cx="1020" cy="86" rx="84" ry="14" />
+              <ellipse cx="1066" cy="75" rx="52" ry="11" />
+            </g>
+
             {/* far skyline (parallax) */}
             <motion.g style={{ x: skylineX }} className="ge-skyline">
               <rect x="0" y="300" width="70" height="160" />
@@ -511,12 +682,31 @@ function JourneyScene() {
               style={{ strokeDashoffset: dashOffset }}
             />
 
+            {/* street lights along the road */}
+            {[300, 520, 740, 980].map((x) => (
+              <g key={x} className="ge-lamp" aria-hidden="true">
+                <line x1={x} y1="452" x2={x} y2="392" className="ge-lamp-pole" />
+                <line x1={x} y1="392" x2={x + 16} y2="392" className="ge-lamp-pole" />
+                <circle cx={x + 18} cy="396" r="17" fill="url(#geLamp)" />
+                <circle cx={x + 18} cy="396" r="3.2" className="ge-lamp-bulb" />
+              </g>
+            ))}
+
             {/* supplier plant — Point A */}
             <g className="ge-building">
+              {/* storage silos */}
+              <rect x="6" y="300" width="26" height="152" rx="12" className="ge-silo" />
+              <rect x="14" y="318" width="26" height="134" rx="12" className="ge-silo ge-silo-back" />
               <rect x="38" y="332" width="150" height="120" className="ge-bldg" />
               <path d="M38 332 L78 306 L118 332 L158 306 L188 332" className="ge-bldg-roof" fill="none" />
               <rect x="168" y="248" width="24" height="204" className="ge-bldg" />
               <rect x="164" y="240" width="32" height="10" className="ge-bldg-top" />
+              {/* chimney smoke */}
+              <g className="ge-chimney-smoke" aria-hidden="true">
+                <circle cx="180" cy="232" r="6" className="ge-chimney-puff ge-chimney-1" />
+                <circle cx="180" cy="232" r="8" className="ge-chimney-puff ge-chimney-2" />
+                <circle cx="180" cy="232" r="10" className="ge-chimney-puff ge-chimney-3" />
+              </g>
               <rect x="58" y="356" width="22" height="16" className="ge-bldg-win" />
               <rect x="92" y="356" width="22" height="16" className="ge-bldg-win" />
               <rect x="126" y="356" width="22" height="16" className="ge-bldg-win" />
@@ -559,14 +749,28 @@ function JourneyScene() {
                 <rect x="512" y="350" width="26" height="102" className="ge-scan-beam" />
                 <line x1="525" y1="350" x2="525" y2="452" className="ge-scan-line" />
               </motion.g>
-              <rect x="498" y="380" width="18" height="14" className="ge-bldg-win" />
+              <rect x="498" y="380" width="18" height="14" className="ge-bldg-win-lit" />
               <rect x="498" y="406" width="18" height="14" className="ge-bldg-win" />
               <rect x="684" y="380" width="18" height="14" className="ge-bldg-win" />
-              <rect x="684" y="406" width="18" height="14" className="ge-bldg-win" />
+              <rect x="684" y="406" width="18" height="14" className="ge-bldg-win-lit" />
+              {/* dock leveler + safety cones */}
+              <rect x="552" y="448" width="96" height="6" className="ge-dock-leveler" />
+              <path d="M536 452 L541 438 L546 452 Z" className="ge-cone" />
+              <path d="M654 452 L659 438 L664 452 Z" className="ge-cone" />
               {/* stacked bags beside the warehouse */}
               <rect x="738" y="426" width="26" height="20" rx="3" className="ge-dock-bag" />
               <rect x="742" y="404" width="26" height="20" rx="3" className="ge-dock-bag" />
               <rect x="770" y="426" width="26" height="20" rx="3" className="ge-dock-bag" />
+              {/* forklift rolls out with a pallet during QC */}
+              <motion.g className="ge-forklift" style={{ x: forkliftX }}>
+                <rect x="596" y="410" width="30" height="22" rx="2" className="ge-forklift-pallet" />
+                <rect x="592" y="432" width="40" height="4" className="ge-forklift-forks" />
+                <rect x="622" y="392" width="6" height="46" className="ge-forklift-mast" />
+                <rect x="628" y="416" width="30" height="18" rx="3" className="ge-forklift-body" />
+                <path d="M634 416 L634 402 L652 402 L652 416" className="ge-forklift-cage" fill="none" />
+                <circle cx="636" cy="440" r="6" className="ge-forklift-wheel" />
+                <circle cx="654" cy="442" r="4.6" className="ge-forklift-wheel" />
+              </motion.g>
             </g>
             <text x="478" y="246" className="ge-scene-label">GREY WAREHOUSE</text>
             <text x="478" y="266" className="ge-scene-sub">AHMEDABAD — QC BAY</text>
@@ -577,13 +781,18 @@ function JourneyScene() {
               <path d="M958 322 L1008 296 L1058 322 L1108 296 L1154 322" className="ge-bldg-roof" fill="none" />
               <rect x="1096" y="252" width="22" height="200" className="ge-bldg" />
               <rect x="1092" y="244" width="30" height="10" className="ge-bldg-top" />
-              <rect x="978" y="348" width="22" height="16" className="ge-bldg-win" />
+              <rect x="978" y="348" width="22" height="16" className="ge-bldg-win-lit" />
               <rect x="1012" y="348" width="22" height="16" className="ge-bldg-win" />
-              <rect x="1046" y="348" width="22" height="16" className="ge-bldg-win" />
+              <rect x="1046" y="348" width="22" height="16" className="ge-bldg-win-lit" />
               <rect x="978" y="382" width="22" height="16" className="ge-bldg-win" />
-              <rect x="1012" y="382" width="22" height="16" className="ge-bldg-win" />
-              {/* gate */}
-              <rect x="1066" y="398" width="64" height="54" className="ge-gate" />
+              <rect x="1012" y="382" width="22" height="16" className="ge-bldg-win-lit" />
+              {/* gate — slides open on delivery */}
+              <motion.g className="ge-gate-wrap" style={{ scaleX: gateScale }}>
+                <rect x="1066" y="398" width="64" height="54" className="ge-gate" />
+                <line x1="1082" y1="398" x2="1082" y2="452" className="ge-gate-bar" />
+                <line x1="1098" y1="398" x2="1098" y2="452" className="ge-gate-bar" />
+                <line x1="1114" y1="398" x2="1114" y2="452" className="ge-gate-bar" />
+              </motion.g>
             </g>
             <text x="958" y="228" className="ge-scene-label">CUSTOMER FACTORY</text>
             <text x="958" y="248" className="ge-scene-sub">POINT B</text>
@@ -596,7 +805,11 @@ function JourneyScene() {
             aria-hidden="true"
           >
             <motion.div style={{ y: truckBob }}>
-              <TruckArt wheelRotate={wheelRotate} bagOpacities={[bag0, bag1, bag2]} />
+              <TruckArt
+                wheelRotate={wheelRotate}
+                bagOpacities={[bag0, bag1, bag2]}
+                dustOpacity={dustOpacity}
+              />
             </motion.div>
           </motion.div>
 
@@ -680,6 +893,7 @@ function JourneyScene() {
                 </span>
               ))}
             </span>
+            <span className="ge-route-pct">ROUTE PROGRESS {routePct}%</span>
           </div>
         </div>
       </div>
@@ -724,6 +938,319 @@ function JourneyMobile() {
                   ))}
                 </ul>
               ) : null}
+            </div>
+          </motion.li>
+        ))}
+      </ol>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* FROM THE PORT — pinned prequel: ship -> crane -> truck -> warehouse */
+/* ------------------------------------------------------------------ */
+
+const PORT_PHASES = [
+  { num: "01", title: "ARRIVAL", caption: "Material arrives by sea." },
+  { num: "02", title: "LIFT", caption: "Lifted at the port." },
+  { num: "03", title: "LOAD", caption: "Loaded for the road." },
+  { num: "04", title: "DEPART", caption: "Next stop: GREY warehouse." },
+];
+
+function portPhaseFromProgress(v) {
+  if (v < 0.25) return 0;
+  if (v < 0.55) return 1;
+  if (v < 0.8) return 2;
+  return 3;
+}
+
+function PortScene() {
+  const sectionRef = useRef(null);
+  const [phase, setPhase] = useState(0);
+
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end end"],
+  });
+  const progress = useSpring(scrollYProgress, SCROLL_SPRING);
+
+  useMotionValueEvent(progress, "change", (v) => {
+    const next = portPhaseFromProgress(v);
+    setPhase((prev) => (prev === next ? prev : next));
+  });
+
+  // Ship sails in from the left and docks by 0.25, with a gentle bob.
+  const shipX = useTransform(progress, [0, 0.25], [-460, 0]);
+  const shipBob = useTransform(progress, (v) => Math.sin(v * 46) * 2.4);
+  const wakeOpacity = useTransform(progress, [0, 0.08, 0.24, 0.3], [0, 0.85, 0.85, 0.25]);
+
+  // Crane trolley: parked over the ship stack, then travels to the truck.
+  const trolleyX = useTransform(progress, [0, 0.52, 0.62, 1], [412, 412, 900, 900]);
+  // Spreader height (top edge y): parked high, down to lock, up, down to place, up.
+  const spreaderY = useTransform(
+    progress,
+    [0, 0.25, 0.35, 0.42, 0.52, 0.62, 0.72, 0.78, 1],
+    [120, 120, 222, 222, 150, 150, 309, 150, 150]
+  );
+  const cableScale = useTransform(spreaderY, (v) => Math.max(0.02, (v - 112) / 200));
+
+  // The lifted container: sits on the stack, rises with the spreader,
+  // crosses to the truck, settles on the flatbed.
+  const containerY = useTransform(
+    progress,
+    [0, 0.42, 0.52, 0.62, 0.72, 1],
+    [228, 228, 156, 156, 315, 315]
+  );
+  const containerSway = useTransform(progress, (v) =>
+    v > 0.45 && v < 0.75 ? Math.sin(v * 64) * 2.4 : 0
+  );
+
+  // Truck departs right at the end; the container rides with it.
+  const departX = useTransform(progress, [0.8, 1], [0, 430]);
+  const containerX = useTransform([trolleyX, departX], ([t, d]) => t + d);
+  const portWheelRotate = useTransform(departX, (d) => d * 3.2);
+
+  return (
+    <section className="ge-port" ref={sectionRef} aria-label="From the port">
+      <div className="ge-journey-sticky">
+        <div className="ge-journey-head">
+          <Scramble text="01 — FROM THE PORT" className="ge-eyebrow" as="p" />
+          <Reveal text="WHERE IT *BEGINS*" as="h2" className="ge-h2" />
+          <p className="ge-journey-sub">
+            Before the road, the sea. Scroll — a container ship docks, the
+            crane lifts one box, and the truck takes it from there.
+          </p>
+        </div>
+
+        <div className="ge-journey-stage ge-port-stage">
+          <svg
+            className="ge-journey-svg"
+            viewBox="0 0 1200 520"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <defs>
+              <linearGradient id="geSkyPort" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#131d2b" />
+                <stop offset="55%" stopColor="#24303f" />
+                <stop offset="84%" stopColor="#54382a" />
+                <stop offset="100%" stopColor="#7a3b26" />
+              </linearGradient>
+              <radialGradient id="geLampPort" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="#ffd9a0" stopOpacity="0.85" />
+                <stop offset="100%" stopColor="#ffd9a0" stopOpacity="0" />
+              </radialGradient>
+            </defs>
+
+            {/* dusk sky */}
+            <rect x="0" y="0" width="1200" height="420" fill="url(#geSkyPort)" />
+            <g className="ge-cloud ge-cloud-2" aria-hidden="true">
+              <ellipse cx="320" cy="52" rx="100" ry="14" />
+              <ellipse cx="380" cy="42" rx="58" ry="11" />
+            </g>
+
+            {/* seagulls */}
+            <g className="ge-gulls" aria-hidden="true">
+              <path d="M210 110 q7 -7 14 0 q7 -7 14 0" className="ge-gull ge-gull-1" />
+              <path d="M268 132 q6 -6 12 0 q6 -6 12 0" className="ge-gull ge-gull-2" />
+              <path d="M980 96 q7 -7 14 0 q7 -7 14 0" className="ge-gull ge-gull-3" />
+            </g>
+
+            {/* sea + animated waves */}
+            <rect x="0" y="404" width="1200" height="116" className="ge-sea" />
+            <g className="ge-waves ge-waves-back" aria-hidden="true">
+              <path d="M-40 418 q30 -9 60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0" />
+            </g>
+            <g className="ge-waves ge-waves-front" aria-hidden="true">
+              <path d="M-40 448 q30 -10 60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0" />
+            </g>
+
+            {/* quay */}
+            <rect x="520" y="382" width="680" height="26" className="ge-quay" />
+            <rect x="520" y="382" width="680" height="4" className="ge-quay-edge" />
+            {[580, 700, 820, 1040, 1140].map((x) => (
+              <rect key={x} x={x} y="370" width="10" height="14" rx="3" className="ge-bollard" />
+            ))}
+            {/* port lights */}
+            {[600, 1080].map((x) => (
+              <g key={x} aria-hidden="true">
+                <line x1={x} y1="382" x2={x} y2="318" className="ge-lamp-pole" />
+                <circle cx={x} cy="314" r="20" fill="url(#geLampPort)" />
+                <circle cx={x} cy="314" r="3.4" className="ge-lamp-bulb" />
+              </g>
+            ))}
+
+            {/* container ship */}
+            <motion.g style={{ x: shipX }}>
+              <motion.g style={{ y: shipBob }}>
+                {/* wake foam at the stern */}
+                <motion.ellipse
+                  cx="66"
+                  cy="414"
+                  rx="58"
+                  ry="7"
+                  className="ge-wake"
+                  style={{ opacity: wakeOpacity }}
+                />
+                {/* hull */}
+                <path
+                  d="M60 330 L540 330 L512 402 L110 402 Z"
+                  className="ge-ship-hull"
+                />
+                <rect x="60" y="322" width="480" height="10" className="ge-ship-deck" />
+                {/* stacked containers (the top GREY one gets lifted) */}
+                {[
+                  { x: 120, y: 296, c: "#2e7cf6" },
+                  { x: 238, y: 296, c: "#e05236" },
+                  { x: 356, y: 296, c: "#8f8f8a" },
+                  { x: 120, y: 262, c: "#e8e6df" },
+                  { x: 238, y: 262, c: "#3f5a74" },
+                  { x: 356, y: 262, c: "#e05236" },
+                  { x: 120, y: 228, c: "#8f8f8a" },
+                  { x: 238, y: 228, c: "#2e7cf6" },
+                ].map((box, i) => (
+                  <g key={i}>
+                    <rect x={box.x} y={box.y} width="112" height="34" fill={box.c} className="ge-ship-box" />
+                    {[16, 40, 64, 88].map((dx) => (
+                      <line
+                        key={dx}
+                        x1={box.x + dx}
+                        y1={box.y + 3}
+                        x2={box.x + dx}
+                        y2={box.y + 31}
+                        className="ge-ship-box-rib"
+                      />
+                    ))}
+                  </g>
+                ))}
+                {/* bridge tower + funnel */}
+                <rect x="472" y="196" width="52" height="126" className="ge-ship-bridge" />
+                <rect x="478" y="206" width="40" height="12" className="ge-bldg-win-lit" />
+                <rect x="478" y="226" width="40" height="12" className="ge-bldg-win-lit" />
+                <rect x="486" y="168" width="24" height="28" className="ge-ship-funnel" />
+                <text x="300" y="368" textAnchor="middle" className="ge-ship-name">
+                  MV POLYMER
+                </text>
+              </motion.g>
+            </motion.g>
+
+            {/* gantry crane */}
+            <g className="ge-crane" aria-hidden="true">
+              <rect x="548" y="100" width="14" height="282" className="ge-crane-leg" />
+              <rect x="758" y="100" width="14" height="282" className="ge-crane-leg" />
+              <line x1="548" y1="200" x2="772" y2="300" className="ge-crane-brace" />
+              <line x1="772" y1="200" x2="548" y2="300" className="ge-crane-brace" />
+              <rect x="330" y="84" width="640" height="16" className="ge-crane-boom" />
+              <rect x="330" y="84" width="640" height="5" className="ge-crane-stripe" />
+              <circle cx="660" cy="76" r="5" className="ge-beacon" />
+            </g>
+
+            {/* trolley + cables + spreader */}
+            <motion.g style={{ x: trolleyX }} aria-hidden="true">
+              <rect x="-26" y="96" width="52" height="16" rx="2" className="ge-crane-trolley" />
+              <motion.g className="ge-cables" style={{ scaleY: cableScale }}>
+                <rect x="-42" y="112" width="2.4" height="200" className="ge-cable" />
+                <rect x="40" y="112" width="2.4" height="200" className="ge-cable" />
+              </motion.g>
+              <motion.g style={{ y: spreaderY }}>
+                <rect x="-58" y="0" width="116" height="8" rx="2" className="ge-spreader" />
+              </motion.g>
+            </motion.g>
+
+            {/* the lifted container */}
+            <motion.g style={{ x: containerX, y: containerY, rotate: containerSway }} aria-hidden="true">
+              <g className="ge-lift-box">
+                <rect x="-56" y="0" width="112" height="34" className="ge-lift-box-body" />
+                {[-40, -16, 8, 32].map((dx) => (
+                  <line key={dx} x1={dx} y1="3" x2={dx} y2="31" className="ge-ship-box-rib" />
+                ))}
+                <text x="0" y="21" textAnchor="middle" className="ge-lift-box-text">
+                  GREY
+                </text>
+              </g>
+            </motion.g>
+
+            {/* flatbed truck waiting on the quay, departs at the end */}
+            <motion.g style={{ x: departX }} aria-hidden="true">
+              <g transform="translate(820 325)">
+                <rect x="0" y="30" width="150" height="6" className="ge-truck-chassis" />
+                <rect x="6" y="24" width="140" height="6" className="ge-flatbed" />
+                <path d="M152 36 L152 8 L172 8 L186 22 L186 36 Z" className="ge-truck-cab" />
+                <path d="M157 12 L170 12 L181 22 L157 22 Z" fill="url(#geGlass)" className="ge-truck-glass" />
+                <rect x="182" y="26" width="5" height="5" rx="1" className="ge-truck-light" />
+                <TruckWheel cx={34} cy={44} wheelRotate={portWheelRotate} />
+                <TruckWheel cx={58} cy={44} wheelRotate={portWheelRotate} />
+                <TruckWheel cx={162} cy={44} wheelRotate={portWheelRotate} />
+              </g>
+            </motion.g>
+          </svg>
+        </div>
+
+        {/* captions + progress (same pattern as the Journey) */}
+        <div className="ge-journey-foot">
+          <div className="ge-journey-captions">
+            {PORT_PHASES.map((p, i) => (
+              <motion.div
+                key={p.num}
+                className="ge-journey-caption"
+                animate={{ opacity: i === phase ? 1 : 0, y: i === phase ? 0 : 14 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                aria-hidden={i !== phase}
+              >
+                <span className="ge-journey-phase-num">{p.num}</span>
+                <div>
+                  <h3>{p.title}</h3>
+                  <p>
+                    {p.caption}
+                    {i === 3 ? (
+                      <span className="ge-port-handoff"> SCROLL — THE JOURNEY CONTINUES ↓</span>
+                    ) : null}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="ge-journey-progress" aria-hidden="true">
+            <span className="ge-journey-bar">
+              <motion.span className="ge-journey-bar-fill" style={{ scaleX: progress }} />
+            </span>
+            <span className="ge-journey-ticks">
+              {PORT_PHASES.map((p, i) => (
+                <span key={p.num} className={i === phase ? "ge-tick-active" : ""}>
+                  {p.num} {p.title}
+                </span>
+              ))}
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// Mobile degrade: vertical timeline, no pin, no blank risk.
+function PortMobile() {
+  return (
+    <section className="ge-journey-mobile" aria-label="From the port">
+      <Scramble text="01 — FROM THE PORT" className="ge-eyebrow" as="p" />
+      <Reveal text="WHERE IT *BEGINS*" as="h2" className="ge-h2" />
+      <ol className="ge-timeline">
+        {PORT_PHASES.map((p, i) => (
+          <motion.li
+            key={p.num}
+            className="ge-timeline-item"
+            initial={{ opacity: 0, x: -18 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.5, delay: i * 0.06 }}
+          >
+            <span className="ge-timeline-dot" />
+            <div>
+              <p className="ge-timeline-meta">
+                {p.num} — {p.title}
+              </p>
+              <p className="ge-timeline-cap">{p.caption}</p>
             </div>
           </motion.li>
         ))}
@@ -800,6 +1327,11 @@ function MaterialsRail({ onRequest, isMobile }) {
           >
             {MATERIALS.map((m) => (
               <article className="ge-spec-card" key={m.id} data-cursor="REQUEST">
+                <div
+                  className="ge-dot-band"
+                  style={{ "--dot": m.color }}
+                  aria-hidden="true"
+                />
                 <div className="ge-spec-top">
                   <span className="ge-spec-num">{m.num}</span>
                   <span className="ge-spec-family">{m.family}</span>
@@ -962,7 +1494,7 @@ function HomePage({ goTo, onRequest, isMobile }) {
       <section className="ge-hero">
         <Parallax className="ge-hero-bg" speed={0.14} scale={1.22}>
           <img
-            src="https://images.unsplash.com/photo-1621255554316-2aef3188d3da?w=2000&q=80&auto=format&fit=crop"
+            src={PELLETS_IMG}
             alt=""
           />
         </Parallax>
@@ -1036,6 +1568,20 @@ function HomePage({ goTo, onRequest, isMobile }) {
             </Magnetic>
           </motion.div>
         </div>
+        {/* floating grade chips over the granule macro */}
+        <div className="ge-hero-chips" aria-hidden="true">
+          {["GPPS 105", "HDPE PE100", "ABS", "PP 104"].map((chip, i) => (
+            <motion.span
+              key={chip}
+              className={`ge-hero-chip ge-hero-chip-${i + 1}`}
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.9 + i * 0.12 }}
+            >
+              {chip}
+            </motion.span>
+          ))}
+        </div>
         <HeroTruckStrip />
         <p className="ge-scroll-hint" aria-hidden="true">
           SCROLL TO EXPLORE <span>↓</span>
@@ -1074,8 +1620,26 @@ function HomePage({ goTo, onRequest, isMobile }) {
         </VelocityMarquee>
       </div>
 
+      {/* FROM THE PORT — prequel */}
+      {isMobile ? <PortMobile /> : <PortScene />}
+
       {/* THE JOURNEY */}
       {isMobile ? <JourneyMobile /> : <JourneyScene />}
+
+      {/* PHOTO BAND — full-bleed parallax */}
+      <section className="ge-photoband" aria-label="From Ahmedabad to your gate">
+        <Parallax className="ge-photoband-bg" speed={0.18} scale={1.22}>
+          <img src="https://images.unsplash.com/photo-1565793298595-6a879b1d9492?w=1600&q=80&auto=format&fit=crop" alt="" loading="lazy" />
+        </Parallax>
+        <div className="ge-photoband-shade" aria-hidden="true" />
+        <div className="ge-photoband-inner">
+          <ScrubWords
+            as="h2"
+            className="ge-photoband-text"
+            text="FROM *AHMEDABAD* TO YOUR *GATE*"
+          />
+        </div>
+      </section>
 
       {/* MATERIALS RAIL */}
       <MaterialsRail onRequest={onRequest} isMobile={isMobile} />
@@ -1165,11 +1729,13 @@ function HomePage({ goTo, onRequest, isMobile }) {
         </div>
       </section>
 
+      <div className="ge-hazard" aria-hidden="true" />
+
       {/* BIG CTA */}
       <section className="ge-bigcta" aria-label="Request a material">
         <Parallax className="ge-bigcta-bg" speed={0.16} scale={1.24}>
           <img
-            src="https://images.unsplash.com/photo-1590458643896-1c4b79b9dc4a?w=2000&q=80&auto=format&fit=crop"
+            src="https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?w=1600&q=80&auto=format&fit=crop"
             alt=""
             loading="lazy"
           />
@@ -1240,6 +1806,11 @@ function MaterialsPage({ onRequest }) {
               transition={{ duration: 0.35, ease: "easeOut" }}
             >
               <TiltCard className="ge-material-card" max={5}>
+                <div
+                  className="ge-dot-band"
+                  style={{ "--dot": m.color }}
+                  aria-hidden="true"
+                />
                 <div className="ge-spec-top">
                   <span className="ge-spec-num">{m.num}</span>
                   <span className="ge-spec-family">{m.family}</span>
@@ -1369,7 +1940,7 @@ function ProcessPage({ goTo }) {
         <div className="ge-process-qc-media">
           <Parallax className="ge-qc-photo" speed={0.1}>
             <img
-              src="https://images.unsplash.com/photo-1553413077-190dd305871c?w=1200&q=80&auto=format&fit=crop"
+              src="https://images.unsplash.com/photo-1587293852726-70cdb56c2866?w=1600&q=80&auto=format&fit=crop"
               alt="Warehouse aisle with stored material"
               loading="lazy"
             />
@@ -1379,6 +1950,43 @@ function ProcessPage({ goTo }) {
           </span>
         </div>
       </div>
+
+      {/* warehouse band */}
+      <div className="ge-warehouse-band">
+        <Parallax className="ge-warehouse-band-bg" speed={0.14} scale={1.2}>
+          <img src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1600&q=80&auto=format&fit=crop" alt="Grey Enterprise warehouse storage" loading="lazy" />
+        </Parallax>
+        <div className="ge-warehouse-band-shade" aria-hidden="true" />
+        <div className="ge-warehouse-band-inner">
+          <Scramble text="STORAGE — AHMEDABAD" className="ge-eyebrow" as="p" />
+          <Reveal text="HELD, CHECKED, THEN *MOVED*" as="h2" className="ge-h2" />
+        </div>
+      </div>
+
+      {/* logistics strip — road, terminal, sea */}
+      <div className="ge-logistics" aria-label="Dispatch and logistics">
+        {[
+          { src: "https://images.unsplash.com/photo-1519003722824-194d4455a60c?w=1600&q=80&auto=format&fit=crop", label: "ROAD FREIGHT" },
+          { src: "https://images.unsplash.com/photo-1559297434-fae8a1916a79?w=1600&q=80&auto=format&fit=crop", label: "CONTAINER TERMINAL" },
+          { src: "https://images.unsplash.com/photo-1605745341112-85968b19335b?w=1600&q=80&auto=format&fit=crop", label: "PORT MOVEMENT" },
+        ].map((item, i) => (
+          <motion.figure
+            key={item.label}
+            className="ge-logistics-item"
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.55, delay: i * 0.12 }}
+          >
+            <Parallax className="ge-logistics-media" speed={0.08 + i * 0.03}>
+              <img src={item.src} alt={item.label} loading="lazy" />
+            </Parallax>
+            <figcaption>{item.label}</figcaption>
+          </motion.figure>
+        ))}
+      </div>
+
+      <div className="ge-hazard" aria-hidden="true" />
 
       <div className="ge-route-map" aria-label="Route map: supplier to warehouse to customer">
         <Scramble text="THE ROUTE" className="ge-eyebrow" as="p" />
