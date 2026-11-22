@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ShoppingBag,
   Plus,
@@ -7,6 +7,7 @@ import {
   ArrowRight,
   ArrowDown,
   ArrowUpRight,
+  Quote,
 } from "lucide-react";
 import "./Voidwear.css";
 
@@ -18,6 +19,7 @@ const IMG = (id) =>
   `https://images.unsplash.com/${id}?w=1200&q=80&auto=format&fit=crop`;
 
 const HERO_IMG = IMG("photo-1529139574466-a303027c1d8b");
+const FEATURED_IMG = IMG("photo-1524504388940-b1c1722653e1");
 
 const PRODUCTS = [
   {
@@ -25,6 +27,7 @@ const PRODUCTS = [
     name: "STATIC HOODIE",
     price: 118,
     tag: "NEW",
+    category: "Hoodies",
     img: IMG("photo-1552374196-c4e7ffc6e126"),
   },
   {
@@ -32,6 +35,7 @@ const PRODUCTS = [
     name: "VOID TEE 004",
     price: 54,
     tag: "HOT",
+    category: "Tees",
     img: IMG("photo-1521572163474-6864f9cf17ab"),
   },
   {
@@ -39,6 +43,7 @@ const PRODUCTS = [
     name: "RIOT LEATHER JACKET",
     price: 340,
     tag: "LAST",
+    category: "Hoodies",
     img: IMG("photo-1551028719-00167b16eac5"),
   },
   {
@@ -46,6 +51,7 @@ const PRODUCTS = [
     name: "SIGNAL CARGO JACKET",
     price: 196,
     tag: "NEW",
+    category: "Hoodies",
     img: IMG("photo-1591047139829-d91aecb6caea"),
   },
   {
@@ -53,6 +59,7 @@ const PRODUCTS = [
     name: "CONCRETE RUNNER",
     price: 162,
     tag: "HOT",
+    category: "Accessories",
     img: IMG("photo-1552346154-21d32810aba3"),
   },
   {
@@ -60,9 +67,42 @@ const PRODUCTS = [
     name: "ACID COURT LOW",
     price: 148,
     tag: "LAST",
+    category: "Accessories",
     img: IMG("photo-1600185365926-3a2ce3cdb9eb"),
   },
+  {
+    id: "p7",
+    name: "GLITCH GRAPHIC TEE",
+    price: 62,
+    tag: "NEW",
+    category: "Tees",
+    img: IMG("photo-1503341504253-dff4815485f1"),
+  },
+  {
+    id: "p8",
+    name: "ACID WASH TEE",
+    price: 58,
+    tag: "HOT",
+    category: "Tees",
+    img: IMG("photo-1583743814966-8936f5b7be1a"),
+  },
+  {
+    id: "p9",
+    name: "VOID LOGO CAP",
+    price: 42,
+    tag: "LAST",
+    category: "Accessories",
+    img: IMG("photo-1588850561407-ed78c282e89b"),
+  },
 ];
+
+const FEATURED = {
+  id: "featured",
+  name: "DROP 004 — ACID RAIN",
+  price: 128,
+  img: FEATURED_IMG,
+  specs: ["480GSM HEAVY FLEECE", "ACID WASH / BLACK", "OVERSIZED BOXY CUT", "LIMITED — 300 PIECES"],
+};
 
 const LOOKS = [
   { img: IMG("photo-1515886657613-9f3515b0c78f"), cap: "LOOK 01 — NIGHT SHIFT" },
@@ -72,6 +112,65 @@ const LOOKS = [
   { img: IMG("photo-1490481651871-ab68de25d43d"), cap: "LOOK 05 — AFTER HOURS" },
   { img: IMG("photo-1529139574466-a303027c1d8b"), cap: "LOOK 06 — VOID UNIFORM" },
 ];
+
+const LOOKBOOK_FULL = [
+  { img: IMG("photo-1515886657613-9f3515b0c78f"), cap: "LOOK 01 — TOKYO / SHIBUYA" },
+  { img: IMG("photo-1539109136881-3be0616acf4b"), cap: "LOOK 02 — LONDON / SHOREDITCH" },
+  { img: IMG("photo-1509631179647-0177331693ae"), cap: "LOOK 03 — NEW YORK / SOHO" },
+  { img: IMG("photo-1445205170230-053b83016050"), cap: "LOOK 04 — BERLIN / KREUZBERG" },
+  { img: IMG("photo-1490481651871-ab68de25d43d"), cap: "LOOK 05 — SEOUL / HONGDAE" },
+  { img: IMG("photo-1529139574466-a303027c1d8b"), cap: "LOOK 06 — PARIS / LE MARAIS" },
+  { img: IMG("photo-1483985988355-763728e1935b"), cap: "LOOK 07 — LOS ANGELES / FAIRFAX" },
+  { img: IMG("photo-1496747611176-843222e1e57c"), cap: "LOOK 08 — TOKYO / HARAJUKU" },
+];
+
+const QUOTES = [
+  {
+    text: "Wore it once, got asked about it three times. Now it is gone forever. That is the whole point.",
+    name: "MARCUS",
+    city: "LONDON",
+  },
+  {
+    text: "VOIDWEAR does not sell clothes. It sells the fear of missing out — and it works every single time.",
+    name: "YUKI",
+    city: "TOKYO",
+  },
+  {
+    text: "Bought the hoodie at 2AM before the timer died. Best decision I made all year.",
+    name: "DRE",
+    city: "NEW YORK",
+  },
+];
+
+const RULES = [
+  {
+    num: "01",
+    title: "NO RESTOCK, EVER",
+    body: "When a drop sells out, the files are deleted. No reprints, no reissues, no quiet second run. If you missed it, you missed it.",
+  },
+  {
+    num: "02",
+    title: "NO SEASONS",
+    body: "We do not follow fashion weeks or seasonal calendars. We drop when the work is ready, and the timer starts the second it goes live.",
+  },
+  {
+    num: "03",
+    title: "BLACK IS THE UNIFORM",
+    body: "Black on black with one hit of acid. No logos screaming for attention — the cut does the talking.",
+  },
+  {
+    num: "04",
+    title: "CUT HARD, WEAR LOUD",
+    body: "Oversized, boxy, built to be seen from across the street. Every piece is cut once and cut deliberately.",
+  },
+  {
+    num: "05",
+    title: "THE TIMER IS THE TRUTH",
+    body: "The countdown never lies and never extends. When it hits zero, the drop is deleted. That is the deal.",
+  },
+];
+
+const CATEGORIES = ["All", "Hoodies", "Tees", "Accessories"];
 
 const MARQUEE_TEXT = "NEW DROP — NO RESTOCK — VOIDWEAR — DROP 004 LIVE — ";
 
@@ -96,6 +195,12 @@ const lineReveal = {
     clipPath: "inset(0 0 0% 0)",
     transition: { duration: 0.85, delay: i * 0.14, ease: [0.22, 1, 0.36, 1] },
   }),
+};
+
+const pageTransition = {
+  initial: { opacity: 0, y: 28 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] } },
+  exit: { opacity: 0, y: -18, transition: { duration: 0.28, ease: "easeIn" } },
 };
 
 // ---------------------------------------------------------------------------
@@ -152,59 +257,126 @@ function SpinBadge() {
 }
 
 // ---------------------------------------------------------------------------
-// Main component
+// Shared product card
 // ---------------------------------------------------------------------------
 
-export default function Voidwear() {
-  const [cartCount, setCartCount] = useState(0);
-  const [added, setAdded] = useState({});
-  const timers = useRef({});
-  const { days, hours, mins, secs } = useCountdown();
-
-  // Clear any pending "ADDED" revert timers on unmount
-  useEffect(() => {
-    const stash = timers.current;
-    return () => Object.values(stash).forEach(clearTimeout);
-  }, []);
-
-  const handleAdd = (id) => {
-    setCartCount((c) => c + 1);
-    setAdded((prev) => ({ ...prev, [id]: true }));
-    clearTimeout(timers.current[id]);
-    timers.current[id] = setTimeout(() => {
-      setAdded((prev) => ({ ...prev, [id]: false }));
-    }, 1400);
-  };
+function ProductCard({ product, isAdded, onAdd, index = 0, layoutMode = false }) {
+  const motionProps = layoutMode
+    ? {
+        layout: true,
+        initial: { opacity: 0, scale: 0.92 },
+        animate: { opacity: 1, scale: 1 },
+        exit: { opacity: 0, scale: 0.92 },
+        transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] },
+      }
+    : {
+        variants: fadeUp,
+        initial: "hidden",
+        whileInView: "show",
+        viewport: { once: true, margin: "-60px" },
+        custom: index % 3,
+      };
 
   return (
-    <div className="vw-root">
-      {/* ---------------------------------------------------------- NAV */}
-      <header className="vw-nav">
-        <a className="vw-logo" href="#vw-top">
-          VOID<span>WEAR</span>
-        </a>
-        <nav className="vw-nav-links">
-          <a href="#vw-drop">Drop</a>
-          <a href="#vw-shop">Shop</a>
-          <a href="#vw-lookbook">Lookbook</a>
-          <a href="#vw-manifesto">Manifesto</a>
-        </nav>
-        <button className="vw-cart" type="button" aria-label="Cart">
-          <ShoppingBag size={20} strokeWidth={2.2} />
-          <motion.span
-            key={cartCount}
-            className="vw-cart-badge"
-            initial={{ scale: 0.3 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", stiffness: 500, damping: 16 }}
-          >
-            {cartCount}
-          </motion.span>
+    <motion.article className="vw-card" {...motionProps}>
+      <div className="vw-card-media">
+        <img src={product.img} alt={product.name} loading="lazy" />
+        <span className="vw-card-sweep" />
+        <span className={`vw-card-tag vw-tag-${product.tag.toLowerCase()}`}>
+          {product.tag}
+        </span>
+        <button
+          type="button"
+          className={`vw-add${isAdded ? " vw-added" : ""}`}
+          onClick={() => onAdd(product.id)}
+        >
+          {isAdded ? (
+            <>
+              ADDED <Check size={16} strokeWidth={3} />
+            </>
+          ) : (
+            <>
+              ADD <Plus size={16} strokeWidth={3} />
+            </>
+          )}
         </button>
-      </header>
+      </div>
+      <div className="vw-card-info">
+        <h3>{product.name}</h3>
+        <span className="vw-price">${product.price}</span>
+      </div>
+    </motion.article>
+  );
+}
 
+// ---------------------------------------------------------------------------
+// Shared footer (every page)
+// ---------------------------------------------------------------------------
+
+function SiteFooter({ goTo }) {
+  return (
+    <footer className="vw-footer">
+      <div className="vw-footer-top">
+        <div className="vw-footer-col">
+          <h4>VOIDWEAR</h4>
+          <p>Drop-culture streetwear. Black, acid, final.</p>
+        </div>
+        <div className="vw-footer-col">
+          <h4>SHOP</h4>
+          <button type="button" className="vw-footer-link" onClick={() => goTo("shop")}>
+            Drop 004
+          </button>
+          <button type="button" className="vw-footer-link" onClick={() => goTo("home")}>
+            Countdown
+          </button>
+          <button type="button" className="vw-footer-link" onClick={() => goTo("lookbook")}>
+            Lookbook
+          </button>
+        </div>
+        <div className="vw-footer-col">
+          <h4>LABEL</h4>
+          <button type="button" className="vw-footer-link" onClick={() => goTo("manifesto")}>
+            Manifesto
+          </button>
+          <button
+            type="button"
+            className="vw-footer-link"
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          >
+            Back to top
+          </button>
+        </div>
+        <div className="vw-footer-col">
+          <h4>STATUS</h4>
+          <p>
+            <span className="vw-dot" /> DROP 004 LIVE
+          </p>
+          <p>RESTOCK: NEVER</p>
+        </div>
+      </div>
+      <div className="vw-footer-giant" aria-hidden="true">
+        VOIDWEAR
+      </div>
+      <div className="vw-footer-bottom">
+        <span>© 2026 VOIDWEAR</span>
+        <span>NO RESTOCK — NO SEASONS — NO APOLOGY</span>
+      </div>
+    </footer>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// PAGE: HOME (hero / marquee / countdown / featured / grid / looks / quotes)
+// ---------------------------------------------------------------------------
+
+function HomePage({ cartCount, added, onAdd, goTo }) {
+  const { days, hours, mins, secs } = useCountdown();
+  const featuredAdded = !!added[FEATURED.id];
+
+  return (
+    <>
       {/* ---------------------------------------------------------- HERO */}
-      <section className="vw-hero" id="vw-top">
+      <section className="vw-hero">
         <div className="vw-hero-copy">
           <motion.p
             className="vw-hero-kicker"
@@ -255,12 +427,20 @@ export default function Voidwear() {
             animate="show"
             custom={4}
           >
-            <a className="vw-btn vw-btn-acid" href="#vw-shop">
+            <button
+              type="button"
+              className="vw-btn vw-btn-acid"
+              onClick={() => goTo("shop")}
+            >
               Shop the drop <ArrowRight size={18} strokeWidth={2.5} />
-            </a>
-            <a className="vw-btn vw-btn-outline" href="#vw-manifesto">
+            </button>
+            <button
+              type="button"
+              className="vw-btn vw-btn-outline"
+              onClick={() => goTo("manifesto")}
+            >
               Manifesto
-            </a>
+            </button>
           </motion.div>
 
           <motion.div
@@ -306,7 +486,7 @@ export default function Voidwear() {
       </div>
 
       {/* ---------------------------------------------------------- COUNTDOWN */}
-      <section className="vw-countdown" id="vw-drop">
+      <section className="vw-countdown">
         <motion.div
           className="vw-section-head"
           variants={fadeUp}
@@ -352,8 +532,63 @@ export default function Voidwear() {
         </motion.p>
       </section>
 
-      {/* ---------------------------------------------------------- SHOP */}
-      <section className="vw-shop" id="vw-shop">
+      {/* ---------------------------------------------------------- FEATURED DROP */}
+      <section className="vw-featured">
+        <motion.div
+          className="vw-featured-media"
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-80px" }}
+        >
+          <img src={FEATURED.img} alt={FEATURED.name} loading="lazy" />
+          <span className="vw-hero-tint" />
+          <span className="vw-hero-tag">FEATURED / DROP 004</span>
+        </motion.div>
+
+        <motion.div
+          className="vw-featured-copy"
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-80px" }}
+          custom={1}
+        >
+          <p className="vw-eyebrow">FEATURED DROP</p>
+          <h2 className="vw-featured-title">
+            DROP 004<span>ACID RAIN</span>
+          </h2>
+          <p className="vw-featured-price">${FEATURED.price}</p>
+          <p className="vw-featured-desc">
+            The centerpiece of Drop 004. Heavyweight fleece, acid-washed by
+            hand, cut boxy enough to disappear into. Three hundred pieces.
+            Then the files get deleted.
+          </p>
+          <ul className="vw-featured-specs">
+            {FEATURED.specs.map((spec) => (
+              <li key={spec}>{spec}</li>
+            ))}
+          </ul>
+          <button
+            type="button"
+            className={`vw-btn vw-btn-acid vw-featured-add${featuredAdded ? " vw-added" : ""}`}
+            onClick={() => onAdd(FEATURED.id)}
+          >
+            {featuredAdded ? (
+              <>
+                Added to cart <Check size={18} strokeWidth={3} />
+              </>
+            ) : (
+              <>
+                Add to cart <Plus size={18} strokeWidth={3} />
+              </>
+            )}
+          </button>
+        </motion.div>
+      </section>
+
+      {/* ---------------------------------------------------------- SHOP TEASER */}
+      <section className="vw-shop">
         <motion.div
           className="vw-section-head vw-section-head-row"
           variants={fadeUp}
@@ -366,59 +601,41 @@ export default function Voidwear() {
             <h2 className="vw-h2">SHOP DROP 004</h2>
           </div>
           <p className="vw-shop-count">
-            CART ({cartCount}) — 6 PIECES — ALL FINAL
+            CART ({cartCount}) — 9 PIECES — ALL FINAL
           </p>
         </motion.div>
 
         <div className="vw-grid">
-          {PRODUCTS.map((product, i) => {
-            const isAdded = !!added[product.id];
-            return (
-              <motion.article
-                className="vw-card"
-                key={product.id}
-                variants={fadeUp}
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: true, margin: "-60px" }}
-                custom={i % 3}
-              >
-                <div className="vw-card-media">
-                  <img src={product.img} alt={product.name} loading="lazy" />
-                  <span className="vw-card-sweep" />
-                  <span
-                    className={`vw-card-tag vw-tag-${product.tag.toLowerCase()}`}
-                  >
-                    {product.tag}
-                  </span>
-                  <button
-                    type="button"
-                    className={`vw-add${isAdded ? " vw-added" : ""}`}
-                    onClick={() => handleAdd(product.id)}
-                  >
-                    {isAdded ? (
-                      <>
-                        ADDED <Check size={16} strokeWidth={3} />
-                      </>
-                    ) : (
-                      <>
-                        ADD <Plus size={16} strokeWidth={3} />
-                      </>
-                    )}
-                  </button>
-                </div>
-                <div className="vw-card-info">
-                  <h3>{product.name}</h3>
-                  <span className="vw-price">${product.price}</span>
-                </div>
-              </motion.article>
-            );
-          })}
+          {PRODUCTS.slice(0, 6).map((product, i) => (
+            <ProductCard
+              key={product.id}
+              product={product}
+              index={i}
+              isAdded={!!added[product.id]}
+              onAdd={onAdd}
+            />
+          ))}
         </div>
+
+        <motion.div
+          className="vw-shop-more"
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-60px" }}
+        >
+          <button
+            type="button"
+            className="vw-btn vw-btn-outline"
+            onClick={() => goTo("shop")}
+          >
+            View all 9 pieces <ArrowRight size={18} strokeWidth={2.5} />
+          </button>
+        </motion.div>
       </section>
 
-      {/* ---------------------------------------------------------- LOOKBOOK */}
-      <section className="vw-lookbook" id="vw-lookbook">
+      {/* ---------------------------------------------------------- LOOKBOOK STRIP */}
+      <section className="vw-lookbook">
         <motion.div
           className="vw-section-head vw-section-head-row"
           variants={fadeUp}
@@ -430,9 +647,13 @@ export default function Voidwear() {
             <p className="vw-eyebrow">03 — LOOKBOOK</p>
             <h2 className="vw-h2">SHOT ON CONCRETE</h2>
           </div>
-          <p className="vw-scroll-hint">
-            SCROLL <ArrowRight size={16} strokeWidth={2.5} />
-          </p>
+          <button
+            type="button"
+            className="vw-scroll-hint vw-hint-btn"
+            onClick={() => goTo("lookbook")}
+          >
+            FULL LOOKBOOK <ArrowRight size={16} strokeWidth={2.5} />
+          </button>
         </motion.div>
 
         <div className="vw-look-row">
@@ -453,9 +674,45 @@ export default function Voidwear() {
         </div>
       </section>
 
-      {/* ---------------------------------------------------------- MANIFESTO */}
-      <section className="vw-manifesto" id="vw-manifesto">
-        <p className="vw-eyebrow">04 — MANIFESTO</p>
+      {/* ---------------------------------------------------------- STREET QUOTES */}
+      <section className="vw-quotes">
+        <motion.div
+          className="vw-section-head"
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-80px" }}
+        >
+          <p className="vw-eyebrow">04 — STREET TALK</p>
+          <h2 className="vw-h2">WORD ON THE STREET</h2>
+        </motion.div>
+
+        <div className="vw-quotes-grid">
+          {QUOTES.map((quote, i) => (
+            <motion.blockquote
+              className="vw-quote-card"
+              key={quote.name}
+              variants={fadeUp}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, margin: "-60px" }}
+              custom={i}
+            >
+              <span className="vw-quote-mark" aria-hidden="true">
+                <Quote size={28} strokeWidth={2.5} />
+              </span>
+              <p className="vw-quote-text">“{quote.text}”</p>
+              <footer className="vw-quote-who">
+                {quote.name} <span>/ {quote.city}</span>
+              </footer>
+            </motion.blockquote>
+          ))}
+        </div>
+      </section>
+
+      {/* ---------------------------------------------------------- MANIFESTO TEASER */}
+      <section className="vw-manifesto">
+        <p className="vw-eyebrow">05 — MANIFESTO</p>
         <h2 className="vw-manifesto-lines">
           {[
             "WE DON'T DO SEASONS.",
@@ -488,53 +745,353 @@ export default function Voidwear() {
           something the day you wear it, not the year it sits in a warehouse.
           Buy it or watch it disappear. Either way, the void keeps moving.
         </motion.p>
-        <motion.a
+        <motion.button
+          type="button"
           className="vw-btn vw-btn-acid"
-          href="#vw-shop"
+          onClick={() => goTo("manifesto")}
           variants={fadeUp}
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: "-80px" }}
           custom={4}
         >
-          Enter the drop <ArrowUpRight size={18} strokeWidth={2.5} />
-        </motion.a>
+          Read the manifesto <ArrowUpRight size={18} strokeWidth={2.5} />
+        </motion.button>
       </section>
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// PAGE: SHOP (9 products, category filters, layout animation)
+// ---------------------------------------------------------------------------
+
+function ShopPage({ cartCount, added, onAdd }) {
+  const [category, setCategory] = useState("All");
+
+  const visible =
+    category === "All"
+      ? PRODUCTS
+      : PRODUCTS.filter((p) => p.category === category);
+
+  return (
+    <section className="vw-shop-page">
+      <motion.div
+        className="vw-section-head vw-section-head-row"
+        variants={fadeUp}
+        initial="hidden"
+        animate="show"
+      >
+        <div>
+          <p className="vw-eyebrow">DROP 004 — FULL RANGE</p>
+          <h2 className="vw-h2">SHOP ALL</h2>
+        </div>
+        <p className="vw-shop-count">
+          {visible.length} PRODUCTS — CART ({cartCount}) — ALL FINAL
+        </p>
+      </motion.div>
+
+      <motion.div
+        className="vw-filters"
+        variants={fadeUp}
+        initial="hidden"
+        animate="show"
+        custom={1}
+        role="tablist"
+        aria-label="Filter by category"
+      >
+        {CATEGORIES.map((cat) => (
+          <button
+            key={cat}
+            type="button"
+            role="tab"
+            aria-selected={category === cat}
+            className={`vw-filter-btn${category === cat ? " vw-filter-active" : ""}`}
+            onClick={() => setCategory(cat)}
+          >
+            {cat}
+          </button>
+        ))}
+      </motion.div>
+
+      <motion.div className="vw-grid" layout>
+        <AnimatePresence mode="popLayout">
+          {visible.map((product) => (
+            <ProductCard
+              key={product.id}
+              product={product}
+              layoutMode
+              isAdded={!!added[product.id]}
+              onAdd={onAdd}
+            />
+          ))}
+        </AnimatePresence>
+      </motion.div>
+
+      <p className="vw-shop-note">
+        EVERY PIECE IS FINAL. NO RESTOCK. NO SECOND RUN. WHEN THE TIMER DIES,
+        THIS PAGE EMPTIES.
+      </p>
+    </section>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// PAGE: LOOKBOOK (masonry grid, hover zoom + acid label)
+// ---------------------------------------------------------------------------
+
+function LookbookPage() {
+  return (
+    <section className="vw-lookbook-page">
+      <motion.div
+        className="vw-section-head vw-section-head-row"
+        variants={fadeUp}
+        initial="hidden"
+        animate="show"
+      >
+        <div>
+          <p className="vw-eyebrow">DROP 004 — EDITORIAL</p>
+          <h2 className="vw-h2">LOOKBOOK</h2>
+        </div>
+        <p className="vw-shop-count">{LOOKBOOK_FULL.length} LOOKS — SHOT ON CONCRETE</p>
+      </motion.div>
+
+      <div className="vw-lb-grid">
+        {LOOKBOOK_FULL.map((look, i) => (
+          <motion.figure
+            className="vw-lb-item"
+            key={look.cap}
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, margin: "-40px" }}
+            custom={i % 3}
+          >
+            <div className="vw-lb-media">
+              <img src={look.img} alt={look.cap} loading="lazy" />
+              <span className="vw-lb-label">{look.cap}</span>
+            </div>
+            <figcaption>{look.cap}</figcaption>
+          </motion.figure>
+        ))}
+      </div>
+
+      <p className="vw-shop-note">
+        NO STUDIO. NO RETOUCHING. EVERY LOOK SHOT ON THE STREET IT WAS MADE FOR.
+      </p>
+    </section>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// PAGE: MANIFESTO (big type, numbered rules, quote block, CTA)
+// ---------------------------------------------------------------------------
+
+function ManifestoPage({ goTo }) {
+  return (
+    <section className="vw-manifesto-page">
+      <p className="vw-eyebrow">THE VOIDWEAR MANIFESTO</p>
+
+      <h2 className="vw-mani-hero">
+        {[
+          "WE DON'T",
+          "RESTOCK.",
+          "WE DON'T",
+          "APOLOGIZE.",
+        ].map((line, i) => (
+          <motion.span
+            key={`${line}-${i}`}
+            className={`vw-mani-line${i === 1 ? " vw-line-acid" : ""}${i === 3 ? " vw-mani-outline" : ""}`}
+            variants={lineReveal}
+            initial="hidden"
+            animate="show"
+            custom={i}
+          >
+            {line}
+          </motion.span>
+        ))}
+      </h2>
+
+      <motion.p
+        className="vw-mani-intro"
+        variants={fadeUp}
+        initial="hidden"
+        animate="show"
+        custom={4}
+      >
+        VOIDWEAR is not a collection. It is a timer. Every piece is cut once,
+        released once, and deleted on schedule. These are the rules we run on —
+        all five of them, no exceptions.
+      </motion.p>
+
+      <div className="vw-rules">
+        {RULES.map((rule, i) => (
+          <motion.div
+            className="vw-rule"
+            key={rule.num}
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, margin: "-60px" }}
+            custom={i % 2}
+          >
+            <span className="vw-rule-num">{rule.num}</span>
+            <div className="vw-rule-body">
+              <h3>{rule.title}</h3>
+              <p>{rule.body}</p>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      <motion.blockquote
+        className="vw-big-quote"
+        variants={fadeUp}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, margin: "-80px" }}
+      >
+        <span className="vw-quote-mark" aria-hidden="true">
+          <Quote size={36} strokeWidth={2.5} />
+        </span>
+        <p>
+          CLOTHING SHOULD MEAN SOMETHING THE DAY YOU WEAR IT — NOT THE YEAR IT
+          SITS IN A WAREHOUSE.
+        </p>
+        <footer>— THE VOIDWEAR RULEBOOK</footer>
+      </motion.blockquote>
+
+      <motion.div
+        className="vw-mani-cta"
+        variants={fadeUp}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, margin: "-60px" }}
+      >
+        <p className="vw-mani-cta-note">DROP 004 IS LIVE. THE TIMER IS RUNNING.</p>
+        <button
+          type="button"
+          className="vw-btn vw-btn-acid"
+          onClick={() => goTo("shop")}
+        >
+          Enter the drop <ArrowUpRight size={18} strokeWidth={2.5} />
+        </button>
+      </motion.div>
+    </section>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Root component — page state + persistent cart
+// ---------------------------------------------------------------------------
+
+const NAV_PAGES = [
+  { id: "home", label: "Home" },
+  { id: "shop", label: "Shop" },
+  { id: "lookbook", label: "Lookbook" },
+  { id: "manifesto", label: "Manifesto" },
+];
+
+export default function Voidwear() {
+  const [page, setPage] = useState("home");
+  const [cartCount, setCartCount] = useState(0);
+  const [added, setAdded] = useState({});
+  const timers = useRef({});
+
+  // Clear any pending "ADDED" revert timers on unmount
+  useEffect(() => {
+    const stash = timers.current;
+    return () => Object.values(stash).forEach(clearTimeout);
+  }, []);
+
+  // Reset scroll on every page switch
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [page]);
+
+  const handleAdd = (id) => {
+    setCartCount((c) => c + 1);
+    setAdded((prev) => ({ ...prev, [id]: true }));
+    clearTimeout(timers.current[id]);
+    timers.current[id] = setTimeout(() => {
+      setAdded((prev) => ({ ...prev, [id]: false }));
+    }, 1400);
+  };
+
+  const goTo = (next) => setPage(next);
+
+  return (
+    <div className="vw-root">
+      {/* ---------------------------------------------------------- NAV */}
+      <header className="vw-nav">
+        <button
+          type="button"
+          className="vw-logo vw-logo-btn"
+          onClick={() => goTo("home")}
+          aria-label="VOIDWEAR home"
+        >
+          VOID<span>WEAR</span>
+        </button>
+        <nav className="vw-nav-links" aria-label="VOIDWEAR pages">
+          {NAV_PAGES.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              className={`vw-nav-btn${page === item.id ? " vw-nav-active" : ""}`}
+              onClick={() => goTo(item.id)}
+              aria-current={page === item.id ? "page" : undefined}
+            >
+              {item.label}
+            </button>
+          ))}
+        </nav>
+        <button
+          className="vw-cart"
+          type="button"
+          aria-label="Cart"
+          onClick={() => goTo("shop")}
+        >
+          <ShoppingBag size={20} strokeWidth={2.2} />
+          <motion.span
+            key={cartCount}
+            className="vw-cart-badge"
+            initial={{ scale: 0.3 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 500, damping: 16 }}
+          >
+            {cartCount}
+          </motion.span>
+        </button>
+      </header>
+
+      {/* ---------------------------------------------------------- PAGES */}
+      <AnimatePresence mode="wait">
+        <motion.main
+          key={page}
+          className="vw-page"
+          variants={pageTransition}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+        >
+          {page === "home" && (
+            <HomePage
+              cartCount={cartCount}
+              added={added}
+              onAdd={handleAdd}
+              goTo={goTo}
+            />
+          )}
+          {page === "shop" && (
+            <ShopPage cartCount={cartCount} added={added} onAdd={handleAdd} />
+          )}
+          {page === "lookbook" && <LookbookPage />}
+          {page === "manifesto" && <ManifestoPage goTo={goTo} />}
+        </motion.main>
+      </AnimatePresence>
 
       {/* ---------------------------------------------------------- FOOTER */}
-      <footer className="vw-footer">
-        <div className="vw-footer-top">
-          <div className="vw-footer-col">
-            <h4>VOIDWEAR</h4>
-            <p>Drop-culture streetwear. Black, acid, final.</p>
-          </div>
-          <div className="vw-footer-col">
-            <h4>SHOP</h4>
-            <a href="#vw-shop">Drop 004</a>
-            <a href="#vw-drop">Countdown</a>
-            <a href="#vw-lookbook">Lookbook</a>
-          </div>
-          <div className="vw-footer-col">
-            <h4>LABEL</h4>
-            <a href="#vw-manifesto">Manifesto</a>
-            <a href="#vw-top">Back to top</a>
-          </div>
-          <div className="vw-footer-col">
-            <h4>STATUS</h4>
-            <p>
-              <span className="vw-dot" /> DROP 004 LIVE
-            </p>
-            <p>RESTOCK: NEVER</p>
-          </div>
-        </div>
-        <div className="vw-footer-giant" aria-hidden="true">
-          VOIDWEAR
-        </div>
-        <div className="vw-footer-bottom">
-          <span>© 2026 VOIDWEAR</span>
-          <span>NO RESTOCK — NO SEASONS — NO APOLOGY</span>
-        </div>
-      </footer>
+      <SiteFooter goTo={goTo} />
     </div>
   );
 }

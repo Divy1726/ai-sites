@@ -19,6 +19,7 @@ const sites = [
     desc: "Black. Acid. No restock. A drop-culture label that never asks twice.",
     accent: "#d9ff3d",
     bg: "#0a0a0a",
+    pages: "4 pages",
     img: "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=1200&q=80&auto=format&fit=crop",
   },
   {
@@ -29,17 +30,19 @@ const sites = [
     desc: "Ivory, gold and silence. Fragrance composed like light.",
     accent: "#b08d4f",
     bg: "#f6f1e7",
+    pages: "4 pages",
     img: "https://images.unsplash.com/photo-1541643600914-78b084683601?w=1200&q=80&auto=format&fit=crop",
   },
   {
     id: "orbital",
     num: "03",
     name: "ORBITAL",
-    tag: "Space Tourism",
-    desc: "Leave Earth. Come back different. Civilian flights beyond the line.",
-    accent: "#67e8f9",
-    bg: "#030712",
-    img: "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=1200&q=80&auto=format&fit=crop",
+    tag: "Civilian Space Programme",
+    desc: "A printed dossier for civilian flight. Spec sheets, crew files and boarding passes.",
+    accent: "#ff4d00",
+    bg: "#ece7dd",
+    pages: "4 pages",
+    img: "https://images.unsplash.com/photo-1517976487492-5750f3195933?w=1200&q=80&auto=format&fit=crop",
   },
   {
     id: "savage",
@@ -49,6 +52,7 @@ const sites = [
     desc: "Built, not born. Iron, discipline and zero excuses.",
     accent: "#ff2d2d",
     bg: "#0b0b0b",
+    pages: "4 pages",
     img: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1200&q=80&auto=format&fit=crop",
   },
   {
@@ -59,6 +63,7 @@ const sites = [
     desc: "A small workshop for slow coffee. Beans, steam and ritual.",
     accent: "#c47b3a",
     bg: "#f3ead9",
+    pages: "4 pages",
     img: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=1200&q=80&auto=format&fit=crop",
   },
 ];
@@ -163,7 +168,10 @@ function App() {
               <span className="home-card-name">{site.name}</span>
               <span className="home-card-desc">{site.desc}</span>
               <span className="home-card-enter">
-                Enter site
+                <span>
+                  Enter site
+                  <em className="home-card-pages">{site.pages}</em>
+                </span>
                 <span className="home-card-arrow">
                   <ArrowUpRight size={18} />
                 </span>

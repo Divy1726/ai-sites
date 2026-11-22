@@ -993,3 +993,631 @@
     padding: 0 20px;
   }
 }
+
+/* ============================================================
+   KOBO multi-page upgrade — nav pages, process strip,
+   grind selector, brew guide + timer
+   ============================================================ */
+
+/* ---------- Buttons that reuse link styles ---------- */
+
+.kb-root button {
+  font-family: inherit;
+}
+
+.kb-logo-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  color: inherit;
+}
+
+.kb-root button.kb-btn {
+  cursor: pointer;
+  gap: 8px;
+}
+
+.kb-root button.kb-btn-dark {
+  border: none;
+}
+
+.kb-nav-cta-btn {
+  border: none;
+  cursor: pointer;
+  font-family: var(--kb-sans);
+}
+
+.kb-nav-links button {
+  position: relative;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--kb-sans);
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  padding: 4px 0;
+  color: var(--kb-ink-soft);
+  transition: color 0.25s ease;
+}
+
+.kb-nav-links button::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 2px;
+  background: var(--kb-amber);
+  transition: width 0.3s ease;
+}
+
+.kb-nav-links button:hover {
+  color: var(--kb-ink);
+}
+
+.kb-nav-links button:hover::after {
+  width: 100%;
+}
+
+.kb-nav-links button.kb-nav-btn-active {
+  color: var(--kb-ink);
+}
+
+.kb-nav-links button.kb-nav-btn-active::after {
+  width: 100%;
+}
+
+.kb-order-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--kb-amber);
+  color: #fff;
+  font-family: var(--kb-mono);
+  font-size: 11.5px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.kb-footer-links button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--kb-sans);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--kb-ink-soft);
+  padding: 0;
+  transition: color 0.25s ease;
+}
+
+.kb-footer-links button:hover {
+  color: var(--kb-amber);
+}
+
+/* ---------- Page heads ---------- */
+
+.kb-page-head {
+  max-width: 700px;
+}
+
+.kb-menu-note {
+  margin-top: 40px;
+  max-width: 640px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--kb-ink-soft);
+  border-left: 3px solid var(--kb-amber);
+  padding-left: 18px;
+}
+
+.kb-menu-more {
+  margin-top: 44px;
+  display: flex;
+  justify-content: center;
+}
+
+.kb-badge-new {
+  background: transparent;
+  color: var(--kb-amber);
+  border: 1px solid var(--kb-amber);
+}
+
+/* ---------- Process strip (From Bean to Cup) ---------- */
+
+.kb-process-section {
+  border-bottom: 1px solid var(--kb-line-soft);
+}
+
+.kb-process-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 26px;
+}
+
+.kb-process-grid::before {
+  content: "";
+  position: absolute;
+  top: 35px;
+  left: 13%;
+  right: 13%;
+  border-top: 2px dotted rgba(196, 123, 58, 0.45);
+  pointer-events: none;
+}
+
+.kb-process-step {
+  position: relative;
+  text-align: center;
+  padding: 0 8px;
+}
+
+.kb-process-icon {
+  position: relative;
+  z-index: 1;
+  width: 70px;
+  height: 70px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  background: var(--kb-paper);
+  border: 1px solid rgba(196, 123, 58, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--kb-amber);
+  box-shadow: 0 14px 30px rgba(43, 29, 18, 0.1);
+  transition: transform 0.35s ease, background 0.35s ease, color 0.35s ease;
+}
+
+.kb-process-step:hover .kb-process-icon {
+  transform: translateY(-5px);
+  background: var(--kb-amber);
+  color: #fff;
+}
+
+.kb-process-num {
+  display: block;
+  font-family: var(--kb-mono);
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  color: var(--kb-amber);
+  margin-bottom: 8px;
+}
+
+.kb-process-title {
+  font-family: var(--kb-serif);
+  font-size: 26px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.kb-process-desc {
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: var(--kb-ink-soft);
+  max-width: 240px;
+  margin: 0 auto;
+}
+
+/* ---------- Grind selector ---------- */
+
+.kb-grind {
+  margin-bottom: 22px;
+}
+
+.kb-grind-label {
+  display: block;
+  font-family: var(--kb-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--kb-ink-soft);
+  margin-bottom: 9px;
+}
+
+.kb-grind-options {
+  display: flex;
+  gap: 6px;
+  background: var(--kb-bg-soft);
+  border: 1px solid var(--kb-line-soft);
+  border-radius: 999px;
+  padding: 4px;
+}
+
+.kb-grind-btn {
+  flex: 1;
+  font-family: var(--kb-sans);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--kb-ink-soft);
+  background: transparent;
+  border: none;
+  border-radius: 999px;
+  padding: 8px 4px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+}
+
+.kb-grind-btn:hover {
+  color: var(--kb-ink);
+}
+
+.kb-grind-btn-active {
+  background: var(--kb-amber);
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(196, 123, 58, 0.35);
+}
+
+/* ---------- Order bar (Beans page) ---------- */
+
+.kb-order-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+  background: var(--kb-paper);
+  border: 1px solid rgba(196, 123, 58, 0.4);
+  border-radius: 18px;
+  padding: 18px 24px;
+  margin-bottom: 36px;
+}
+
+.kb-order-bar-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14.5px;
+  font-weight: 500;
+  color: var(--kb-ink);
+}
+
+.kb-order-bar-text svg {
+  color: var(--kb-amber);
+  flex-shrink: 0;
+}
+
+.kb-order-bar-count {
+  font-family: var(--kb-mono);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #fff;
+  background: var(--kb-amber);
+  border-radius: 999px;
+  padding: 7px 15px;
+  white-space: nowrap;
+}
+
+/* ---------- Brew guide page ---------- */
+
+.kb-guide-section {
+  background: var(--kb-paper);
+}
+
+.kb-method-tabs {
+  display: inline-flex;
+  gap: 6px;
+  background: var(--kb-bg-soft);
+  border: 1px solid var(--kb-line-soft);
+  border-radius: 999px;
+  padding: 5px;
+  margin-bottom: 48px;
+}
+
+.kb-method-btn {
+  font-family: var(--kb-sans);
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--kb-ink-soft);
+  background: transparent;
+  border: none;
+  border-radius: 999px;
+  padding: 11px 28px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.kb-method-btn:hover {
+  color: var(--kb-ink);
+}
+
+.kb-method-btn-active {
+  background: var(--kb-amber);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(196, 123, 58, 0.35);
+}
+
+.kb-guide-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 56px;
+  align-items: start;
+}
+
+.kb-guide-ratio {
+  display: inline-block;
+  font-family: var(--kb-mono);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: var(--kb-amber);
+  border: 1px solid rgba(196, 123, 58, 0.4);
+  border-radius: 999px;
+  padding: 8px 16px;
+  margin-bottom: 30px;
+}
+
+.kb-guide-steps {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.kb-guide-step {
+  display: flex;
+  gap: 24px;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--kb-line-soft);
+}
+
+.kb-guide-step:first-child {
+  padding-top: 4px;
+}
+
+.kb-guide-time {
+  flex-shrink: 0;
+  width: 62px;
+  font-family: var(--kb-mono);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--kb-amber);
+  padding-top: 4px;
+}
+
+.kb-guide-step-title {
+  font-family: var(--kb-serif);
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.2;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.kb-guide-step-num {
+  font-family: var(--kb-mono);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  color: rgba(43, 29, 18, 0.4);
+}
+
+.kb-guide-step-desc {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--kb-ink-soft);
+  max-width: 520px;
+}
+
+/* ---------- Brew timer ---------- */
+
+.kb-timer-card {
+  position: sticky;
+  top: 104px;
+  background: var(--kb-bg);
+  border: 1px solid rgba(196, 123, 58, 0.45);
+  border-radius: 28px;
+  padding: 34px 32px 30px;
+  box-shadow: 0 26px 52px rgba(43, 29, 18, 0.13);
+  text-align: center;
+}
+
+.kb-timer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+
+.kb-timer-method {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--kb-mono);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--kb-ink);
+}
+
+.kb-timer-method svg {
+  color: var(--kb-amber);
+}
+
+.kb-timer-target {
+  font-family: var(--kb-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
+  color: var(--kb-ink-soft);
+}
+
+.kb-timer-display {
+  font-family: var(--kb-mono);
+  font-size: clamp(56px, 7vw, 76px);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--kb-ink);
+  margin-bottom: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.kb-timer-display-done {
+  color: var(--kb-amber);
+}
+
+.kb-timer-status {
+  font-family: var(--kb-serif);
+  font-style: italic;
+  font-size: 16px;
+  color: var(--kb-ink-soft);
+  min-height: 26px;
+  margin-bottom: 24px;
+}
+
+.kb-timer-track {
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(43, 29, 18, 0.1);
+  overflow: hidden;
+  margin-bottom: 28px;
+}
+
+.kb-timer-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--kb-amber-soft), var(--kb-amber));
+}
+
+.kb-timer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+
+.kb-timer-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--kb-sans);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--kb-ink);
+  background: transparent;
+  border: 1px solid var(--kb-ink);
+  border-radius: 999px;
+  padding: 13px 28px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.kb-timer-btn:hover:not(:disabled) {
+  background: var(--kb-ink);
+  color: var(--kb-bg);
+  transform: translateY(-2px);
+}
+
+.kb-timer-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.kb-timer-btn-primary {
+  background: var(--kb-ink);
+  color: var(--kb-bg);
+  border-color: var(--kb-ink);
+}
+
+.kb-timer-btn-primary:hover:not(:disabled) {
+  background: var(--kb-amber);
+  border-color: var(--kb-amber);
+  color: #fff;
+  box-shadow: 0 14px 28px rgba(196, 123, 58, 0.3);
+}
+
+.kb-timer-done {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #fff;
+  background: var(--kb-amber);
+  border-radius: 999px;
+  padding: 13px 30px;
+  box-shadow: 0 14px 28px rgba(196, 123, 58, 0.35);
+}
+
+.kb-timer-note {
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--kb-ink-soft);
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+/* ---------- Responsive (upgrade) ---------- */
+
+@media (max-width: 1024px) {
+  .kb-process-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 40px 26px;
+  }
+  .kb-process-grid::before {
+    display: none;
+  }
+  .kb-guide-grid {
+    grid-template-columns: 1fr;
+    gap: 44px;
+  }
+  .kb-timer-card {
+    position: static;
+    max-width: 520px;
+    margin: 0 auto;
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .kb-process-grid {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+  .kb-method-tabs {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .kb-method-btn {
+    flex: 1;
+    padding: 11px 6px;
+    font-size: 12.5px;
+  }
+  .kb-guide-step {
+    gap: 16px;
+  }
+  .kb-guide-time {
+    width: 50px;
+    font-size: 13.5px;
+  }
+  .kb-guide-step-title {
+    font-size: 21px;
+  }
+  .kb-timer-card {
+    padding: 28px 22px 24px;
+  }
+  .kb-order-bar {
+    padding: 16px 20px;
+  }
+  .kb-order-bar-text {
+    font-size: 13.5px;
+  }
+}

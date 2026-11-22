@@ -1,6 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Coffee, MapPin, Clock, Check, ArrowRight, Sparkles } from "lucide-react";
+import {
+  Coffee,
+  MapPin,
+  Clock,
+  Check,
+  ArrowRight,
+  Sparkles,
+  Sprout,
+  Flame,
+  Cog,
+  Play,
+  Pause,
+  RotateCcw,
+  ShoppingBag,
+  Timer,
+} from "lucide-react";
 import "./Kobo.css";
 
 const fadeUp = {
@@ -14,22 +29,28 @@ const fadeUp = {
 
 const menuData = {
   espresso: [
-    { name: "KOBO Espresso", desc: "Double shot, Brazil Cerrado base — dark chocolate, toasted hazelnut.", price: "¥550" },
+    { name: "KOBO Espresso", desc: "Double shot, Brazil Cerrado base — dark chocolate, toasted hazelnut.", price: "¥550", tag: "POPULAR" },
     { name: "Cortado", desc: "Equal parts espresso and silky steamed milk, served in glass.", price: "¥620" },
-    { name: "Flat White", desc: "Velvet micro-foam over a ristretto pull. Quiet, balanced, warm.", price: "¥680" },
+    { name: "Flat White", desc: "Velvet micro-foam over a ristretto pull. Quiet, balanced, warm.", price: "¥680", tag: "POPULAR" },
     { name: "Tokyo Latte", desc: "Our signature — espresso, milk, and a whisper of kuromitsu syrup.", price: "¥720" },
+    { name: "Cappuccino", desc: "Classic thirds — espresso, steamed milk, airy foam, dusted with cocoa.", price: "¥660" },
+    { name: "Espresso Romano", desc: "Double shot with a twist of lemon peel. Bright, sharp, old-school.", price: "¥600", tag: "NEW" },
   ],
   filter: [
-    { name: "V60 — Ethiopia", desc: "Yirgacheffe, washed. Jasmine, bergamot, white peach. 92°C pour.", price: "¥780" },
+    { name: "V60 — Ethiopia", desc: "Yirgacheffe, washed. Jasmine, bergamot, white peach. 92°C pour.", price: "¥780", tag: "POPULAR" },
     { name: "V60 — Colombia", desc: "Huila, honey process. Red plum, panela sweetness, soft acidity.", price: "¥750" },
     { name: "Aeropress", desc: "Full immersion, paper filtered. Round body, cocoa finish.", price: "¥700" },
     { name: "Cold Brew", desc: "18-hour slow steep. Served over clear ice, no sugar needed.", price: "¥650" },
+    { name: "Chemex — Kenya", desc: "Nyeri AA, thick paper filter. Blackcurrant, grapefruit, clean sweetness.", price: "¥800", tag: "NEW" },
+    { name: "Iced Filter", desc: "Flash-chilled V60 over clear ice. Crisp, floral, never diluted.", price: "¥720" },
   ],
   seasonal: [
-    { name: "Sakura Latte", desc: "Cherry blossom syrup, steamed milk, espresso. Spring only.", price: "¥820", limited: true },
-    { name: "Yuzu Espresso Tonic", desc: "Double shot over yuzu tonic and ice. Bright, bitter, electric.", price: "¥850", limited: true },
-    { name: "Matcha Espresso", desc: "Uji matcha whisked fresh, layered over espresso and milk.", price: "¥800", limited: true },
-    { name: "Chestnut Mont Blanc", desc: "Chestnut cream, espresso, steamed milk. Autumn in a cup.", price: "¥880", limited: true },
+    { name: "Sakura Latte", desc: "Cherry blossom syrup, steamed milk, espresso. Spring only.", price: "¥820", tag: "NEW" },
+    { name: "Yuzu Espresso Tonic", desc: "Double shot over yuzu tonic and ice. Bright, bitter, electric.", price: "¥850", tag: "POPULAR" },
+    { name: "Matcha Espresso", desc: "Uji matcha whisked fresh, layered over espresso and milk.", price: "¥800" },
+    { name: "Chestnut Mont Blanc", desc: "Chestnut cream, espresso, steamed milk. Autumn in a cup.", price: "¥880" },
+    { name: "Hojicha Latte", desc: "Roasted green tea, steamed milk, brown sugar. Toasty and calm.", price: "¥780", tag: "NEW" },
+    { name: "Strawberry Matcha", desc: "Fresh strawberry milk under whisked Uji matcha. Sweet, green, photogenic.", price: "¥840", tag: "NEW" },
   ],
 };
 
@@ -67,6 +88,39 @@ const beansData = [
     price: "¥1,500 / 200g",
     img: "https://images.unsplash.com/photo-1511920170033-f8396924c348?w=1200&q=80&auto=format&fit=crop",
   },
+  {
+    id: "kenya",
+    name: "Kenya Nyeri",
+    region: "Nyeri, Mount Kenya",
+    notes: "Blackcurrant · Grapefruit · Brown Sugar",
+    desc: "Washed AA lot from high-altitude smallholders. Juicy acidity with a wine-like finish.",
+    roast: 2,
+    roastLabel: "Light",
+    price: "¥1,900 / 200g",
+    img: "https://images.unsplash.com/photo-1524350876685-274059332603?w=1200&q=80&auto=format&fit=crop",
+  },
+  {
+    id: "sumatra",
+    name: "Sumatra Mandheling",
+    region: "Mandheling, Lake Toba",
+    notes: "Cedar · Dark Cocoa · Earthy Spice",
+    desc: "Wet-hulled and heavy-bodied. Low acidity, deep sweetness, made for slow mornings.",
+    roast: 5,
+    roastLabel: "Dark",
+    price: "¥1,600 / 200g",
+    img: "https://images.unsplash.com/photo-1512568400610-62da28bc8a13?w=1200&q=80&auto=format&fit=crop",
+  },
+  {
+    id: "guatemala",
+    name: "Guatemala Antigua",
+    region: "Antigua, Volcanic Valley",
+    notes: "Toffee · Orange Zest · Baking Spice",
+    desc: "Grown in volcanic soil at 1,500m. Balanced and sweet with a gentle citrus lift.",
+    roast: 3,
+    roastLabel: "Medium",
+    price: "¥1,700 / 200g",
+    img: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=1200&q=80&auto=format&fit=crop",
+  },
 ];
 
 const brewSteps = [
@@ -76,35 +130,372 @@ const brewSteps = [
   { num: "04", title: "Taste", desc: "Swirl gently. First sip for aroma, second for sweetness, third for the story.", detail: "Serve at 60°C" },
 ];
 
+const processSteps = [
+  { num: "01", title: "Source", icon: Sprout, desc: "We buy small, traceable lots directly from farms we know by name." },
+  { num: "02", title: "Roast", icon: Flame, desc: "Roasted in-house every Tuesday in tiny batches, rested for seven days." },
+  { num: "03", title: "Grind", icon: Cog, desc: "Ground seconds before brewing, matched to your brewer and dose." },
+  { num: "04", title: "Brew", icon: Coffee, desc: "Poured slow at 92°C with a 1:16 ratio. Nothing rushed, nothing wasted." },
+];
+
+const brewGuideData = {
+  v60: {
+    label: "V60",
+    target: 180,
+    ratio: "1:16 · 15g coffee · 240g water · 92°C",
+    steps: [
+      { time: "0:00", title: "Rinse & Preheat", desc: "Rinse the paper filter with hot water to remove paper taste and warm the dripper. Add 15g of medium-ground coffee and level the bed." },
+      { time: "0:30", title: "Bloom", desc: "Pour 30g of water in slow circles until all the grounds are wet. Swirl gently and let the coffee degas for 30 seconds." },
+      { time: "1:00", title: "First Pour", desc: "Pour up to 150g in steady spirals from the center outward. Keep the water level even and avoid pouring on the paper." },
+      { time: "1:45", title: "Second Pour", desc: "Top up to 240g with a slow, centered pour. Give the dripper one gentle swirl to settle the bed flat." },
+      { time: "2:30", title: "Drawdown & Serve", desc: "Let it drain fully by 3:00. Swirl the server, pour into a warm cup, and taste while it is still aromatic." },
+    ],
+  },
+  espresso: {
+    label: "Espresso",
+    target: 30,
+    ratio: "1:2 · 18g in · 36g out · 93°C",
+    steps: [
+      { time: "0:00", title: "Dose & Distribute", desc: "Dose 18g of fine-ground coffee into the portafilter. Distribute evenly with a needle tool or a gentle tap to break up clumps." },
+      { time: "0:05", title: "Tamp", desc: "Tamp level and firm — about 15kg of pressure. Wipe the rim clean so the seal stays tight." },
+      { time: "0:10", title: "Lock & Start", desc: "Lock the portafilter into the group head and start the pump and timer together. First drops should appear around 6–8 seconds." },
+      { time: "0:20", title: "Watch the Extraction", desc: "Look for a steady, honey-like stream the color of warm caramel. Too fast means grind finer; too slow, grind coarser." },
+      { time: "0:30", title: "Stop & Serve", desc: "Stop at 36g out, around 25–30 seconds total. Stir the shot once and serve immediately — espresso waits for no one." },
+    ],
+  },
+  frenchpress: {
+    label: "French Press",
+    target: 240,
+    ratio: "1:12 · 30g coffee · 360g water · 94°C",
+    steps: [
+      { time: "0:00", title: "Add Coffee", desc: "Add 30g of coarse-ground coffee to a warm press. Coarse like sea salt — too fine and the cup turns muddy." },
+      { time: "0:15", title: "Pour & Stir", desc: "Pour all 360g of water in one go, saturating every ground. Stir gently for 10 seconds to start even extraction." },
+      { time: "1:00", title: "Steep", desc: "Place the lid on with the plunger raised. Let it steep undisturbed — the crust on top is doing quiet work." },
+      { time: "3:30", title: "Break the Crust", desc: "Stir the crust down and skim off the foam and floating grounds with a spoon for a cleaner, sweeter cup." },
+      { time: "4:00", title: "Press & Serve", desc: "Press slowly, stopping just above the bed — never squeeze. Decant everything at once so it does not over-extract." },
+    ],
+  },
+};
+
+const grindOptions = ["Whole", "Filter", "Espresso"];
+
+function formatTime(totalSeconds) {
+  const m = Math.floor(totalSeconds / 60);
+  const s = totalSeconds % 60;
+  return `${m}:${String(s).padStart(2, "0")}`;
+}
+
+function BeanCard({ bean, index, added, onToggle, grind, onGrind, showGrind }) {
+  return (
+    <motion.article
+      className="kb-bean-card"
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-60px" }}
+      variants={fadeUp}
+      custom={index % 3}
+    >
+      <div className="kb-bean-imgwrap">
+        <img src={bean.img} alt={`${bean.name} coffee beans`} className="kb-bean-img" loading="lazy" />
+      </div>
+      <div className="kb-bean-body">
+        <p className="kb-bean-region">{bean.region}</p>
+        <h3 className="kb-bean-name">{bean.name}</h3>
+        <p className="kb-bean-notes">{bean.notes}</p>
+        <p className="kb-bean-desc">{bean.desc}</p>
+
+        <div className="kb-roast">
+          <div className="kb-roast-head">
+            <span>Roast</span>
+            <span className="kb-roast-label">{bean.roastLabel} · {bean.roast}/5</span>
+          </div>
+          <div className="kb-roast-track">
+            <motion.div
+              className="kb-roast-fill"
+              initial={{ width: 0 }}
+              whileInView={{ width: `${(bean.roast / 5) * 100}%` }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 1.1, delay: 0.2 + (index % 3) * 0.15, ease: [0.22, 1, 0.36, 1] }}
+            />
+          </div>
+          <div className="kb-roast-segments" aria-hidden="true">
+            {[1, 2, 3, 4, 5].map((s) => (
+              <span key={s} className={s <= bean.roast ? "kb-seg kb-seg-on" : "kb-seg"} />
+            ))}
+          </div>
+        </div>
+
+        {showGrind && (
+          <div className="kb-grind">
+            <span className="kb-grind-label">Grind</span>
+            <div className="kb-grind-options" role="group" aria-label={`Grind for ${bean.name}`}>
+              {grindOptions.map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  className={`kb-grind-btn ${grind === option ? "kb-grind-btn-active" : ""}`}
+                  onClick={() => onGrind(bean.id, option)}
+                  aria-pressed={grind === option}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="kb-bean-foot">
+          <span className="kb-bean-price">{bean.price}</span>
+          <button
+            type="button"
+            className={`kb-add-btn ${added ? "kb-add-btn-added" : ""}`}
+            onClick={() => onToggle(bean.id)}
+            aria-pressed={added}
+          >
+            {added ? (<><Check size={15} /> Added</>) : "Add to Order"}
+          </button>
+        </div>
+      </div>
+    </motion.article>
+  );
+}
+
+function BrewGuidePage() {
+  const [method, setMethod] = useState("v60");
+  const [seconds, setSeconds] = useState(0);
+  const [running, setRunning] = useState(false);
+
+  const guide = brewGuideData[method];
+  const target = guide.target;
+  const done = seconds >= target;
+  const progress = Math.min(100, (seconds / target) * 100);
+
+  useEffect(() => {
+    if (!running) return undefined;
+    const id = setInterval(() => {
+      setSeconds((prev) => Math.min(prev + 1, target));
+    }, 1000);
+    return () => clearInterval(id);
+  }, [running, target]);
+
+  useEffect(() => {
+    if (seconds >= target && running) {
+      setRunning(false);
+    }
+  }, [seconds, target, running]);
+
+  const selectMethod = (key) => {
+    setMethod(key);
+    setSeconds(0);
+    setRunning(false);
+  };
+
+  const handleReset = () => {
+    setSeconds(0);
+    setRunning(false);
+  };
+
+  const statusText = done
+    ? "Done — enjoy your cup."
+    : running
+      ? "Brewing… stay with it."
+      : seconds > 0
+        ? "Paused. Ready when you are."
+        : "Ready. Press start when the water hits the coffee.";
+
+  return (
+    <section className="kb-section kb-guide-section">
+      <span className="kb-vertical kb-vertical-edge kb-vertical-right" aria-hidden="true">淹れ方</span>
+      <div className="kb-container">
+        <motion.div
+          className="kb-section-head kb-page-head"
+          initial="hidden"
+          animate="visible"
+          variants={fadeUp}
+        >
+          <p className="kb-label">— Brew Guide</p>
+          <h1 className="kb-section-title">Brew it <em>the slow way.</em></h1>
+          <p className="kb-section-sub">
+            Pick your method, follow the steps, and let the timer keep you honest.
+            Same recipes we use at the pour-over bar in Shibuya.
+          </p>
+        </motion.div>
+
+        <div className="kb-method-tabs" role="tablist" aria-label="Brew methods">
+          {Object.entries(brewGuideData).map(([key, data]) => (
+            <button
+              key={key}
+              type="button"
+              role="tab"
+              aria-selected={method === key}
+              className={`kb-method-btn ${method === key ? "kb-method-btn-active" : ""}`}
+              onClick={() => selectMethod(key)}
+            >
+              {data.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="kb-guide-grid">
+          <div className="kb-guide-main">
+            <p className="kb-guide-ratio">{guide.ratio}</p>
+            <AnimatePresence mode="wait">
+              <motion.ol
+                key={method}
+                className="kb-guide-steps"
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.35, ease: "easeOut" }}
+              >
+                {guide.steps.map((step, i) => (
+                  <motion.li
+                    key={step.title}
+                    className="kb-guide-step"
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.45, delay: i * 0.09, ease: [0.22, 1, 0.36, 1] }}
+                  >
+                    <span className="kb-guide-time">{step.time}</span>
+                    <div className="kb-guide-step-copy">
+                      <h3 className="kb-guide-step-title">
+                        <span className="kb-guide-step-num">{String(i + 1).padStart(2, "0")}</span>
+                        {step.title}
+                      </h3>
+                      <p className="kb-guide-step-desc">{step.desc}</p>
+                    </div>
+                  </motion.li>
+                ))}
+              </motion.ol>
+            </AnimatePresence>
+          </div>
+
+          <aside className="kb-timer-card" aria-label="Brew timer">
+            <div className="kb-timer-head">
+              <span className="kb-timer-method"><Timer size={15} /> {guide.label} Timer</span>
+              <span className="kb-timer-target">Target {formatTime(target)}</span>
+            </div>
+
+            <p className={`kb-timer-display ${done ? "kb-timer-display-done" : ""}`}>{formatTime(seconds)}</p>
+            <p className="kb-timer-status">{statusText}</p>
+
+            <div className="kb-timer-track" role="progressbar" aria-valuemin={0} aria-valuemax={target} aria-valuenow={seconds}>
+              <motion.div
+                className="kb-timer-fill"
+                animate={{ width: `${progress}%` }}
+                transition={{ duration: 0.6, ease: "linear" }}
+              />
+            </div>
+
+            <div className="kb-timer-actions">
+              {done ? (
+                <span className="kb-timer-done"><Check size={16} /> Done</span>
+              ) : running ? (
+                <button type="button" className="kb-timer-btn kb-timer-btn-primary" onClick={() => setRunning(false)}>
+                  <Pause size={15} /> Pause
+                </button>
+              ) : (
+                <button type="button" className="kb-timer-btn kb-timer-btn-primary" onClick={() => setRunning(true)}>
+                  <Play size={15} /> {seconds > 0 ? "Resume" : "Start"}
+                </button>
+              )}
+              <button type="button" className="kb-timer-btn" onClick={handleReset} disabled={seconds === 0 && !running}>
+                <RotateCcw size={15} /> Reset
+              </button>
+            </div>
+
+            <p className="kb-timer-note">
+              Switching methods resets the timer. Times are a guide — taste always wins.
+            </p>
+          </aside>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function Kobo() {
+  const [page, setPage] = useState("home");
   const [activeTab, setActiveTab] = useState("espresso");
   const [addedBeans, setAddedBeans] = useState({});
+  const [grindByBean, setGrindByBean] = useState({});
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [page]);
+
+  const orderCount = Object.values(addedBeans).filter(Boolean).length;
 
   const toggleBean = (id) => {
     setAddedBeans((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
-  return (
-    <div className="kb-root">
-      {/* NAV */}
-      <header className="kb-nav">
-        <div className="kb-nav-inner">
-          <a href="#" className="kb-logo">
-            <span className="kb-logo-word">KOBO</span>
-            <span className="kb-logo-kanji">工房</span>
-          </a>
-          <nav className="kb-nav-links">
-            <a href="#kb-menu">Menu</a>
-            <a href="#kb-beans">Beans</a>
-            <a href="#kb-brew">Brew</a>
-            <a href="#kb-visit">Visit</a>
-          </nav>
-          <a href="#kb-beans" className="kb-nav-cta">
-            Order Beans <ArrowRight size={15} strokeWidth={2} />
-          </a>
-        </div>
-      </header>
+  const setGrind = (id, grind) => {
+    setGrindByBean((prev) => ({ ...prev, [id]: grind }));
+  };
 
+  const navLinks = [
+    { key: "home", label: "Home" },
+    { key: "menu", label: "Menu" },
+    { key: "beans", label: "Beans" },
+    { key: "brew", label: "Brew Guide" },
+  ];
+
+  const menuTabs = [
+    { key: "espresso", label: "Espresso" },
+    { key: "filter", label: "Filter" },
+    { key: "seasonal", label: "Seasonal" },
+  ];
+
+  const renderMenuTabs = () => (
+    <div className="kb-tabs" role="tablist" aria-label="Menu categories">
+      {menuTabs.map((tab) => (
+        <button
+          key={tab.key}
+          type="button"
+          role="tab"
+          aria-selected={activeTab === tab.key}
+          className={`kb-tab ${activeTab === tab.key ? "kb-tab-active" : ""}`}
+          onClick={() => setActiveTab(tab.key)}
+        >
+          {tab.label}
+        </button>
+      ))}
+    </div>
+  );
+
+  const renderMenuList = (items, listKey) => (
+    <AnimatePresence mode="wait">
+      <motion.ul
+        key={listKey}
+        className="kb-menu-list"
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        transition={{ duration: 0.35, ease: "easeOut" }}
+      >
+        {items.map((item) => (
+          <li key={item.name} className="kb-menu-item">
+            <div className="kb-menu-line">
+              <span className="kb-menu-name">
+                {item.name}
+                {item.tag && (
+                  <span className={`kb-badge ${item.tag === "NEW" ? "kb-badge-new" : ""}`}>
+                    <Sparkles size={11} /> {item.tag}
+                  </span>
+                )}
+              </span>
+              <span className="kb-menu-leader" aria-hidden="true" />
+              <span className="kb-menu-price">{item.price}</span>
+            </div>
+            <p className="kb-menu-desc">{item.desc}</p>
+          </li>
+        ))}
+      </motion.ul>
+    </AnimatePresence>
+  );
+
+  const renderHome = () => (
+    <>
       {/* HERO */}
       <section className="kb-hero">
         <div className="kb-hero-inner">
@@ -127,8 +518,8 @@ export default function Kobo() {
               one pair of hands at a time.
             </motion.p>
             <motion.div className="kb-hero-ctas" variants={fadeUp} custom={3}>
-              <a href="#kb-menu" className="kb-btn kb-btn-dark">See the Menu</a>
-              <a href="#kb-beans" className="kb-btn kb-btn-outline">Our Beans</a>
+              <button type="button" className="kb-btn kb-btn-dark" onClick={() => setPage("menu")}>See the Menu</button>
+              <button type="button" className="kb-btn kb-btn-outline" onClick={() => setPage("beans")}>Our Beans</button>
             </motion.div>
             <motion.div className="kb-hero-meta" variants={fadeUp} custom={4}>
               <span><Coffee size={14} /> Roasted in-house, weekly</span>
@@ -164,8 +555,48 @@ export default function Kobo() {
         </div>
       </section>
 
-      {/* MENU */}
-      <section id="kb-menu" className="kb-section kb-menu-section">
+      {/* PROCESS STRIP */}
+      <section className="kb-section kb-process-section">
+        <div className="kb-container">
+          <motion.div
+            className="kb-section-head"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-80px" }}
+            variants={fadeUp}
+          >
+            <p className="kb-label">— From Bean to Cup</p>
+            <h2 className="kb-section-title">Four hands-on steps, <em>zero shortcuts.</em></h2>
+          </motion.div>
+
+          <div className="kb-process-grid">
+            {processSteps.map((step, i) => {
+              const Icon = step.icon;
+              return (
+                <motion.article
+                  key={step.num}
+                  className="kb-process-step"
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, margin: "-60px" }}
+                  variants={fadeUp}
+                  custom={i}
+                >
+                  <div className="kb-process-icon">
+                    <Icon size={24} strokeWidth={1.6} />
+                  </div>
+                  <span className="kb-process-num">{step.num}</span>
+                  <h3 className="kb-process-title">{step.title}</h3>
+                  <p className="kb-process-desc">{step.desc}</p>
+                </motion.article>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* MENU PREVIEW */}
+      <section className="kb-section kb-menu-section">
         <span className="kb-vertical kb-vertical-edge" aria-hidden="true">メニュー</span>
         <div className="kb-container">
           <motion.div
@@ -179,55 +610,19 @@ export default function Kobo() {
             <h2 className="kb-section-title">Poured to order, <em>never rushed.</em></h2>
           </motion.div>
 
-          <div className="kb-tabs" role="tablist" aria-label="Menu categories">
-            {[
-              { key: "espresso", label: "Espresso" },
-              { key: "filter", label: "Filter" },
-              { key: "seasonal", label: "Seasonal" },
-            ].map((tab) => (
-              <button
-                key={tab.key}
-                role="tab"
-                aria-selected={activeTab === tab.key}
-                className={`kb-tab ${activeTab === tab.key ? "kb-tab-active" : ""}`}
-                onClick={() => setActiveTab(tab.key)}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+          {renderMenuTabs()}
+          {renderMenuList(menuData[activeTab].slice(0, 4), `home-${activeTab}`)}
 
-          <AnimatePresence mode="wait">
-            <motion.ul
-              key={activeTab}
-              className="kb-menu-list"
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.35, ease: "easeOut" }}
-            >
-              {menuData[activeTab].map((item) => (
-                <li key={item.name} className="kb-menu-item">
-                  <div className="kb-menu-line">
-                    <span className="kb-menu-name">
-                      {item.name}
-                      {item.limited && (
-                        <span className="kb-badge"><Sparkles size={11} /> Limited</span>
-                      )}
-                    </span>
-                    <span className="kb-menu-leader" aria-hidden="true" />
-                    <span className="kb-menu-price">{item.price}</span>
-                  </div>
-                  <p className="kb-menu-desc">{item.desc}</p>
-                </li>
-              ))}
-            </motion.ul>
-          </AnimatePresence>
+          <div className="kb-menu-more">
+            <button type="button" className="kb-btn kb-btn-outline" onClick={() => setPage("menu")}>
+              View Full Menu <ArrowRight size={15} strokeWidth={2} />
+            </button>
+          </div>
         </div>
       </section>
 
-      {/* BEANS */}
-      <section id="kb-beans" className="kb-section kb-beans-section">
+      {/* BEANS PREVIEW */}
+      <section className="kb-section kb-beans-section">
         <div className="kb-container">
           <motion.div
             className="kb-section-head"
@@ -237,72 +632,37 @@ export default function Kobo() {
             variants={fadeUp}
           >
             <p className="kb-label">— Fresh Beans</p>
-            <h2 className="kb-section-title">Three origins, <em>one small roaster.</em></h2>
+            <h2 className="kb-section-title">Six origins, <em>one small roaster.</em></h2>
             <p className="kb-section-sub">
               Roasted every Tuesday in Shibuya. Whole bean or ground to your brewer.
             </p>
           </motion.div>
 
           <div className="kb-beans-grid">
-            {beansData.map((bean, i) => (
-              <motion.article
+            {beansData.slice(0, 3).map((bean, i) => (
+              <BeanCard
                 key={bean.id}
-                className="kb-bean-card"
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, margin: "-60px" }}
-                variants={fadeUp}
-                custom={i}
-              >
-                <div className="kb-bean-imgwrap">
-                  <img src={bean.img} alt={`${bean.name} coffee beans`} className="kb-bean-img" loading="lazy" />
-                </div>
-                <div className="kb-bean-body">
-                  <p className="kb-bean-region">{bean.region}</p>
-                  <h3 className="kb-bean-name">{bean.name}</h3>
-                  <p className="kb-bean-notes">{bean.notes}</p>
-                  <p className="kb-bean-desc">{bean.desc}</p>
-
-                  <div className="kb-roast">
-                    <div className="kb-roast-head">
-                      <span>Roast</span>
-                      <span className="kb-roast-label">{bean.roastLabel} · {bean.roast}/5</span>
-                    </div>
-                    <div className="kb-roast-track">
-                      <motion.div
-                        className="kb-roast-fill"
-                        initial={{ width: 0 }}
-                        whileInView={{ width: `${(bean.roast / 5) * 100}%` }}
-                        viewport={{ once: true, margin: "-40px" }}
-                        transition={{ duration: 1.1, delay: 0.2 + i * 0.15, ease: [0.22, 1, 0.36, 1] }}
-                      />
-                    </div>
-                    <div className="kb-roast-segments" aria-hidden="true">
-                      {[1, 2, 3, 4, 5].map((s) => (
-                        <span key={s} className={s <= bean.roast ? "kb-seg kb-seg-on" : "kb-seg"} />
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="kb-bean-foot">
-                    <span className="kb-bean-price">{bean.price}</span>
-                    <button
-                      className={`kb-add-btn ${addedBeans[bean.id] ? "kb-add-btn-added" : ""}`}
-                      onClick={() => toggleBean(bean.id)}
-                      aria-pressed={!!addedBeans[bean.id]}
-                    >
-                      {addedBeans[bean.id] ? (<><Check size={15} /> Added</>) : "Add to Order"}
-                    </button>
-                  </div>
-                </div>
-              </motion.article>
+                bean={bean}
+                index={i}
+                added={!!addedBeans[bean.id]}
+                onToggle={toggleBean}
+                grind={grindByBean[bean.id] || "Whole"}
+                onGrind={setGrind}
+                showGrind={false}
+              />
             ))}
+          </div>
+
+          <div className="kb-menu-more">
+            <button type="button" className="kb-btn kb-btn-outline" onClick={() => setPage("beans")}>
+              See All Six Beans <ArrowRight size={15} strokeWidth={2} />
+            </button>
           </div>
         </div>
       </section>
 
-      {/* BREW GUIDE */}
-      <section id="kb-brew" className="kb-section kb-brew-section">
+      {/* BREW PREVIEW */}
+      <section className="kb-section kb-brew-section">
         <span className="kb-vertical kb-vertical-edge kb-vertical-right" aria-hidden="true">淹れ方</span>
         <div className="kb-container">
           <motion.div
@@ -334,11 +694,17 @@ export default function Kobo() {
               </motion.article>
             ))}
           </div>
+
+          <div className="kb-menu-more">
+            <button type="button" className="kb-btn kb-btn-dark" onClick={() => setPage("brew")}>
+              Open the Brew Guide <ArrowRight size={15} strokeWidth={2} />
+            </button>
+          </div>
         </div>
       </section>
 
       {/* VISIT */}
-      <section id="kb-visit" className="kb-section kb-visit-section">
+      <section className="kb-section kb-visit-section">
         <div className="kb-container kb-visit-grid">
           <motion.div
             className="kb-visit-copy"
@@ -390,19 +756,151 @@ export default function Kobo() {
           </motion.div>
         </div>
       </section>
+    </>
+  );
+
+  const renderMenuPage = () => (
+    <section className="kb-section kb-menu-section">
+      <span className="kb-vertical kb-vertical-edge" aria-hidden="true">メニュー</span>
+      <div className="kb-container">
+        <motion.div
+          className="kb-section-head kb-page-head"
+          initial="hidden"
+          animate="visible"
+          variants={fadeUp}
+        >
+          <p className="kb-label">— The Menu</p>
+          <h1 className="kb-section-title">Everything we pour, <em>all day.</em></h1>
+          <p className="kb-section-sub">
+            Espresso pulled to order, filters brewed one at a time, and a small
+            seasonal board that changes with the weather. Oat milk on request.
+          </p>
+        </motion.div>
+
+        {renderMenuTabs()}
+        {renderMenuList(menuData[activeTab], `menu-${activeTab}`)}
+
+        <motion.p
+          className="kb-menu-note"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
+          All drinks can be made with oat milk (+¥80). Beans rotate weekly — ask
+          at the bar what is freshest today, or take a bag home from the Beans page.
+        </motion.p>
+      </div>
+    </section>
+  );
+
+  const renderBeansPage = () => (
+    <section className="kb-section kb-beans-section">
+      <div className="kb-container">
+        <motion.div
+          className="kb-section-head kb-page-head"
+          initial="hidden"
+          animate="visible"
+          variants={fadeUp}
+        >
+          <p className="kb-label">— Fresh Beans</p>
+          <h1 className="kb-section-title">Six origins, <em>one small roaster.</em></h1>
+          <p className="kb-section-sub">
+            Roasted every Tuesday in Shibuya and rested for seven days before
+            they ship. Pick your grind, add a bag to your order, and we will
+            have it ready at the counter.
+          </p>
+        </motion.div>
+
+        <div className="kb-order-bar" role="status" aria-live="polite">
+          <span className="kb-order-bar-text">
+            <ShoppingBag size={16} />
+            {orderCount === 0
+              ? "Your order is empty — add a bag below to get started."
+              : `${orderCount} ${orderCount === 1 ? "bean" : "beans"} in your order. Pick up at the Shibuya counter.`}
+          </span>
+          {orderCount > 0 && (
+            <span className="kb-order-bar-count">{orderCount} selected</span>
+          )}
+        </div>
+
+        <div className="kb-beans-grid">
+          {beansData.map((bean, i) => (
+            <BeanCard
+              key={bean.id}
+              bean={bean}
+              index={i}
+              added={!!addedBeans[bean.id]}
+              onToggle={toggleBean}
+              grind={grindByBean[bean.id] || "Whole"}
+              onGrind={setGrind}
+              showGrind
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+
+  return (
+    <div className="kb-root">
+      {/* NAV */}
+      <header className="kb-nav">
+        <div className="kb-nav-inner">
+          <button type="button" className="kb-logo kb-logo-btn" onClick={() => setPage("home")} aria-label="KOBO home">
+            <span className="kb-logo-word">KOBO</span>
+            <span className="kb-logo-kanji">工房</span>
+          </button>
+          <nav className="kb-nav-links" aria-label="KOBO pages">
+            {navLinks.map((link) => (
+              <button
+                key={link.key}
+                type="button"
+                className={`kb-nav-btn ${page === link.key ? "kb-nav-btn-active" : ""}`}
+                onClick={() => setPage(link.key)}
+                aria-current={page === link.key ? "page" : undefined}
+              >
+                {link.label}
+              </button>
+            ))}
+          </nav>
+          <button type="button" className="kb-nav-cta kb-nav-cta-btn" onClick={() => setPage("beans")}>
+            <ShoppingBag size={15} strokeWidth={2} />
+            Order Beans
+            <span className="kb-order-count" aria-label={`${orderCount} beans in order`}>{orderCount}</span>
+          </button>
+        </div>
+      </header>
+
+      {/* PAGES */}
+      <AnimatePresence mode="wait">
+        <motion.main
+          key={page}
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+        >
+          {page === "home" && renderHome()}
+          {page === "menu" && renderMenuPage()}
+          {page === "beans" && renderBeansPage()}
+          {page === "brew" && <BrewGuidePage />}
+        </motion.main>
+      </AnimatePresence>
 
       {/* FOOTER */}
       <footer className="kb-footer">
         <div className="kb-footer-inner">
-          <a href="#" className="kb-logo kb-logo-footer">
+          <button type="button" className="kb-logo kb-logo-footer kb-logo-btn" onClick={() => setPage("home")} aria-label="KOBO home">
             <span className="kb-logo-word">KOBO</span>
             <span className="kb-logo-kanji">工房</span>
-          </a>
-          <nav className="kb-footer-links">
-            <a href="#kb-menu">Menu</a>
-            <a href="#kb-beans">Beans</a>
-            <a href="#kb-brew">Brew</a>
-            <a href="#kb-visit">Visit</a>
+          </button>
+          <nav className="kb-footer-links" aria-label="Footer pages">
+            {navLinks.map((link) => (
+              <button key={link.key} type="button" onClick={() => setPage(link.key)}>
+                {link.label}
+              </button>
+            ))}
           </nav>
           <p className="kb-footer-copy">© 2026 KOBO Coffee Lab — Tokyo</p>
         </div>

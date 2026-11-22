@@ -1,81 +1,154 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { motion, useInView } from "framer-motion";
-import { Orbit, Play, Check, GraduationCap, Rocket, Globe, Anchor, ArrowRight, Shield, Clock, Users, Gauge } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  Check,
+  Minus,
+  Plus,
+  Rocket,
+  ShieldCheck,
+  Ticket,
+  Users,
+} from "lucide-react";
 import "./Orbital.css";
 
-/* Starfield canvas: 180 drifting, twinkling stars */
-function Starfield() {
-  const canvasRef = useRef(null);
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    let width = 0, height = 0, raf = 0;
-    const DPR = Math.min(window.devicePixelRatio || 1, 2);
-    const stars = Array.from({ length: 180 }, () => ({
-      x: Math.random(), y: Math.random(), r: Math.random() * 1.4 + 0.3,
-      speed: Math.random() * 0.012 + 0.002, phase: Math.random() * Math.PI * 2,
-      twinkleSpeed: Math.random() * 0.8 + 0.3,
-    }));
-    const resize = () => {
-      const parent = canvas.parentElement;
-      if (!parent) return;
-      width = parent.clientWidth; height = parent.clientHeight;
-      canvas.width = Math.floor(width * DPR); canvas.height = Math.floor(height * DPR);
-      canvas.style.width = `${width}px`; canvas.style.height = `${height}px`;
-      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    };
-    resize();
-    window.addEventListener("resize", resize);
-    let last = performance.now();
-    const draw = (now) => {
-      const dt = Math.min((now - last) / 1000, 0.05);
-      last = now;
-      const t = now / 1000;
-      ctx.clearRect(0, 0, width, height);
-      for (const s of stars) {
-        s.y += s.speed * dt * 0.12; s.x -= s.speed * dt * 0.04;
-        if (s.y > 1.02) { s.y = -0.02; s.x = Math.random(); }
-        if (s.x < -0.02) s.x = 1.02;
-        const alpha = 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(t * s.twinkleSpeed + s.phase));
-        const x = s.x * width, y = s.y * height;
-        ctx.beginPath(); ctx.arc(x, y, s.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(229, 246, 255, ${alpha.toFixed(3)})`; ctx.fill();
-        if (s.r > 1.1) {
-          ctx.beginPath(); ctx.arc(x, y, s.r * 2.6, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(103, 232, 249, ${(alpha * 0.08).toFixed(3)})`; ctx.fill();
-        }
-      }
-      raf = requestAnimationFrame(draw);
-    };
-    raf = requestAnimationFrame(draw);
-    return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", resize); };
-  }, []);
-  return <canvas ref={canvasRef} className="or-star-canvas" aria-hidden="true" />;
-}
+/* ORBITAL — Editorial space programme. 1970s NASA dossier / Swiss poster style. */
 
-/* Count-up number that runs when scrolled into view */
-function Counter({ value, decimals = 0, duration = 1600 }) {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-40px" });
-  const [display, setDisplay] = useState(0);
-  useEffect(() => {
-    if (!inView) return;
-    let raf = 0;
-    const start = performance.now();
-    const tick = (now) => {
-      const progress = Math.min((now - start) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setDisplay(value * eased);
-      if (progress < 1) raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [inView, value, duration]);
-  const formatted = display.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
-  return <span ref={ref} className="or-counter-value">{formatted}</span>;
-}
+/* ---------- Data ---------- */
+
+const FLIGHTS = [
+  {
+    id: "suborbital",
+    code: "ORB-S1",
+    name: "SUBORBITAL",
+    price: 85000,
+    duration: "90 MIN",
+    altitude: "100 KM",
+    seat: "1A",
+    gate: "GATE 01",
+    blurb: "A ballistic arc past the Karman line. Four minutes of weightlessness, one view that rewires you.",
+  },
+  {
+    id: "orbital",
+    code: "ORB-1",
+    name: "ORBITAL",
+    price: 450000,
+    duration: "3 DAYS",
+    altitude: "408 KM",
+    seat: "2C",
+    gate: "GATE 02",
+    blurb: "Dock with the ORBITAL station. Sixteen sunrises a day, real science, real silence.",
+  },
+  {
+    id: "lunar",
+    code: "ORB-L1",
+    name: "LUNAR",
+    price: 2900000,
+    duration: "6 DAYS",
+    altitude: "384,400 KM",
+    seat: "1A",
+    gate: "GATE 03",
+    blurb: "A free-return trajectory around the Moon. The far side, with your own eyes.",
+  },
+];
+
+const MISSION_SPECS = [
+  ["PROGRAMME", "CIVILIAN SPACEFLIGHT"],
+  ["VEHICLE", "ORB-1"],
+  ["DESTINATION", "LOW EARTH ORBIT"],
+  ["ALTITUDE", "408 KM"],
+  ["CREW", "4 PASSENGERS + 2 PILOTS"],
+  ["DURATION", "3 DAYS"],
+  ["LAUNCH SITE", "PAD 39A, CAPE CANAVERAL"],
+  ["STATUS", "MANIFEST OPEN — 2026"],
+];
+
+const VEHICLE_SPECS = [
+  ["HEIGHT", "62 M"],
+  ["THRUST", "7,600 KN"],
+  ["CREW", "4 + 2"],
+  ["CABIN VOLUME", "18 M3"],
+  ["PROPELLANT", "METHALOX"],
+  ["REUSABLE", "YES"],
+  ["ABORT SYSTEM", "PUSHER, FULL ENVELOPE"],
+  ["RETURN", "PARACHUTE SPLASHDOWN"],
+];
+
+const SAFETY_ITEMS = [
+  ["01", "Abort system", "Pusher abort motors separate the capsule from the booster at any point from pad to orbit."],
+  ["02", "Dual redundancy", "Flight computers, guidance and life support run in triplicate. Any single failure is survivable."],
+  ["03", "Medical screening", "Full flight-surgeon assessment before training. No passenger flies without clearance."],
+  ["04", "Recovery forces", "Navy recovery ships on station for every splashdown, with helicopter extraction on standby."],
+  ["05", "Flown hardware", "Every ORB-1 airframe is flight-proven and inspected panel by panel between missions."],
+];
+
+const CREW = [
+  {
+    index: "01",
+    name: "ELENA VASQUEZ",
+    role: "COMMANDER",
+    missions: "6",
+    hours: "1,240 HRS",
+    img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=900&q=80&auto=format&fit=crop",
+    alt: "Portrait of Commander Elena Vasquez",
+  },
+  {
+    index: "02",
+    name: "MARCUS HALE",
+    role: "PILOT",
+    missions: "4",
+    hours: "860 HRS",
+    img: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=900&q=80&auto=format&fit=crop",
+    alt: "Portrait of Pilot Marcus Hale",
+  },
+  {
+    index: "03",
+    name: "YUKI TANAKA",
+    role: "MISSION SPECIALIST",
+    missions: "3",
+    hours: "610 HRS",
+    img: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=900&q=80&auto=format&fit=crop",
+    alt: "Portrait of Mission Specialist Yuki Tanaka",
+  },
+  {
+    index: "04",
+    name: "DAVID OKONKWO",
+    role: "FLIGHT SURGEON",
+    missions: "5",
+    hours: "1,020 HRS",
+    img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=900&q=80&auto=format&fit=crop",
+    alt: "Portrait of Flight Surgeon David Okonkwo",
+  },
+];
+
+const NAV_PAGES = [
+  { id: "programme", label: "PROGRAMME" },
+  { id: "vehicle", label: "VEHICLE" },
+  { id: "crew", label: "CREW" },
+  { id: "book", label: "BOOK A SEAT" },
+];
+
+/* ---------- Helpers ---------- */
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 16 },
+  show: (i = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.4, delay: i * 0.06, ease: "easeOut" },
+  }),
+};
+
+const pageFade = {
+  hidden: { opacity: 0, y: 10 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: "easeOut" } },
+  exit: { opacity: 0, y: -8, transition: { duration: 0.2, ease: "easeIn" } },
+};
+
+const pad2 = (n) => String(n).padStart(2, "0");
+
+const formatPrice = (n) => "$" + n.toLocaleString("en-US");
 
 function getTimeLeft(target) {
   const totalSec = Math.floor(Math.max(0, target - Date.now()) / 1000);
@@ -87,302 +160,710 @@ function getTimeLeft(target) {
   };
 }
 
-const pad2 = (n) => String(n).padStart(2, "0");
+/* ---------- Shared pieces ---------- */
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 28 },
-  show: (i = 0) => ({ opacity: 1, y: 0, transition: { duration: 0.65, delay: i * 0.09, ease: [0.22, 1, 0.36, 1] } }),
-};
+function MissionPatch() {
+  return (
+    <div className="or-patch" aria-hidden="true">
+      <span className="or-patch-ring" />
+      <span className="or-patch-inner">
+        <span className="or-patch-top">ORBITAL</span>
+        <span className="or-patch-code">ORB-1</span>
+        <span className="or-patch-bottom">EST. 2026</span>
+      </span>
+    </div>
+  );
+}
 
-const IMG = (id) => `https://images.unsplash.com/${id}?w=1600&q=80&auto=format&fit=crop`;
+function PlanetArt() {
+  return (
+    <div className="or-planet-wrap" aria-hidden="true">
+      <div className="or-planet">
+        <span className="or-planet-shadow" />
+        <span className="or-planet-band" />
+      </div>
+      <span className="or-planet-ring" />
+      <span className="or-planet-moon" />
+      <span className="or-planet-label">FIG. 00 — LOW EARTH ORBIT, 408 KM</span>
+    </div>
+  );
+}
 
-export default function Orbital() {
-  /* Countdown target: always ~6 days in the future */
-  const target = useMemo(() => Date.now() + (6 * 86400 + 4 * 3600 + 12 * 60) * 1000, []);
-  const [timeLeft, setTimeLeft] = useState(() => getTimeLeft(target));
+function Barcode({ small = false }) {
+  return <div className={`or-barcode${small ? " or-barcode--sm" : ""}`} aria-hidden="true" />;
+}
+
+function Stamp({ text, className = "" }) {
+  return (
+    <span className={`or-stamp ${className}`} aria-hidden="true">
+      {text}
+    </span>
+  );
+}
+
+function Ticker() {
+  const line =
+    "ORB-1 · NEXT WINDOW OPEN · KARMAN LINE 100 KM · ALTITUDE 408 KM · CREW 4 + 2 · PAD 39A · MANIFEST 2026 · ";
+  return (
+    <div className="or-ticker" aria-hidden="true">
+      <div className="or-ticker-track">
+        <span>{line.repeat(2)}</span>
+        <span>{line.repeat(2)}</span>
+      </div>
+    </div>
+  );
+}
+
+function SpecTable({ rows }) {
+  return (
+    <div className="or-spec-table">
+      {rows.map(([label, value]) => (
+        <div className="or-spec-row" key={label}>
+          <span className="or-spec-label">{label}</span>
+          <span className="or-spec-value">{value}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function SectionHead({ number, title, note }) {
+  return (
+    <div className="or-section-head">
+      <span className="or-section-num">{number}</span>
+      <h2 className="or-section-title">{title}</h2>
+      {note && <span className="or-section-note">{note}</span>}
+    </div>
+  );
+}
+
+function Countdown() {
+  const target = useMemo(
+    () => Date.now() + (40 * 86400 + 7 * 3600 + 23 * 60 + 11) * 1000,
+    []
+  );
+  const [left, setLeft] = useState(() => getTimeLeft(target));
+
   useEffect(() => {
-    setTimeLeft(getTimeLeft(target));
-    const id = setInterval(() => setTimeLeft(getTimeLeft(target)), 1000);
+    setLeft(getTimeLeft(target));
+    const id = setInterval(() => setLeft(getTimeLeft(target)), 1000);
     return () => clearInterval(id);
   }, [target]);
 
-  const stats = [
-    { value: 408, decimals: 0, suffix: " km", label: "Orbit altitude", icon: Gauge },
-    { value: 214, decimals: 0, suffix: "", label: "Travellers flown", icon: Users },
-    { value: 99.2, decimals: 1, suffix: "%", label: "Safety record", icon: Shield },
-    { value: 14, decimals: 0, suffix: " days", label: "Longest mission", icon: Clock },
-  ];
-
-  const missions = [
-    {
-      name: "SUBORBITAL", price: "$85,000", tag: "11 MINUTES · KÁRMÁN LINE", featured: false,
-      desc: "A ballistic arc past 100 km. Four minutes of weightlessness and a view that rewires you.",
-      img: IMG("photo-1517976487492-5750f3195933"),
-      features: ["Cross the Kármán line at 100 km", "4 min zero-gravity cabin time", "G-force training included", "Flight suit + mission patch", "Full HD cabin film"],
-    },
-    {
-      name: "ORBITAL", price: "$450,000", tag: "3 DAYS · STATION STAY", featured: true,
-      desc: "Dock with our orbital station. Sixteen sunrises a day, real science, real silence.",
-      img: IMG("photo-1446776811953-b23d57bd21aa"),
-      features: ["3 days aboard ORBITAL Station", "Private sleep pod + cupola access", "16 Earth orbits per day", "Dedicated flight surgeon", "Live family video link", "Splashdown + recovery ceremony"],
-    },
-    {
-      name: "LUNAR LOOP", price: "$2.9M", tag: "7 DAYS · AROUND THE MOON", featured: false,
-      desc: "A free-return trajectory around the Moon. The far side, with your own eyes.",
-      img: IMG("photo-1454789548928-9efd52dc4031"),
-      features: ["7-day lunar free-return flight", "Far-side Moon flyby at 8,000 km", "Crew of four, two pilots", "Deep-space comms package", "Full medical + training program"],
-    },
-  ];
-
-  const journey = [
-    { n: "01", icon: GraduationCap, title: "Training", time: "3 DAYS", desc: "Centrifuge runs, zero-g parabolas, emergency drills and capsule systems at our Mojave campus." },
-    { n: "02", icon: Rocket, title: "Launch", time: "T-0", desc: "Strap in. Eight minutes of controlled thunder from pad to orbit at 27,600 km/h." },
-    { n: "03", icon: Globe, title: "Orbit", time: "408 KM", desc: "Float through the station, run experiments, and watch the terminator race across oceans." },
-    { n: "04", icon: Anchor, title: "Return", time: "SPLASHDOWN", desc: "Plasma-blackout re-entry, parachutes over the Pacific, and a hero's welcome on deck." },
-  ];
-
-  const countBoxes = [
-    { num: pad2(timeLeft.days), unit: "DAYS", live: false },
-    { num: pad2(timeLeft.hours), unit: "HOURS", live: false },
-    { num: pad2(timeLeft.mins), unit: "MIN", live: false },
-    { num: pad2(timeLeft.secs), unit: "SEC", live: true },
+  const boxes = [
+    { num: pad2(left.days), unit: "DAYS" },
+    { num: pad2(left.hours), unit: "HRS" },
+    { num: pad2(left.mins), unit: "MIN" },
+    { num: pad2(left.secs), unit: "SEC" },
   ];
 
   return (
-    <div className="or-root">
-      {/* Nav */}
-      <header className="or-nav">
-        <a href="#" className="or-logo" aria-label="ORBITAL home">
-          <span className="or-logo-icon"><Orbit size={20} strokeWidth={1.8} /></span>
-          <span className="or-logo-text">ORBITAL</span>
-          <span className="or-logo-sub">SPACEFLIGHT</span>
-        </a>
-        <nav className="or-nav-links" aria-label="Primary">
-          <a href="#or-missions">Missions</a>
-          <a href="#or-journey">Journey</a>
-          <a href="#or-missions">Pricing</a>
+    <div className="or-countdown" role="timer" aria-label="Countdown to next launch">
+      <div className="or-countdown-label">
+        <span className="or-countdown-kicker">NEXT LAUNCH — ORB-1</span>
+        <span className="or-countdown-sub">PAD 39A · CREW OF FOUR · STATION RENDEZVOUS</span>
+      </div>
+      <div className="or-countdown-boxes">
+        {boxes.map((b) => (
+          <span className="or-count-box" key={b.unit}>
+            <span className="or-count-num">{b.num}</span>
+            <span className="or-count-unit">{b.unit}</span>
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function Footer({ onNavigate }) {
+  return (
+    <footer className="or-footer">
+      <div className="or-footer-main">
+        <div className="or-footer-brand">
+          <span className="or-footer-name">ORBITAL</span>
+          <span className="or-footer-sub">CIVILIAN SPACE PROGRAMME</span>
+        </div>
+        <nav className="or-footer-links" aria-label="Footer">
+          {NAV_PAGES.map((p) => (
+            <button key={p.id} type="button" onClick={() => onNavigate(p.id)}>
+              {p.label}
+            </button>
+          ))}
         </nav>
-        <a href="#or-missions" className="or-nav-cta">Reserve a Seat</a>
-      </header>
+        <div className="or-footer-meta">
+          <span>28.6084 N · 80.6043 W — PAD 39A</span>
+          <span>FLIGHT ORB-1 · MANIFEST 2026</span>
+        </div>
+      </div>
+      <div className="or-footer-bottom">
+        <span>© 2026 ORBITAL</span>
+        <span>PRINTED DOSSIER NO. 01 — ALL FLIGHTS SUBJECT TO WEATHER AND RANGE CLEARANCE</span>
+      </div>
+    </footer>
+  );
+}
 
-      {/* Hero with starfield */}
+/* ---------- Page: PROGRAMME ---------- */
+
+function ProgrammePage({ onBook }) {
+  return (
+    <div className="or-page">
+      {/* Hero */}
       <section className="or-hero">
-        <Starfield />
-        <div className="or-hero-glow" aria-hidden="true" />
-        <img className="or-hero-bgimg" src={IMG("photo-1451187580459-43490279c0fa")} alt="" aria-hidden="true" />
-        <div className="or-hero-fade" aria-hidden="true" />
-        <div className="or-hero-inner">
-          <motion.p className="or-eyebrow" variants={fadeUp} initial="hidden" animate="show" custom={0}>
-            <span className="or-live-dot" aria-hidden="true" />
-            CIVILIAN SPACEFLIGHT — NOW BOARDING
-          </motion.p>
-          <motion.h1 className="or-hero-title" variants={fadeUp} initial="hidden" animate="show" custom={1}>
-            Leave Earth.
-            <span className="or-hero-title-accent">Come Back Different.</span>
-          </motion.h1>
-          <motion.p className="or-hero-sub" variants={fadeUp} initial="hidden" animate="show" custom={2}>
-            The overview effect is real — every traveller reports it. ORBITAL flies civilians
-            to a working station at 408 km, with the training, medicine and engineering to
-            bring you home changed.
-          </motion.p>
-          <motion.div className="or-hero-actions" variants={fadeUp} initial="hidden" animate="show" custom={3}>
-            <a href="#or-missions" className="or-btn or-btn-solid">View Missions <ArrowRight size={17} /></a>
-            <a href="#or-journey" className="or-btn or-btn-ghost">
-              <span className="or-play-ring"><Play size={13} fill="currentColor" /></span>
-              Watch the Film
-            </a>
-          </motion.div>
-          <motion.div className="or-telemetry" variants={fadeUp} initial="hidden" animate="show" custom={4} aria-label="Live telemetry">
-            <span className="or-chip"><span className="or-chip-key">ALT</span> 408 KM</span>
-            <span className="or-chip"><span className="or-chip-key">VEL</span> 7.66 KM/S</span>
-            <span className="or-chip"><span className="or-chip-key">CREW</span> 4</span>
-            <span className="or-chip or-chip-status">
-              <span className="or-live-dot or-live-dot--sm" aria-hidden="true" /> STATION NOMINAL
-            </span>
+        <div className="or-hero-topstrip">
+          <span>EST. 2026 · FLIGHT ORB-1 · KARMAN LINE 100 KM</span>
+          <span className="or-hero-topstrip-right">DOSSIER NO. 01 / REV. C</span>
+        </div>
+
+        <div className="or-hero-grid">
+          <div className="or-hero-copy">
+            <motion.p className="or-hero-kicker" variants={fadeUp} initial="hidden" animate="show" custom={0}>
+              CIVILIAN SPACE PROGRAMME — NOW BOARDING
+            </motion.p>
+            <motion.h1 className="or-hero-title" variants={fadeUp} initial="hidden" animate="show" custom={1}>
+              ORBITAL
+            </motion.h1>
+            <motion.p className="or-hero-sub" variants={fadeUp} initial="hidden" animate="show" custom={2}>
+              Leave Earth. Come back different. ORBITAL flies civilians to a working
+              station at 408 km — with the training, medicine and engineering to bring
+              you home changed.
+            </motion.p>
+            <motion.div className="or-hero-actions" variants={fadeUp} initial="hidden" animate="show" custom={3}>
+              <button type="button" className="or-btn or-btn-solid" onClick={() => onBook("orbital")}>
+                BOOK A SEAT <ArrowRight size={16} />
+              </button>
+              <span className="or-hero-note">FULLY REFUNDABLE DEPOSIT · MEDICAL SCREENING INCLUDED</span>
+            </motion.div>
+          </div>
+
+          <motion.div className="or-hero-art" variants={fadeUp} initial="hidden" animate="show" custom={2}>
+            <PlanetArt />
+            <MissionPatch />
           </motion.div>
         </div>
-        <div className="or-hero-scroll" aria-hidden="true">
-          <span className="or-scroll-line" /><span className="or-scroll-text">SCROLL</span>
-        </div>
-      </section>
 
-      {/* Live launch countdown */}
-      <section className="or-countdown" aria-label="Next launch countdown">
-        <div className="or-countdown-inner">
-          <div className="or-countdown-label">
-            <span className="or-countdown-kicker">NEXT LAUNCH — ORBITAL-07</span>
-            <span className="or-countdown-sub">Crew of four · Station rendezvous · Pad 39A</span>
+        {/* Telemetry strip */}
+        <div className="or-telemetry" aria-label="Flight telemetry">
+          <div className="or-telemetry-cell">
+            <span className="or-telemetry-label">ALTITUDE</span>
+            <span className="or-telemetry-value">408 KM</span>
           </div>
-          <div className="or-countdown-boxes" role="timer" aria-label="Countdown to launch">
-            {countBoxes.map((b, i) => (
-              <span key={b.unit} className="or-count-group">
-                {i > 0 && <span className="or-count-sep" aria-hidden="true">:</span>}
-                <span className={`or-count-box${b.live ? " or-count-box--live" : ""}`}>
-                  <span className="or-count-num">{b.num}</span>
-                  <span className="or-count-unit">{b.unit}</span>
-                </span>
-              </span>
-            ))}
+          <div className="or-telemetry-cell">
+            <span className="or-telemetry-label">CREW</span>
+            <span className="or-telemetry-value">4 + 2</span>
           </div>
-          <a href="#or-missions" className="or-countdown-cta">Join this flight <ArrowRight size={15} /></a>
+          <div className="or-telemetry-cell">
+            <span className="or-telemetry-label">DURATION</span>
+            <span className="or-telemetry-value">3 DAYS</span>
+          </div>
+          <div className="or-telemetry-cell">
+            <span className="or-telemetry-label">VELOCITY</span>
+            <span className="or-telemetry-value">7.66 KM/S</span>
+          </div>
+          <div className="or-telemetry-cell or-telemetry-cell--status">
+            <span className="or-telemetry-label">STATUS</span>
+            <span className="or-telemetry-value or-telemetry-value--orange">MANIFEST OPEN</span>
+          </div>
+        </div>
+
+        <Countdown />
+      </section>
+
+      <Ticker />
+
+      {/* 01 / Mission */}
+      <section className="or-section">
+        <SectionHead number="01" title="MISSION" note="SPECIFICATION SHEET" />
+        <div className="or-mission-grid">
+          <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }}>
+            <SpecTable rows={MISSION_SPECS} />
+            <p className="or-body-text">
+              Every ORBITAL flight is a working mission. Passengers train for three days,
+              fly with two professional pilots, and join the station crew for real
+              experiments — then splash down in the Pacific under parachute.
+            </p>
+          </motion.div>
+          <motion.figure
+            className="or-figure"
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, margin: "-60px" }}
+            custom={1}
+          >
+            <div className="or-figure-media">
+              <img
+                src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1400&q=80&auto=format&fit=crop"
+                alt="Earth seen from orbit at night"
+                loading="lazy"
+              />
+            </div>
+            <figcaption className="or-figure-caption">
+              FIG. 01 — EARTH FROM 408 KM. SIXTEEN SUNRISES PER DAY.
+            </figcaption>
+          </motion.figure>
         </div>
       </section>
 
-      {/* Animated stats */}
-      <section className="or-stats" aria-label="Mission statistics">
-        <div className="or-stats-grid">
-          {stats.map((s, i) => {
-            const Icon = s.icon;
-            return (
-              <motion.div key={s.label} className="or-stat-card" variants={fadeUp} initial="hidden"
-                whileInView="show" viewport={{ once: true, margin: "-60px" }} custom={i}>
-                <span className="or-stat-icon"><Icon size={17} strokeWidth={1.8} /></span>
-                <p className="or-stat-value">
-                  <Counter value={s.value} decimals={s.decimals} />
-                  <span className="or-stat-suffix">{s.suffix}</span>
-                </p>
-                <p className="or-stat-label">{s.label}</p>
-              </motion.div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* Missions / pricing */}
-      <section className="or-section" id="or-missions">
-        <div className="or-section-head">
-          <p className="or-section-kicker">MISSIONS</p>
-          <h2 className="or-section-title">Choose your altitude.</h2>
-          <p className="or-section-sub">
-            Every tier includes full medical screening, training, insurance and a flight
-            surgeon on call. No experience required — curiosity mandatory.
-          </p>
-        </div>
-        <div className="or-missions-grid">
-          {missions.map((m, i) => (
-            <motion.article key={m.name} className={`or-mission-card${m.featured ? " or-mission-card--featured" : ""}`}
-              variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }} custom={i}>
-              {m.featured && <span className="or-mission-badge">MOST CHOSEN</span>}
-              <div className="or-mission-media">
-                <img src={m.img} alt={`${m.name} mission`} loading="lazy" />
-                <span className="or-mission-tag">{m.tag}</span>
+      {/* 02 / Flights — boarding passes */}
+      <section className="or-section">
+        <SectionHead number="02" title="FLIGHTS" note="SELECT A FLIGHT TO BOOK" />
+        <div className="or-flights-grid">
+          {FLIGHTS.map((f, i) => (
+            <motion.article
+              key={f.id}
+              className="or-pass"
+              variants={fadeUp}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, margin: "-60px" }}
+              custom={i}
+            >
+              <div className="or-pass-head">
+                <span className="or-pass-brand">ORBITAL</span>
+                <span className="or-pass-code">{f.code}</span>
               </div>
-              <div className="or-mission-body">
-                <h3 className="or-mission-name">{m.name}</h3>
-                <p className="or-mission-price">{m.price}<span className="or-mission-per"> / seat</span></p>
-                <p className="or-mission-desc">{m.desc}</p>
-                <ul className="or-mission-features">
-                  {m.features.map((f) => (
-                    <li key={f}><Check size={15} strokeWidth={2.4} /><span>{f}</span></li>
-                  ))}
-                </ul>
-                <a href="#or-missions" className={`or-mission-cta${m.featured ? " or-mission-cta--solid" : ""}`}>
-                  Reserve {m.name} <ArrowRight size={15} />
-                </a>
+              <h3 className="or-pass-name">{f.name}</h3>
+              <p className="or-pass-blurb">{f.blurb}</p>
+              <div className="or-pass-fields">
+                <div className="or-pass-field">
+                  <span>FLIGHT</span>
+                  <strong>{f.code}</strong>
+                </div>
+                <div className="or-pass-field">
+                  <span>SEAT</span>
+                  <strong>{f.seat}</strong>
+                </div>
+                <div className="or-pass-field">
+                  <span>DURATION</span>
+                  <strong>{f.duration}</strong>
+                </div>
+                <div className="or-pass-field">
+                  <span>ALTITUDE</span>
+                  <strong>{f.altitude}</strong>
+                </div>
+              </div>
+              <div className="or-pass-perf" aria-hidden="true">
+                <span className="or-pass-notch or-pass-notch--left" />
+                <span className="or-pass-notch or-pass-notch--right" />
+              </div>
+              <div className="or-pass-foot">
+                <div className="or-pass-price">
+                  <span>PRICE / SEAT</span>
+                  <strong>{formatPrice(f.price)}</strong>
+                </div>
+                <Barcode small />
+              </div>
+              <button type="button" className="or-btn or-btn-pass" onClick={() => onBook(f.id)}>
+                BOOK THIS FLIGHT <ArrowUpRight size={15} />
+              </button>
+            </motion.article>
+          ))}
+        </div>
+        <p className="or-fineprint">
+          ALL TIERS INCLUDE MEDICAL SCREENING, 3-DAY TRAINING, FLIGHT SUIT, INSURANCE AND RECOVERY.
+        </p>
+      </section>
+    </div>
+  );
+}
+
+/* ---------- Page: VEHICLE ---------- */
+
+function VehiclePage() {
+  return (
+    <div className="or-page">
+      <section className="or-section or-section--top">
+        <SectionHead number="02" title="VEHICLE — ORB-1" note="TECHNICAL DOSSIER" />
+
+        <motion.figure className="or-figure or-figure--wide" variants={fadeUp} initial="hidden" animate="show" custom={0}>
+          <div className="or-figure-media or-figure-media--wide">
+            <img
+              src="https://images.unsplash.com/photo-1517976487492-5750f3195933?w=1800&q=80&auto=format&fit=crop"
+              alt="ORB-1 launch vehicle lifting off from the pad"
+              loading="lazy"
+            />
+            <Stamp text="APPROVED FOR FLIGHT" className="or-stamp--figure" />
+          </div>
+          <figcaption className="or-figure-caption">FIG. 01 — ORB-1 ON PAD 39A, T-MINUS 10 MINUTES.</figcaption>
+        </motion.figure>
+
+        <div className="or-vehicle-grid">
+          <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }}>
+            <h3 className="or-subhead">SPECIFICATION</h3>
+            <SpecTable rows={VEHICLE_SPECS} />
+            <p className="or-body-text">
+              ORB-1 is a fully reusable two-stage vehicle burning methalox. The capsule
+              seats six, flies itself, and returns under parachute — the same engineering
+              philosophy as commercial aviation: redundancy everywhere, surprises nowhere.
+            </p>
+          </motion.div>
+
+          <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }} custom={1}>
+            <h3 className="or-subhead">
+              <ShieldCheck size={16} /> SAFETY SYSTEM
+            </h3>
+            <ol className="or-safety-list">
+              {SAFETY_ITEMS.map(([num, title, desc]) => (
+                <li key={num} className="or-safety-item">
+                  <span className="or-safety-num">{num}</span>
+                  <span className="or-safety-body">
+                    <strong>{title}</strong>
+                    <span>{desc}</span>
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </motion.div>
+        </div>
+      </section>
+
+      <Ticker />
+    </div>
+  );
+}
+
+/* ---------- Page: CREW ---------- */
+
+function CrewPage() {
+  return (
+    <div className="or-page">
+      <section className="or-section or-section--top">
+        <SectionHead number="03" title="CREW" note="FLIGHT CREW — ORB-1" />
+        <p className="or-lede">
+          Two professional pilots fly every mission. A flight surgeon rides along.
+          You are the fourth seat — trained, screened, and part of the crew.
+        </p>
+
+        <div className="or-crew-grid">
+          {CREW.map((c, i) => (
+            <motion.article
+              key={c.index}
+              className="or-crew-card"
+              variants={fadeUp}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, margin: "-60px" }}
+              custom={i}
+            >
+              <div className="or-crew-media">
+                <img src={c.img} alt={c.alt} loading="lazy" />
+                <span className="or-crew-index">{c.index}</span>
+              </div>
+              <div className="or-crew-body">
+                <h3 className="or-crew-name">{c.name}</h3>
+                <p className="or-crew-role">{c.role}</p>
+                <div className="or-spec-table or-spec-table--tight">
+                  <div className="or-spec-row">
+                    <span className="or-spec-label">MISSIONS FLOWN</span>
+                    <span className="or-spec-value">{c.missions}</span>
+                  </div>
+                  <div className="or-spec-row">
+                    <span className="or-spec-label">FLIGHT HOURS</span>
+                    <span className="or-spec-value">{c.hours}</span>
+                  </div>
+                </div>
               </div>
             </motion.article>
           ))}
         </div>
-        <p className="or-missions-note">Fully refundable deposit · Payment plans available · Medical screening at no cost</p>
+
+        <p className="or-fineprint">
+          <Users size={13} /> CREW ASSIGNMENTS CONFIRMED 30 DAYS BEFORE LAUNCH. ALL CREW HOLD COMMERCIAL SPACEFLIGHT LICENCES.
+        </p>
       </section>
 
-      {/* Journey timeline */}
-      <section className="or-section or-section--journey" id="or-journey">
-        <div className="or-section-head">
-          <p className="or-section-kicker">THE JOURNEY</p>
-          <h2 className="or-section-title">Four steps to orbit.</h2>
-          <p className="or-section-sub">
-            From first centrifuge run to Pacific splashdown, here is exactly how your mission unfolds.
-          </p>
-        </div>
-        <div className="or-journey-track">
-          <span className="or-journey-line" aria-hidden="true" />
-          {journey.map((step, i) => {
-            const Icon = step.icon;
-            return (
-              <motion.div key={step.n} className="or-journey-step" variants={fadeUp} initial="hidden"
-                whileInView="show" viewport={{ once: true, margin: "-60px" }} custom={i}>
-                <span className="or-journey-node"><Icon size={20} strokeWidth={1.8} /></span>
-                <span className="or-journey-num">{step.n}</span>
-                <span className="or-journey-time">{step.time}</span>
-                <h3 className="or-journey-title">{step.title}</h3>
-                <p className="or-journey-desc">{step.desc}</p>
-              </motion.div>
-            );
-          })}
-        </div>
-      </section>
+      <Ticker />
+    </div>
+  );
+}
 
-      {/* Image band with traveller quote */}
-      <section className="or-band" aria-label="Traveller story">
-        <img className="or-band-img" src={IMG("photo-1462331940025-496dfbfc7564")} alt="Earth seen from orbit" loading="lazy" />
-        <div className="or-band-overlay" aria-hidden="true" />
-        <motion.blockquote className="or-quote-card" variants={fadeUp} initial="hidden"
-          whileInView="show" viewport={{ once: true, margin: "-80px" }}>
-          <p className="or-quote-kicker">ORBITAL-04 · FLIGHT LOG</p>
-          <p className="or-quote-text">
-            "You see the whole planet at once and realize every border is imaginary.
-            I came home and called everyone I love."
-          </p>
-          <footer className="or-quote-author">
-            <span className="or-quote-name">Mara Chen</span>
-            <span className="or-quote-role">Traveller 118 · Architect, Singapore</span>
-          </footer>
-        </motion.blockquote>
-      </section>
+/* ---------- Page: BOOK A SEAT ---------- */
 
-      {/* Final call to action */}
-      <section className="or-final">
-        <div className="or-final-media" aria-hidden="true">
-          <img src={IMG("photo-1419242902214-272b3f66ee7a")} alt="" loading="lazy" />
-        </div>
-        <div className="or-final-inner">
-          <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }}>
-            <p className="or-section-kicker">SEATS OPEN — 2026 MANIFEST</p>
-            <h2 className="or-final-title">Your seat is waiting.</h2>
-            <p className="or-final-sub">
-              Forty seats fly this year. Reserve with a refundable deposit and start
-              training within thirty days.
+function BookPage({ selectedFlight, onSelectFlight }) {
+  const [passengerName, setPassengerName] = useState("");
+  const [seats, setSeats] = useState(1);
+  const [error, setError] = useState("");
+  const [confirmed, setConfirmed] = useState(null);
+
+  const flight = FLIGHTS.find((f) => f.id === selectedFlight) || FLIGHTS[1];
+  const total = flight.price * seats;
+
+  const handleSelect = (id) => {
+    onSelectFlight(id);
+    setConfirmed(null);
+    setError("");
+  };
+
+  const handleSeats = (delta) => {
+    setSeats((s) => Math.min(4, Math.max(1, s + delta)));
+    setConfirmed(null);
+  };
+
+  const handleReserve = () => {
+    if (!passengerName.trim()) {
+      setError("ERROR — PASSENGER NAME REQUIRED. ENTER NAME TO RESERVE.");
+      setConfirmed(null);
+      return;
+    }
+    setError("");
+    const seatLabel =
+      seats === 1 ? flight.seat : `${flight.seat} + ${seats - 1} ADJACENT`;
+    setConfirmed({
+      name: passengerName.trim().toUpperCase(),
+      flightName: flight.name,
+      code: flight.code,
+      seat: seatLabel,
+      gate: flight.gate,
+      duration: flight.duration,
+      seats,
+      total,
+    });
+  };
+
+  return (
+    <div className="or-page">
+      <section className="or-section or-section--top">
+        <SectionHead number="04" title="BOOK A SEAT" note="RESERVATION FORM — FORM ORB-04" />
+
+        <div className="or-book-grid">
+          <motion.div className="or-book-form" variants={fadeUp} initial="hidden" animate="show" custom={0}>
+            <p className="or-field-label">01 — SELECT FLIGHT</p>
+            <div className="or-flight-select" role="group" aria-label="Select flight">
+              {FLIGHTS.map((f) => (
+                <button
+                  key={f.id}
+                  type="button"
+                  className={`or-flight-btn${f.id === flight.id ? " or-flight-btn--active" : ""}`}
+                  onClick={() => handleSelect(f.id)}
+                  aria-pressed={f.id === flight.id}
+                >
+                  <span className="or-flight-btn-name">{f.name}</span>
+                  <span className="or-flight-btn-meta">
+                    {f.duration} · {formatPrice(f.price)}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            <label className="or-field-label" htmlFor="or-passenger-name">
+              02 — PASSENGER NAME
+            </label>
+            <input
+              id="or-passenger-name"
+              className="or-input"
+              type="text"
+              value={passengerName}
+              onChange={(e) => {
+                setPassengerName(e.target.value);
+                setError("");
+                setConfirmed(null);
+              }}
+              placeholder="ENTER FULL NAME"
+              autoComplete="name"
+            />
+
+            <p className="or-field-label">03 — SEATS (MAX 4)</p>
+            <div className="or-seats-row">
+              <button
+                type="button"
+                className="or-seat-btn"
+                onClick={() => handleSeats(-1)}
+                disabled={seats <= 1}
+                aria-label="Remove one seat"
+              >
+                <Minus size={16} />
+              </button>
+              <span className="or-seats-count">{seats}</span>
+              <button
+                type="button"
+                className="or-seat-btn"
+                onClick={() => handleSeats(1)}
+                disabled={seats >= 4}
+                aria-label="Add one seat"
+              >
+                <Plus size={16} />
+              </button>
+              <span className="or-seats-note">
+                {flight.name} · {flight.duration} · {formatPrice(flight.price)} / SEAT
+              </span>
+            </div>
+
+            <div className="or-spec-table or-spec-table--tight">
+              <div className="or-spec-row">
+                <span className="or-spec-label">FLIGHT</span>
+                <span className="or-spec-value">
+                  {flight.code} — {flight.name}
+                </span>
+              </div>
+              <div className="or-spec-row">
+                <span className="or-spec-label">DURATION</span>
+                <span className="or-spec-value">{flight.duration}</span>
+              </div>
+              <div className="or-spec-row">
+                <span className="or-spec-label">SEATS</span>
+                <span className="or-spec-value">{seats}</span>
+              </div>
+              <div className="or-spec-row or-spec-row--total">
+                <span className="or-spec-label">TOTAL</span>
+                <span className="or-spec-value">{formatPrice(total)}</span>
+              </div>
+            </div>
+
+            {error && (
+              <p className="or-error" role="alert">
+                {error}
+              </p>
+            )}
+
+            <button type="button" className="or-btn or-btn-solid or-btn-wide" onClick={handleReserve}>
+              <Ticket size={16} /> RESERVE SEAT — {formatPrice(total)}
+            </button>
+            <p className="or-fineprint or-fineprint--left">
+              DEPOSIT FULLY REFUNDABLE UNTIL TRAINING BEGINS. MEDICAL SCREENING SCHEDULED AFTER RESERVATION.
             </p>
-            <a href="#or-missions" className="or-btn or-btn-solid or-btn-lg">Reserve a Seat <ArrowRight size={17} /></a>
+          </motion.div>
+
+          <motion.div className="or-book-side" variants={fadeUp} initial="hidden" animate="show" custom={1}>
+            {confirmed ? (
+              <article className="or-pass or-pass--confirmed">
+                <div className="or-pass-head">
+                  <span className="or-pass-brand">ORBITAL</span>
+                  <span className="or-pass-code">BOARDING PASS</span>
+                </div>
+                <h3 className="or-pass-name">{confirmed.flightName}</h3>
+                <div className="or-pass-fields">
+                  <div className="or-pass-field">
+                    <span>PASSENGER</span>
+                    <strong>{confirmed.name}</strong>
+                  </div>
+                  <div className="or-pass-field">
+                    <span>FLIGHT</span>
+                    <strong>{confirmed.code}</strong>
+                  </div>
+                  <div className="or-pass-field">
+                    <span>SEAT</span>
+                    <strong>{confirmed.seat}</strong>
+                  </div>
+                  <div className="or-pass-field">
+                    <span>GATE</span>
+                    <strong>{confirmed.gate}</strong>
+                  </div>
+                  <div className="or-pass-field">
+                    <span>DURATION</span>
+                    <strong>{confirmed.duration}</strong>
+                  </div>
+                  <div className="or-pass-field">
+                    <span>SEATS</span>
+                    <strong>{confirmed.seats}</strong>
+                  </div>
+                </div>
+                <div className="or-pass-perf" aria-hidden="true">
+                  <span className="or-pass-notch or-pass-notch--left" />
+                  <span className="or-pass-notch or-pass-notch--right" />
+                </div>
+                <div className="or-pass-foot">
+                  <div className="or-pass-price">
+                    <span>TOTAL PAID</span>
+                    <strong>{formatPrice(confirmed.total)}</strong>
+                  </div>
+                  <Barcode />
+                </div>
+                <Stamp text="CONFIRMED" className="or-stamp--pass" />
+                <p className="or-confirmed-note">
+                  <Check size={14} /> RESERVATION RECORDED. TRAINING SCHEDULE FOLLOWS BY POST AND EMAIL.
+                </p>
+              </article>
+            ) : (
+              <div className="or-book-placeholder">
+                <Rocket size={28} strokeWidth={1.5} />
+                <p className="or-book-placeholder-title">YOUR BOARDING PASS</p>
+                <p className="or-book-placeholder-text">
+                  Select a flight, enter the passenger name and reserve. Your pass —
+                  flight, seat, gate and total — prints here.
+                </p>
+                <div className="or-spec-table or-spec-table--tight">
+                  <div className="or-spec-row">
+                    <span className="or-spec-label">SELECTED</span>
+                    <span className="or-spec-value">{flight.name}</span>
+                  </div>
+                  <div className="or-spec-row">
+                    <span className="or-spec-label">GATE</span>
+                    <span className="or-spec-value">{flight.gate}</span>
+                  </div>
+                  <div className="or-spec-row">
+                    <span className="or-spec-label">ALTITUDE</span>
+                    <span className="or-spec-value">{flight.altitude}</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </motion.div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="or-footer">
-        <div className="or-footer-grid">
-          <div className="or-footer-brand">
-            <a href="#" className="or-logo" aria-label="ORBITAL home">
-              <span className="or-logo-icon"><Orbit size={20} strokeWidth={1.8} /></span>
-              <span className="or-logo-text">ORBITAL</span>
-            </a>
-            <p className="or-footer-tagline">
-              Civilian spaceflight, engineered like aviation. Fly to the station. Come back different.
-            </p>
-            <p className="or-footer-coords">28.6084° N · 80.6043° W — PAD 39A</p>
-          </div>
-          <nav className="or-footer-col" aria-label="Missions">
-            <h4>Missions</h4>
-            <a href="#or-missions">Suborbital</a><a href="#or-missions">Orbital Station</a>
-            <a href="#or-missions">Lunar Loop</a><a href="#or-missions">Pricing</a>
-          </nav>
-          <nav className="or-footer-col" aria-label="Company">
-            <h4>Company</h4>
-            <a href="#or-journey">Training</a><a href="#or-journey">Safety</a>
-            <a href="#or-journey">Careers</a><a href="#or-journey">Press</a>
-          </nav>
-          <nav className="or-footer-col" aria-label="Support">
-            <h4>Support</h4>
-            <a href="#or-missions">Book a flight</a><a href="#or-missions">Medical screening</a>
-            <a href="#or-missions">FAQ</a><a href="#or-missions">Contact</a>
-          </nav>
-        </div>
-        <div className="or-footer-bottom">
-          <span>© 2026 ORBITAL Spaceflight</span>
-          <span className="or-footer-legal">Privacy · Terms · Flight safety disclosures</span>
-        </div>
-      </footer>
+      <Ticker />
+    </div>
+  );
+}
+
+/* ---------- Site root ---------- */
+
+export default function Orbital() {
+  const [page, setPage] = useState("programme");
+  const [selectedFlight, setSelectedFlight] = useState("orbital");
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [page]);
+
+  const goTo = (next) => setPage(next);
+
+  const bookFlight = (flightId) => {
+    setSelectedFlight(flightId);
+    setPage("book");
+  };
+
+  return (
+    <div className="or-root">
+      <header className="or-nav">
+        <button type="button" className="or-nav-brand" onClick={() => goTo("programme")} aria-label="ORBITAL — Programme">
+          <span className="or-nav-name">ORBITAL</span>
+          <span className="or-nav-sub">— CIVILIAN SPACE PROGRAMME</span>
+        </button>
+        <nav className="or-nav-links" aria-label="ORBITAL pages">
+          {NAV_PAGES.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              className={`or-nav-link${page === p.id ? " or-nav-link--active" : ""}`}
+              onClick={() => goTo(p.id)}
+              aria-current={page === p.id ? "page" : undefined}
+            >
+              {p.label}
+            </button>
+          ))}
+        </nav>
+      </header>
+
+      <AnimatePresence mode="wait">
+        <motion.main
+          key={page}
+          variants={pageFade}
+          initial="hidden"
+          animate="show"
+          exit="exit"
+        >
+          {page === "programme" && <ProgrammePage onBook={bookFlight} />}
+          {page === "vehicle" && <VehiclePage />}
+          {page === "crew" && <CrewPage />}
+          {page === "book" && (
+            <BookPage selectedFlight={selectedFlight} onSelectFlight={setSelectedFlight} />
+          )}
+        </motion.main>
+      </AnimatePresence>
+
+      <Footer onNavigate={goTo} />
     </div>
   );
 }

@@ -6,11 +6,11 @@ Five original website concepts in one React app. The Home screen shows all 5 sit
 
 ## The 5 Sites
 
-1. **VOIDWEAR** (`src/voidwear/`) — Brutalist streetwear brand. Black + acid yellow, huge type, marquee ticker, live drop countdown, add-to-cart grid and lookbook.
-2. **AURELIA** (`src/aurelia/`) — Luxury perfume house. Ivory + gold, serif elegance, fragrance notes, collection and newsletter.
-3. **ORBITAL** (`src/orbital/`) — Space tourism. Animated starfield canvas, live launch countdown, count-up stats and mission pricing.
-4. **SAVAGE CLUB** (`src/savage/`) — Premium gym. Black + electric red, class schedule tabs, trainers and monthly/yearly pricing toggle.
-5. **KOBO** (`src/kobo/`) — Tokyo specialty coffee lab. Warm cream + brown, steam animation, menu tabs, beans with roast bars and brew guide.
+1. **VOIDWEAR** (`src/voidwear/`) — Brutalist streetwear brand. Black + acid yellow, huge type, marquee ticker, live drop countdown. Pages: Home, Shop (9 products with category filter), Lookbook, Manifesto.
+2. **AURELIA** (`src/aurelia/`) — Luxury perfume house. Ivory + gold, serif elegance, fragrance notes, newsletter. Pages: Home, Collection (6 perfumes with detail view and size selector), Story, Journal.
+3. **ORBITAL** (`src/orbital/`) — Civilian space programme in a printed-dossier style. Paper bone + ink + signal orange, spec-sheet tables, mission patch, flat poster planet art, boarding-pass flight cards, live countdown. Pages: Programme, Vehicle, Crew, Book a Seat.
+4. **SAVAGE CLUB** (`src/savage/`) — Premium gym. Black + electric red, animated counters, FAQ accordion. Pages: Home, Classes (full week schedule), Trainers (book a session), Membership (pricing toggle + join form).
+5. **KOBO** (`src/kobo/`) — Tokyo specialty coffee lab. Warm cream + brown, steam animation, vertical Japanese accents. Pages: Home, Menu, Beans (grind selector + order), Brew Guide (methods + brew timer).
 
 All sites are imported in `src/App.jsx`. `src/main.jsx` starts the app.
 

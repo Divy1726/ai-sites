@@ -2,6 +2,7 @@
    VOIDWEAR — brutalist streetwear
    Black #0a0a0a / white / acid #d9ff3d. Anton display, JetBrains Mono labels.
    All classes prefixed vw- to avoid collisions with sibling sites.
+   Multi-page: HOME / SHOP / LOOKBOOK / MANIFESTO (client-side page state).
    ========================================================================== */
 
 .vw-root {
@@ -22,6 +23,10 @@
   color: #0a0a0a;
 }
 
+.vw-page {
+  display: block;
+}
+
 /* ------------------------------------------------------------------ NAV */
 
 .vw-nav {
@@ -31,7 +36,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
+  flex-wrap: wrap;
+  gap: 16px 24px;
   /* Left padding clears the fixed Back pill rendered by the parent App */
   padding: 18px 32px 18px 118px;
   background: rgba(10, 10, 10, 0.92);
@@ -52,12 +58,21 @@
   color: var(--vw-acid);
 }
 
-.vw-nav-links {
-  display: flex;
-  gap: 34px;
+.vw-logo-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
 }
 
-.vw-nav-links a {
+.vw-nav-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 34px;
+}
+
+.vw-nav-links a,
+.vw-nav-btn {
   font-family: "JetBrains Mono", monospace;
   font-size: 13px;
   letter-spacing: 0.14em;
@@ -66,9 +81,13 @@
   text-decoration: none;
   position: relative;
   padding: 4px 0;
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 
-.vw-nav-links a::after {
+.vw-nav-links a::after,
+.vw-nav-btn::after {
   content: "";
   position: absolute;
   left: 0;
@@ -81,12 +100,24 @@
   transition: transform 0.25s ease;
 }
 
-.vw-nav-links a:hover {
+.vw-nav-links a:hover,
+.vw-nav-btn:hover {
   color: var(--vw-acid);
 }
 
-.vw-nav-links a:hover::after {
+.vw-nav-links a:hover::after,
+.vw-nav-btn:hover::after {
   transform: scaleX(1);
+}
+
+/* Active page link — acid fill + full underline */
+.vw-nav-btn.vw-nav-active {
+  color: var(--vw-acid);
+}
+
+.vw-nav-btn.vw-nav-active::after {
+  transform: scaleX(1);
+  height: 3px;
 }
 
 .vw-cart {
@@ -386,7 +417,12 @@
 .vw-countdown,
 .vw-shop,
 .vw-lookbook,
-.vw-manifesto {
+.vw-manifesto,
+.vw-featured,
+.vw-quotes,
+.vw-shop-page,
+.vw-lookbook-page,
+.vw-manifesto-page {
   max-width: 1440px;
   margin: 0 auto;
   padding: 96px 32px;
@@ -472,6 +508,110 @@
   margin-top: 28px;
 }
 
+/* ------------------------------------------------------------------ FEATURED DROP */
+
+.vw-featured {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  border: 2px solid var(--vw-white);
+  padding: 0;
+  margin-top: 24px;
+  margin-bottom: 24px;
+  max-width: calc(1440px - 64px);
+  background: var(--vw-panel);
+}
+
+.vw-featured-media {
+  position: relative;
+  min-height: 560px;
+  overflow: hidden;
+  background: #1a1a1a;
+  border-right: 2px solid var(--vw-white);
+}
+
+.vw-featured-media img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: grayscale(0.4) contrast(1.12);
+  transition: transform 0.6s ease;
+}
+
+.vw-featured-media:hover img {
+  transform: scale(1.05);
+}
+
+.vw-featured-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 56px;
+  background: #0a0a0a;
+}
+
+.vw-featured-title {
+  font-family: "Anton", sans-serif;
+  font-size: clamp(52px, 6vw, 96px);
+  line-height: 0.95;
+  text-transform: uppercase;
+  margin: 0 0 18px;
+}
+
+.vw-featured-title span {
+  display: block;
+  color: transparent;
+  -webkit-text-stroke: 2px var(--vw-acid);
+}
+
+.vw-featured-price {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 34px;
+  font-weight: 700;
+  color: var(--vw-acid);
+  margin: 0 0 20px;
+}
+
+.vw-featured-desc {
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--vw-dim);
+  margin: 0 0 26px;
+  max-width: 460px;
+}
+
+.vw-featured-specs {
+  list-style: none;
+  margin: 0 0 34px;
+  padding: 18px 0;
+  border-top: 2px solid #2c2c2c;
+  border-bottom: 2px solid #2c2c2c;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 24px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: var(--vw-white);
+}
+
+.vw-featured-specs li::before {
+  content: "▸ ";
+  color: var(--vw-acid);
+}
+
+.vw-featured-add {
+  align-self: flex-start;
+}
+
+.vw-featured-add.vw-added {
+  background: var(--vw-white);
+  border-color: var(--vw-white);
+}
+
 /* ------------------------------------------------------------------ SHOP */
 
 .vw-shop-count,
@@ -488,6 +628,24 @@
 
 .vw-scroll-hint {
   color: var(--vw-acid);
+}
+
+.vw-hint-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  text-transform: uppercase;
+}
+
+.vw-hint-btn:hover {
+  color: var(--vw-white);
+}
+
+.vw-shop-more {
+  display: flex;
+  justify-content: center;
+  margin-top: 48px;
 }
 
 .vw-grid {
@@ -651,7 +809,54 @@
   color: var(--vw-acid);
 }
 
-/* ------------------------------------------------------------------ LOOKBOOK */
+/* ------------------------------------------------------------------ SHOP PAGE FILTERS */
+
+.vw-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 40px;
+}
+
+.vw-filter-btn {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 12px 22px;
+  background: transparent;
+  color: var(--vw-white);
+  border: 2px solid var(--vw-white);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease,
+    transform 0.15s ease;
+}
+
+.vw-filter-btn:hover {
+  border-color: var(--vw-acid);
+  color: var(--vw-acid);
+  transform: translate(-2px, -2px);
+}
+
+.vw-filter-btn.vw-filter-active {
+  background: var(--vw-acid);
+  border-color: var(--vw-acid);
+  color: #0a0a0a;
+}
+
+.vw-shop-note {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  color: var(--vw-dim);
+  text-align: center;
+  margin: 56px 0 0;
+  padding-top: 28px;
+  border-top: 2px solid #2c2c2c;
+}
+
+/* ------------------------------------------------------------------ LOOKBOOK STRIP (HOME) */
 
 .vw-look-row {
   display: flex;
@@ -712,7 +917,137 @@
   color: var(--vw-dim);
 }
 
-/* ------------------------------------------------------------------ MANIFESTO */
+/* ------------------------------------------------------------------ LOOKBOOK PAGE (MASONRY) */
+
+.vw-lb-grid {
+  columns: 3;
+  column-gap: 24px;
+}
+
+.vw-lb-item {
+  break-inside: avoid;
+  margin: 0 0 24px;
+  border: 2px solid var(--vw-white);
+  background: var(--vw-panel);
+  transition: border-color 0.2s ease;
+}
+
+.vw-lb-item:hover {
+  border-color: var(--vw-acid);
+}
+
+.vw-lb-media {
+  position: relative;
+  overflow: hidden;
+  background: #1a1a1a;
+}
+
+.vw-lb-media img {
+  width: 100%;
+  display: block;
+  object-fit: cover;
+  filter: grayscale(0.55) contrast(1.1);
+  transition: transform 0.55s ease, filter 0.55s ease;
+}
+
+.vw-lb-item:hover .vw-lb-media img {
+  transform: scale(1.08);
+  filter: grayscale(0) contrast(1.1);
+}
+
+/* Acid label slides in from the left on hover */
+.vw-lb-label {
+  position: absolute;
+  left: 0;
+  bottom: 18px;
+  background: var(--vw-acid);
+  color: #0a0a0a;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  padding: 8px 14px;
+  transform: translateX(-105%);
+  transition: transform 0.35s ease;
+  pointer-events: none;
+}
+
+.vw-lb-item:hover .vw-lb-label {
+  transform: translateX(0);
+}
+
+.vw-lb-item figcaption {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  padding: 14px 16px;
+  border-top: 2px solid var(--vw-white);
+  background: #0a0a0a;
+  color: var(--vw-dim);
+}
+
+/* Vary masonry heights via aspect ratios */
+.vw-lb-item:nth-child(3n + 1) .vw-lb-media img {
+  aspect-ratio: 3 / 4;
+}
+
+.vw-lb-item:nth-child(3n + 2) .vw-lb-media img {
+  aspect-ratio: 4 / 5;
+}
+
+.vw-lb-item:nth-child(3n) .vw-lb-media img {
+  aspect-ratio: 1 / 1.15;
+}
+
+/* ------------------------------------------------------------------ STREET QUOTES */
+
+.vw-quotes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.vw-quote-card {
+  margin: 0;
+  border: 2px solid var(--vw-white);
+  background: var(--vw-panel);
+  padding: 32px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  transition: border-color 0.2s ease, transform 0.25s ease;
+}
+
+.vw-quote-card:hover {
+  border-color: var(--vw-acid);
+  transform: translateY(-6px);
+}
+
+.vw-quote-mark {
+  color: var(--vw-acid);
+  display: inline-flex;
+}
+
+.vw-quote-text {
+  font-size: 19px;
+  line-height: 1.55;
+  margin: 0;
+  flex: 1;
+}
+
+.vw-quote-who {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--vw-white);
+}
+
+.vw-quote-who span {
+  color: var(--vw-acid);
+}
+
+/* ------------------------------------------------------------------ MANIFESTO (HOME TEASER) */
 
 .vw-manifesto {
   border-top: 2px solid #2c2c2c;
@@ -740,6 +1075,112 @@
   line-height: 1.7;
   color: var(--vw-dim);
   margin: 0 0 40px;
+}
+
+/* ------------------------------------------------------------------ MANIFESTO PAGE */
+
+.vw-mani-hero {
+  font-family: "Anton", sans-serif;
+  text-transform: uppercase;
+  line-height: 0.95;
+  margin: 0 0 36px;
+}
+
+.vw-mani-line {
+  display: block;
+  font-size: clamp(64px, 11vw, 170px);
+}
+
+.vw-mani-outline {
+  color: transparent;
+  -webkit-text-stroke: 3px var(--vw-white);
+}
+
+.vw-mani-intro {
+  max-width: 640px;
+  font-size: 19px;
+  line-height: 1.7;
+  color: var(--vw-dim);
+  margin: 0 0 64px;
+}
+
+.vw-rules {
+  border-top: 2px solid var(--vw-white);
+  margin-bottom: 72px;
+}
+
+.vw-rule {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 32px;
+  padding: 34px 0;
+  border-bottom: 1px solid #3a3a3a;
+  align-items: start;
+}
+
+.vw-rule-num {
+  font-family: "Anton", sans-serif;
+  font-size: 56px;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 2px var(--vw-acid);
+}
+
+.vw-rule-body h3 {
+  font-family: "Anton", sans-serif;
+  font-size: clamp(26px, 3vw, 38px);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  margin: 0 0 12px;
+}
+
+.vw-rule-body p {
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--vw-dim);
+  margin: 0;
+  max-width: 680px;
+}
+
+.vw-big-quote {
+  margin: 0 0 72px;
+  border: 2px solid var(--vw-acid);
+  background: var(--vw-panel);
+  padding: 56px;
+  text-align: left;
+}
+
+.vw-big-quote p {
+  font-family: "Anton", sans-serif;
+  font-size: clamp(30px, 4.4vw, 58px);
+  line-height: 1.1;
+  text-transform: uppercase;
+  margin: 20px 0 22px;
+}
+
+.vw-big-quote footer {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  color: var(--vw-acid);
+}
+
+.vw-mani-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 24px;
+  border-top: 2px solid #2c2c2c;
+  padding-top: 44px;
+}
+
+.vw-mani-cta-note {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 14px;
+  letter-spacing: 0.14em;
+  color: var(--vw-dim);
+  margin: 0;
 }
 
 /* ------------------------------------------------------------------ FOOTER */
@@ -777,6 +1218,24 @@
 }
 
 .vw-footer-col a:hover {
+  color: var(--vw-acid);
+}
+
+.vw-footer-link {
+  display: block;
+  font-family: "Archivo", "Inter", sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--vw-dim);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin: 0 0 8px;
+  text-align: left;
+}
+
+.vw-footer-link:hover {
   color: var(--vw-acid);
 }
 
@@ -824,6 +1283,24 @@
   .vw-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  .vw-featured {
+    grid-template-columns: 1fr;
+  }
+
+  .vw-featured-media {
+    min-height: 420px;
+    border-right: none;
+    border-bottom: 2px solid var(--vw-white);
+  }
+
+  .vw-quotes-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .vw-lb-grid {
+    columns: 2;
+  }
 }
 
 @media (max-width: 768px) {
@@ -831,8 +1308,12 @@
     padding: 14px 20px 14px 104px;
   }
 
+  /* Nav links wrap onto their own row instead of disappearing,
+     so page switching still works on mobile */
   .vw-nav-links {
-    display: none;
+    order: 3;
+    width: 100%;
+    gap: 8px 22px;
   }
 
   .vw-logo {
@@ -856,8 +1337,24 @@
   .vw-countdown,
   .vw-shop,
   .vw-lookbook,
-  .vw-manifesto {
+  .vw-manifesto,
+  .vw-quotes,
+  .vw-shop-page,
+  .vw-lookbook-page,
+  .vw-manifesto-page {
     padding: 64px 20px;
+  }
+
+  .vw-featured {
+    max-width: calc(100% - 40px);
+  }
+
+  .vw-featured-copy {
+    padding: 36px 24px;
+  }
+
+  .vw-featured-specs {
+    grid-template-columns: 1fr;
   }
 
   .vw-clock {
@@ -870,6 +1367,20 @@
 
   .vw-look img {
     height: 350px;
+  }
+
+  .vw-rule {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 28px 0;
+  }
+
+  .vw-rule-num {
+    font-size: 42px;
+  }
+
+  .vw-big-quote {
+    padding: 36px 24px;
   }
 
   .vw-footer {
@@ -890,6 +1401,10 @@
 @media (max-width: 520px) {
   .vw-grid {
     grid-template-columns: 1fr;
+  }
+
+  .vw-lb-grid {
+    columns: 1;
   }
 
   .vw-hero-ctas .vw-btn {
