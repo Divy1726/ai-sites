@@ -17,13 +17,14 @@ import Grain from "./fx/Grain";
 import RollLink from "./fx/RollLink";
 import "./App.css";
 
-// Import all 6 sites
+// Import all 7 sites
 import Voidwear from "./voidwear/Voidwear";
 import Aurelia from "./aurelia/Aurelia";
 import Orbital from "./orbital/Orbital";
 import Savage from "./savage/Savage";
 import Kobo from "./kobo/Kobo";
 import Noir from "./noir/Noir";
+import Grey from "./grey/Grey";
 
 const sites = [
   {
@@ -91,6 +92,17 @@ const sites = [
     bg: "#0e0e0e",
     pages: "4 pages",
     img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200&q=80&auto=format&fit=crop",
+  },
+  {
+    id: "grey",
+    num: "07",
+    name: "GREY ENTERPRISE",
+    tag: "Polymer Trading — Ahmedabad",
+    desc: "Polymers that move industry. Sourced, quality-checked at the warehouse, then delivered to your gate.",
+    accent: "#e05236",
+    bg: "#080808",
+    pages: "4 pages",
+    img: "https://images.unsplash.com/photo-1553413077-190dd305871c?w=1600&q=80&auto=format&fit=crop",
   },
 ];
 
@@ -341,6 +353,7 @@ function App() {
             {page === "savage" && <Savage />}
             {page === "kobo" && <Kobo />}
             {page === "noir" && <Noir />}
+            {page === "grey" && <Grey />}
           </motion.main>
         </AnimatePresence>
       </div>
@@ -360,7 +373,7 @@ function App() {
       <header className="home-top">
         <span className="home-logo">AI—SITES</span>
         <span className="home-top-note">
-          <Sparkles size={14} /> Six original worlds. One app.
+          <Sparkles size={14} /> Seven original worlds. One app.
         </span>
       </header>
 
@@ -379,10 +392,10 @@ function App() {
         </motion.p>
         <h1>
           <span className="home-hero-line">
-            <AnimatedLine text="6 SITES." delay={0.1} play={preloaded} />
+            <AnimatedLine text="7 SITES." delay={0.1} play={preloaded} />
           </span>
           <span className="home-hero-line home-hero-line-outline">
-            <AnimatedLine text="6 WORLDS." delay={0.45} play={preloaded} />
+            <AnimatedLine text="7 WORLDS." delay={0.45} play={preloaded} />
           </span>
         </h1>
         <motion.p
@@ -391,8 +404,9 @@ function App() {
           animate={preloaded ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.7, delay: 0.75 }}
         >
-          Streetwear, perfume, space, iron, coffee and a design studio — each
-          site has its own language, motion and rules. Click one. Step inside.
+          Streetwear, perfume, space, iron, coffee, a design studio and a
+          polymer trading floor — each site has its own language, motion and
+          rules. Click one. Step inside.
         </motion.p>
       </motion.section>
 

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import "./fx.css";
 
-const DEFAULT_WORDS = ["VOIDWEAR", "AURELIA", "ORBITAL", "SAVAGE", "KOBO", "NOIR"];
+const DEFAULT_WORDS = ["VOIDWEAR", "AURELIA", "ORBITAL", "SAVAGE", "KOBO", "NOIR", "GREY"];
 
 // Full-screen intro: mono counter 0->100 bottom-right, cycling site
 // names in the centre, thin progress line. Exits with a curtain lift.

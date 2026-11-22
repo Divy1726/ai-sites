@@ -1,0 +1,2187 @@
+/* GREY ENTERPRISE — polymer & plastic raw material trading, Ahmedabad.
+   HARD RULES honoured: overflow-x:clip (never hidden) so sticky
+   journey/rail sections keep working; all classes ge- prefixed. */
+
+.ge-root {
+  --reveal-accent: #e05236;
+  --ge-bg: #080808;
+  --ge-soft: #101010;
+  --ge-surface: #141414;
+  --ge-surface-2: #1b1b1b;
+  --ge-text: #f2f0eb;
+  --ge-muted: #9b9b96;
+  --ge-accent: #e05236;
+  --ge-line: rgba(242, 240, 235, 0.12);
+  --ge-pad: 5vw;
+  background: var(--ge-bg);
+  color: var(--ge-text);
+  font-family: "Inter", system-ui, sans-serif;
+  overflow-x: clip;
+  min-height: 100vh;
+}
+
+.ge-root *,
+.ge-root *::before,
+.ge-root *::after {
+  box-sizing: border-box;
+}
+
+.ge-root h1,
+.ge-root h2,
+.ge-root h3,
+.ge-root p {
+  margin: 0;
+}
+
+.ge-eyebrow {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ge-accent);
+  margin-bottom: 14px;
+}
+
+.ge-h2 {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(34px, 4.6vw, 58px);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+.ge-section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 32px;
+  flex-wrap: wrap;
+  margin-bottom: 44px;
+}
+
+.ge-section-note {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ge-muted);
+  padding-bottom: 8px;
+}
+
+/* ---------------- Nav ---------------- */
+
+.ge-nav {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  padding: 16px 28px 16px 118px; /* left clears the global Back pill */
+  background: rgba(8, 8, 8, 0.88);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--ge-line);
+}
+
+.ge-logo {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: 0.02em;
+  color: var(--ge-text);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+}
+
+.ge-logo span {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  color: var(--ge-accent);
+}
+
+.ge-nav-links {
+  display: flex;
+  gap: 26px;
+  margin-left: auto;
+}
+
+.ge-nav-link {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--ge-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 0;
+  transition: color 0.25s ease;
+}
+
+.ge-nav-link:hover,
+.ge-nav-link-active {
+  color: var(--ge-text);
+}
+
+.ge-nav-link-active {
+  box-shadow: inset 0 -2px 0 var(--ge-accent);
+}
+
+.ge-nav-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--ge-bg);
+  background: var(--ge-text);
+  border: none;
+  border-radius: 2px;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.ge-nav-cta:hover {
+  background: var(--ge-accent);
+  color: var(--ge-text);
+}
+
+.ge-menu-btn {
+  display: none;
+  background: none;
+  border: 1px solid var(--ge-line);
+  border-radius: 2px;
+  color: var(--ge-text);
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.ge-mobile-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 39;
+  background: rgba(8, 8, 8, 0.97);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 26px;
+}
+
+.ge-mobile-menu button {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--ge-text);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* ---------------- Buttons ---------------- */
+
+.ge-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 15px 26px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.ge-btn-solid {
+  background: var(--ge-text);
+  color: var(--ge-bg);
+  border: 1px solid var(--ge-text);
+}
+
+.ge-btn-solid:hover {
+  background: var(--ge-accent);
+  border-color: var(--ge-accent);
+  color: var(--ge-text);
+}
+
+.ge-btn-ghost {
+  background: transparent;
+  color: var(--ge-text);
+  border: 1px solid var(--ge-line);
+}
+
+.ge-btn-ghost:hover {
+  border-color: var(--ge-text);
+  background: var(--ge-surface);
+}
+
+.ge-btn-lg {
+  padding: 18px 34px;
+  font-size: 14px;
+}
+
+.ge-text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  color: var(--ge-accent);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px 0;
+  margin-top: 28px;
+}
+
+.ge-text-link:hover {
+  color: var(--ge-text);
+}
+
+/* ---------------- Hero ---------------- */
+
+.ge-hero {
+  position: relative;
+  min-height: calc(100svh - 65px);
+  display: flex;
+  align-items: center;
+  overflow: clip;
+}
+
+.ge-hero-bg {
+  position: absolute;
+  inset: 0;
+}
+
+.ge-hero-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: contrast(1.15) brightness(0.75);
+}
+
+.ge-hero-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(8, 8, 8, 0.45) 0%,
+    rgba(8, 8, 8, 0.55) 55%,
+    rgba(8, 8, 8, 0.92) 100%
+  );
+}
+
+.ge-hero-inner {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 90px var(--ge-pad) 150px;
+}
+
+.ge-hero-eyebrow {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  color: var(--ge-text);
+  margin-bottom: 26px;
+}
+
+.ge-hero-title {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(52px, 9vw, 124px);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  margin-bottom: 30px;
+}
+
+.ge-line-mask {
+  display: block;
+  overflow: hidden;
+}
+
+.ge-line-mask > span {
+  display: block;
+}
+
+.ge-hero-accent {
+  color: var(--ge-accent);
+}
+
+.ge-hero-sub {
+  font-size: clamp(17px, 2vw, 22px);
+  line-height: 1.5;
+  color: rgba(242, 240, 235, 0.78);
+  max-width: 580px;
+  margin-bottom: 40px;
+}
+
+.ge-hero-ctas {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.ge-scroll-hint {
+  position: absolute;
+  right: var(--ge-pad);
+  bottom: 96px;
+  z-index: 2;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: rgba(242, 240, 235, 0.6);
+}
+
+.ge-scroll-hint span {
+  display: inline-block;
+  animation: geBounce 1.8s ease-in-out infinite;
+}
+
+@keyframes geBounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(5px);
+  }
+}
+
+/* hero road strip — little truck drives across on a loop */
+.ge-road-strip {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 34px;
+  height: 54px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.ge-road-strip-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 8px;
+  height: 2px;
+  background-image: repeating-linear-gradient(
+    to right,
+    rgba(242, 240, 235, 0.5) 0 26px,
+    transparent 26px 48px
+  );
+}
+
+.ge-road-strip-truck {
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  width: 92px;
+  animation: geDrive 18s linear infinite;
+  will-change: transform;
+}
+
+.ge-road-strip-truck .ge-truck-wheel {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: geSpin 0.9s linear infinite;
+}
+
+@keyframes geDrive {
+  from {
+    transform: translateX(-140px);
+  }
+  to {
+    transform: translateX(calc(100vw + 60px));
+  }
+}
+
+@keyframes geSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------------- Truck art ---------------- */
+
+.ge-truck-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.ge-truck-body {
+  fill: #1d1d1d;
+  stroke: rgba(242, 240, 235, 0.35);
+  stroke-width: 1.5;
+}
+
+.ge-truck-band {
+  fill: var(--ge-accent);
+}
+
+.ge-truck-bag {
+  fill: #2c2c2c;
+  stroke: rgba(242, 240, 235, 0.4);
+  stroke-width: 1;
+}
+
+.ge-truck-bagline {
+  stroke: rgba(242, 240, 235, 0.35);
+  stroke-width: 1;
+}
+
+.ge-truck-brand {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  fill: #f2f0eb;
+}
+
+.ge-truck-cab {
+  fill: #262626;
+  stroke: rgba(242, 240, 235, 0.35);
+  stroke-width: 1.5;
+}
+
+.ge-truck-window {
+  fill: #0e0e0e;
+  stroke: rgba(242, 240, 235, 0.3);
+  stroke-width: 1;
+}
+
+.ge-truck-light {
+  fill: #ffd9a0;
+}
+
+.ge-truck-chassis {
+  fill: #111;
+  stroke: rgba(242, 240, 235, 0.25);
+  stroke-width: 1;
+}
+
+.ge-truck-tyre {
+  fill: #0a0a0a;
+  stroke: rgba(242, 240, 235, 0.45);
+  stroke-width: 2;
+}
+
+.ge-truck-hub {
+  fill: var(--ge-accent);
+}
+
+.ge-truck-spoke {
+  stroke: rgba(242, 240, 235, 0.5);
+  stroke-width: 1.6;
+}
+
+.ge-truck-mudflap {
+  fill: #1a1a1a;
+}
+
+.ge-truck-wheel {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* ---------------- Trust strip + marquee ---------------- */
+
+.ge-trust {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom: 1px solid var(--ge-line);
+  background: var(--ge-soft);
+}
+
+.ge-trust-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 24px var(--ge-pad);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--ge-text);
+  border-right: 1px solid var(--ge-line);
+}
+
+.ge-trust-item:last-child {
+  border-right: none;
+}
+
+.ge-trust-item svg {
+  color: var(--ge-accent);
+  flex-shrink: 0;
+}
+
+.ge-marquee-wrap {
+  border-bottom: 1px solid var(--ge-line);
+  padding: 26px 0;
+  background: var(--ge-bg);
+}
+
+.ge-marquee-chunk {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.ge-marquee-chunk i {
+  color: var(--ge-accent);
+  font-style: normal;
+  margin: 0 14px;
+}
+
+/* ---------------- THE JOURNEY (pinned scene) ---------------- */
+
+.ge-journey {
+  height: 420vh;
+  position: relative;
+  background: var(--ge-soft);
+}
+
+.ge-journey-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  /* top padding clears the sticky site nav (~65px) */
+  padding: 92px var(--ge-pad) 22px;
+  overflow: clip;
+}
+
+.ge-journey-head {
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.ge-journey-sub {
+  color: var(--ge-muted);
+  font-size: 15px;
+  margin-top: 10px;
+  max-width: 560px;
+}
+
+.ge-journey-stage {
+  position: relative;
+  width: 100%;
+  max-width: 1400px;
+  margin: 14px auto 0;
+  aspect-ratio: 1200 / 520;
+  max-height: 54vh;
+  flex-shrink: 1;
+  background-image:
+    linear-gradient(rgba(242, 240, 235, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(242, 240, 235, 0.045) 1px, transparent 1px);
+  background-size: 48px 48px;
+  border: 1px solid var(--ge-line);
+  background-color: #0c0c0c;
+}
+
+.ge-journey-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.ge-skyline rect {
+  fill: #131313;
+}
+
+.ge-crane-line {
+  stroke: #131313;
+  stroke-width: 3;
+}
+
+.ge-ground {
+  fill: #0a0a0a;
+}
+
+.ge-road-base {
+  stroke: #232323;
+  stroke-width: 16;
+  stroke-linecap: round;
+}
+
+.ge-road-done {
+  stroke: rgba(224, 82, 54, 0.55);
+  stroke-width: 16;
+  stroke-linecap: round;
+}
+
+.ge-road-dashes {
+  stroke: rgba(242, 240, 235, 0.55);
+  stroke-width: 2;
+  stroke-dasharray: 16 20;
+}
+
+.ge-bldg {
+  fill: #181818;
+  stroke: rgba(242, 240, 235, 0.22);
+  stroke-width: 1.5;
+}
+
+.ge-bldg-main {
+  fill: #1c1c1c;
+  stroke: rgba(224, 82, 54, 0.5);
+}
+
+.ge-bldg-roof {
+  stroke: rgba(242, 240, 235, 0.35);
+  stroke-width: 2;
+}
+
+.ge-bldg-top {
+  fill: #222;
+  stroke: rgba(242, 240, 235, 0.25);
+  stroke-width: 1;
+}
+
+.ge-bldg-win {
+  fill: rgba(242, 240, 235, 0.1);
+}
+
+.ge-bldg-signband {
+  fill: var(--ge-accent);
+}
+
+.ge-bldg-sign {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  fill: #fff5f0;
+}
+
+.ge-dock-glow {
+  fill: rgba(224, 82, 54, 0.35);
+}
+
+.ge-shutter {
+  transform-box: fill-box;
+  transform-origin: 50% 0%;
+}
+
+.ge-shutter-door {
+  fill: #2a2a2a;
+  stroke: rgba(242, 240, 235, 0.3);
+  stroke-width: 1;
+}
+
+.ge-shutter-slat {
+  stroke: rgba(242, 240, 235, 0.18);
+  stroke-width: 1;
+}
+
+.ge-dock-frame {
+  stroke: rgba(242, 240, 235, 0.3);
+  stroke-width: 1.5;
+}
+
+.ge-scan-beam {
+  fill: rgba(224, 82, 54, 0.16);
+}
+
+.ge-scan-line {
+  stroke: var(--ge-accent);
+  stroke-width: 2;
+}
+
+.ge-dock-bag {
+  fill: #262626;
+  stroke: rgba(242, 240, 235, 0.3);
+  stroke-width: 1;
+}
+
+.ge-gate {
+  fill: #111;
+  stroke: rgba(242, 240, 235, 0.3);
+  stroke-width: 1.5;
+}
+
+.ge-scene-label {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 15px;
+  letter-spacing: 0.18em;
+  fill: #f2f0eb;
+}
+
+.ge-scene-sub {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  fill: var(--ge-accent);
+}
+
+.ge-journey-truck {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: clamp(120px, 15vw, 190px);
+  offset-anchor: 50% 100%;
+  will-change: offset-distance;
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* QC checklist panel */
+.ge-qc-panel {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 4;
+  background: rgba(10, 10, 10, 0.88);
+  border: 1px solid rgba(224, 82, 54, 0.45);
+  padding: 16px 18px;
+  min-width: 230px;
+  backdrop-filter: blur(6px);
+}
+
+.ge-qc-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--ge-accent);
+  margin-bottom: 12px;
+}
+
+.ge-qc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.ge-qc-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--ge-muted);
+  transition: color 0.3s ease;
+}
+
+.ge-qc-list li.ge-qc-done {
+  color: var(--ge-text);
+}
+
+.ge-qc-box {
+  width: 18px;
+  height: 18px;
+  border: 1px solid rgba(242, 240, 235, 0.35);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ge-accent);
+  flex-shrink: 0;
+}
+
+.ge-qc-done .ge-qc-box {
+  border-color: var(--ge-accent);
+  background: rgba(224, 82, 54, 0.14);
+}
+
+/* stamps */
+.ge-stamp {
+  position: absolute;
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--ge-accent);
+  border: 2.5px solid var(--ge-accent);
+  border-radius: 4px;
+  padding: 8px 14px;
+  background: rgba(8, 8, 8, 0.55);
+  pointer-events: none;
+}
+
+.ge-stamp-qc {
+  left: 44%;
+  top: 12%;
+}
+
+.ge-stamp-del {
+  right: 4%;
+  top: 16%;
+}
+
+/* journey footer: caption + progress */
+.ge-journey-foot {
+  max-width: 1400px;
+  width: 100%;
+  margin: auto auto 0;
+  padding-top: 16px;
+}
+
+.ge-journey-captions {
+  display: grid;
+  min-height: 62px;
+}
+
+.ge-journey-caption {
+  grid-area: 1 / 1;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-height: 62px;
+  pointer-events: none;
+}
+
+.ge-journey-phase-num {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 44px;
+  font-weight: 700;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--ge-accent);
+}
+
+.ge-journey-caption h3 {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.ge-journey-caption p {
+  color: var(--ge-muted);
+  font-size: 15px;
+  margin-top: 3px;
+}
+
+.ge-journey-progress {
+  margin-top: 14px;
+}
+
+.ge-journey-bar {
+  display: block;
+  height: 3px;
+  background: rgba(242, 240, 235, 0.12);
+  overflow: hidden;
+}
+
+.ge-journey-bar-fill {
+  display: block;
+  height: 100%;
+  background: var(--ge-accent);
+  transform-origin: left;
+}
+
+.ge-journey-ticks {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 9px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--ge-muted);
+  flex-wrap: wrap;
+}
+
+.ge-journey-ticks .ge-tick-active {
+  color: var(--ge-accent);
+}
+
+/* mobile journey timeline */
+.ge-journey-mobile {
+  padding: 72px var(--ge-pad);
+  background: var(--ge-soft);
+}
+
+.ge-journey-mobile-truck {
+  width: 150px;
+  margin: 26px 0 8px;
+}
+
+.ge-timeline {
+  list-style: none;
+  margin: 26px 0 0;
+  padding: 0;
+  position: relative;
+}
+
+.ge-timeline::before {
+  content: "";
+  position: absolute;
+  left: 7px;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background: rgba(242, 240, 235, 0.14);
+}
+
+.ge-timeline-item {
+  position: relative;
+  display: flex;
+  gap: 22px;
+  padding: 0 0 30px 0;
+}
+
+.ge-timeline-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--ge-accent);
+  background: var(--ge-bg);
+  flex-shrink: 0;
+  margin-top: 3px;
+  z-index: 1;
+}
+
+.ge-timeline-meta {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  color: var(--ge-accent);
+  margin-bottom: 5px;
+}
+
+.ge-timeline-cap {
+  color: var(--ge-muted);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.ge-qc-list-static {
+  margin-top: 12px;
+}
+
+/* ---------------- Materials rail ---------------- */
+
+.ge-rail {
+  height: 340vh;
+  position: relative;
+  background: var(--ge-bg);
+}
+
+.ge-rail-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  /* top padding clears the sticky site nav (~65px) */
+  padding: 96px 0 26px;
+  overflow: clip;
+}
+
+.ge-rail-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 30px;
+  flex-wrap: wrap;
+  padding: 0 var(--ge-pad);
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.ge-rail-viewport {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.ge-rail-track {
+  display: flex;
+  gap: 22px;
+  padding: 10px var(--ge-pad);
+  width: max-content;
+  will-change: transform;
+}
+
+.ge-spec-card {
+  flex: 0 0 372px;
+  background: var(--ge-surface);
+  border: 1px solid var(--ge-line);
+  padding: 30px 28px;
+  display: flex;
+  flex-direction: column;
+  transition: background 0.35s ease, border-color 0.35s ease;
+}
+
+.ge-spec-card:hover {
+  background: var(--ge-surface-2);
+  border-color: rgba(224, 82, 54, 0.55);
+}
+
+.ge-spec-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 34px;
+}
+
+.ge-spec-num {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 42px;
+  font-weight: 300;
+  line-height: 1;
+  color: rgba(242, 240, 235, 0.22);
+  transition: color 0.35s ease;
+}
+
+.ge-spec-card:hover .ge-spec-num,
+.ge-material-card:hover .ge-spec-num {
+  color: var(--ge-accent);
+}
+
+.ge-spec-family {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ge-muted);
+  border: 1px solid var(--ge-line);
+  padding: 5px 9px;
+  border-radius: 999px;
+}
+
+.ge-spec-card h3,
+.ge-material-card h3 {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 23px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-bottom: 7px;
+}
+
+.ge-spec-cat {
+  font-size: 13px;
+  color: var(--ge-accent);
+  margin-bottom: 12px;
+}
+
+.ge-spec-desc {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ge-muted);
+  margin-bottom: 20px;
+}
+
+.ge-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 26px;
+}
+
+.ge-chip {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--ge-text);
+  border: 1px solid rgba(242, 240, 235, 0.25);
+  padding: 6px 10px;
+  border-radius: 2px;
+}
+
+.ge-spec-cta {
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--ge-text);
+  background: none;
+  border: none;
+  border-top: 1px solid var(--ge-line);
+  padding: 16px 0 0;
+  cursor: pointer;
+  text-align: left;
+  transition: color 0.25s ease;
+}
+
+.ge-spec-cta:hover {
+  color: var(--ge-accent);
+}
+
+.ge-rail-progress {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 0 var(--ge-pad);
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--ge-muted);
+}
+
+.ge-rail-line {
+  flex: 1;
+  height: 2px;
+  background: rgba(242, 240, 235, 0.12);
+  overflow: hidden;
+}
+
+.ge-rail-line-fill {
+  display: block;
+  height: 100%;
+  background: var(--ge-accent);
+  transform-origin: left;
+}
+
+.ge-rail-count {
+  color: var(--ge-text);
+}
+
+/* ---------------- Applications ---------------- */
+
+.ge-apps {
+  padding: 110px var(--ge-pad);
+  background: var(--ge-surface);
+  max-width: none;
+}
+
+.ge-apps > * {
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.ge-app-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 20px;
+}
+
+.ge-app-card {
+  position: relative;
+  overflow: clip;
+  border: 1px solid var(--ge-line);
+  grid-column: span 4;
+  height: 460px;
+}
+
+.ge-app-wide {
+  grid-column: span 8;
+}
+
+.ge-app-media {
+  position: absolute;
+  inset: 0;
+}
+
+.ge-app-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ge-app-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(8, 8, 8, 0.92) 0%, rgba(8, 8, 8, 0.15) 60%);
+  transition: background 0.4s ease;
+}
+
+.ge-app-card:hover .ge-app-shade {
+  background: linear-gradient(to top, rgba(8, 8, 8, 0.75) 0%, rgba(224, 82, 54, 0.12) 70%);
+}
+
+.ge-app-body {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  padding: 30px;
+  z-index: 2;
+  transition: transform 0.4s ease;
+}
+
+.ge-app-card:hover .ge-app-body {
+  transform: translateY(-8px);
+}
+
+.ge-app-num {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--ge-accent);
+}
+
+.ge-app-body h3 {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 30px;
+  font-weight: 600;
+  margin: 8px 0 8px;
+}
+
+.ge-app-body p {
+  color: rgba(242, 240, 235, 0.72);
+  font-size: 15px;
+  line-height: 1.55;
+  max-width: 420px;
+}
+
+.ge-app-arrow {
+  position: absolute;
+  right: 26px;
+  bottom: 26px;
+  z-index: 2;
+  color: var(--ge-accent);
+  opacity: 0;
+  transform: translate(-10px, 10px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.ge-app-card:hover .ge-app-arrow {
+  opacity: 1;
+  transform: translate(0, 0);
+}
+
+/* ---------------- Process steps ---------------- */
+
+.ge-process-teaser {
+  padding: 110px var(--ge-pad);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.ge-steps {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 44px;
+}
+
+.ge-steps-line {
+  position: absolute;
+  left: 19px;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  background: var(--ge-surface-2);
+  overflow: hidden;
+}
+
+.ge-steps-line-fill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--ge-accent);
+  transform-origin: top;
+}
+
+.ge-step {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 26px;
+  padding-left: 64px;
+}
+
+.ge-step::before {
+  content: "";
+  position: absolute;
+  left: 13px;
+  top: 8px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--ge-accent);
+  background: var(--ge-bg);
+}
+
+.ge-step-num {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 40px;
+  font-weight: 300;
+  line-height: 0.9;
+  color: rgba(242, 240, 235, 0.25);
+  min-width: 66px;
+}
+
+.ge-step h3 {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 25px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  margin-bottom: 6px;
+}
+
+.ge-step p {
+  color: var(--ge-muted);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* ---------------- Quality ---------------- */
+
+.ge-quality {
+  padding: 110px var(--ge-pad);
+  background: var(--ge-soft);
+  border-top: 1px solid var(--ge-line);
+  border-bottom: 1px solid var(--ge-line);
+}
+
+.ge-quality > * {
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.ge-scrub-statement {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(30px, 4.4vw, 56px);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  max-width: 980px;
+  margin-bottom: 64px;
+}
+
+.ge-quality-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 44px;
+  margin-bottom: 70px;
+}
+
+.ge-quality-line {
+  display: block;
+  width: 100%;
+  height: 1px;
+  background: var(--ge-line);
+  margin-bottom: 22px;
+  position: relative;
+}
+
+.ge-quality-line::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 34%;
+  height: 100%;
+  background: var(--ge-accent);
+}
+
+.ge-quality-item h3 {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  margin-bottom: 10px;
+}
+
+.ge-quality-item p {
+  color: var(--ge-muted);
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.ge-counters {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border: 1px solid var(--ge-line);
+}
+
+.ge-counter {
+  padding: 30px;
+  border-right: 1px solid var(--ge-line);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ge-counter:last-child {
+  border-right: none;
+}
+
+.ge-counter strong {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 52px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--ge-accent);
+}
+
+.ge-counter span {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--ge-muted);
+}
+
+/* ---------------- Big CTA ---------------- */
+
+.ge-bigcta {
+  position: relative;
+  min-height: 92svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: clip;
+}
+
+.ge-bigcta-bg {
+  position: absolute;
+  inset: 0;
+}
+
+.ge-bigcta-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: contrast(1.2) brightness(0.55);
+}
+
+.ge-bigcta-shade {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 8, 8, 0.55);
+}
+
+.ge-bigcta-inner {
+  position: relative;
+  z-index: 2;
+  padding: 100px var(--ge-pad);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ge-bigcta-title {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(38px, 6.5vw, 84px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+
+.ge-bigcta-inner p {
+  font-size: 19px;
+  color: rgba(242, 240, 235, 0.78);
+  margin-bottom: 38px;
+}
+
+/* ---------------- Footer ---------------- */
+
+.ge-footer {
+  background: #000;
+  padding: 70px var(--ge-pad) 26px;
+  overflow: clip;
+}
+
+.ge-footer-top {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 34px;
+  flex-wrap: wrap;
+}
+
+.ge-footer-brand {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.ge-footer-tag {
+  color: var(--ge-muted);
+  font-size: 14px;
+  margin-top: 6px;
+}
+
+.ge-footer-loc {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--ge-accent);
+  margin-top: 12px;
+}
+
+.ge-footer-nav {
+  display: flex;
+  gap: 26px;
+}
+
+.ge-footer-link {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--ge-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.ge-footer-link:hover {
+  color: var(--ge-text);
+}
+
+.ge-top-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid var(--ge-line);
+  background: transparent;
+  color: var(--ge-text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.3s ease, background 0.3s ease;
+}
+
+.ge-top-btn:hover {
+  border-color: var(--ge-accent);
+  background: rgba(224, 82, 54, 0.12);
+}
+
+.ge-footer-giant {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(120px, 24vw, 340px);
+  font-weight: 700;
+  line-height: 0.85;
+  letter-spacing: -0.02em;
+  text-align: center;
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(242, 240, 235, 0.16);
+  margin: 40px 0 10px;
+  user-select: none;
+}
+
+.ge-footer-bottom {
+  max-width: 1400px;
+  margin: 0 auto;
+  border-top: 1px solid var(--ge-line);
+  padding-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--ge-muted);
+}
+
+/* ---------------- Sub pages ---------------- */
+
+.ge-page {
+  padding: 84px var(--ge-pad) 110px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.ge-page-title {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(40px, 6vw, 76px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  margin-bottom: 22px;
+}
+
+.ge-page-sub {
+  color: var(--ge-muted);
+  font-size: 17px;
+  line-height: 1.65;
+  max-width: 640px;
+  margin-bottom: 48px;
+}
+
+.ge-filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 36px;
+}
+
+.ge-filter {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ge-muted);
+  background: transparent;
+  border: 1px solid var(--ge-line);
+  border-radius: 999px;
+  padding: 9px 18px;
+  cursor: pointer;
+  transition: color 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+}
+
+.ge-filter:hover {
+  color: var(--ge-text);
+}
+
+.ge-filter-active {
+  color: var(--ge-bg);
+  background: var(--ge-accent);
+  border-color: var(--ge-accent);
+}
+
+.ge-materials-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.ge-material-card {
+  background: var(--ge-surface);
+  border: 1px solid var(--ge-line);
+  padding: 28px 26px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.ge-material-detail {
+  overflow: hidden;
+  color: rgba(242, 240, 235, 0.8);
+  font-size: 14px;
+  line-height: 1.65;
+  border-left: 2px solid var(--ge-accent);
+  padding-left: 14px;
+  margin-bottom: 18px;
+}
+
+.ge-material-actions {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  border-top: 1px solid var(--ge-line);
+  padding-top: 16px;
+}
+
+.ge-material-actions .ge-spec-cta {
+  border-top: none;
+  padding-top: 0;
+  margin-top: 0;
+}
+
+.ge-detail-btn {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--ge-muted);
+  background: none;
+  border: 1px solid var(--ge-line);
+  border-radius: 2px;
+  padding: 7px 12px;
+  cursor: pointer;
+  transition: color 0.25s ease, border-color 0.25s ease;
+}
+
+.ge-detail-btn:hover {
+  color: var(--ge-text);
+  border-color: var(--ge-accent);
+}
+
+/* process page extras */
+.ge-process-qc {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 56px;
+  align-items: center;
+  margin-top: 96px;
+}
+
+.ge-process-qc-copy p {
+  color: var(--ge-muted);
+  font-size: 16px;
+  line-height: 1.7;
+  margin: 18px 0 26px;
+}
+
+.ge-qc-list-page li {
+  font-size: 12px;
+  padding: 4px 0;
+}
+
+.ge-process-qc-media {
+  position: relative;
+}
+
+.ge-qc-photo {
+  height: 420px;
+  border: 1px solid var(--ge-line);
+}
+
+.ge-qc-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ge-qc-photo-tag {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  background: rgba(8, 8, 8, 0.82);
+  border: 1px solid var(--ge-line);
+  padding: 8px 12px;
+  color: var(--ge-text);
+}
+
+.ge-route-map {
+  margin-top: 96px;
+  border: 1px solid var(--ge-line);
+  background: var(--ge-soft);
+  padding: 34px;
+}
+
+.ge-route-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.ge-route-line {
+  stroke: rgba(224, 82, 54, 0.7);
+  stroke-width: 2.5;
+  stroke-dasharray: 8 7;
+}
+
+.ge-route-dot {
+  fill: var(--ge-bg);
+  stroke: rgba(242, 240, 235, 0.6);
+  stroke-width: 2;
+}
+
+.ge-route-dot-main {
+  fill: var(--ge-accent);
+  stroke: var(--ge-accent);
+}
+
+.ge-route-labels {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--ge-muted);
+  margin-top: 10px;
+}
+
+.ge-route-labels span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ge-route-label-main {
+  color: var(--ge-accent);
+}
+
+.ge-page-cta {
+  margin-top: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--ge-line);
+  padding-top: 40px;
+}
+
+.ge-page-cta p {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+/* contact */
+.ge-contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 64px;
+  align-items: start;
+}
+
+.ge-address {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 17px;
+  margin-bottom: 34px;
+}
+
+.ge-address span {
+  color: var(--ge-muted);
+}
+
+.ge-contact-methods {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 34px;
+}
+
+.ge-method {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ge-method-label {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ge-muted);
+}
+
+.ge-method-value {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  color: var(--ge-accent);
+}
+
+.ge-contact-note {
+  color: var(--ge-muted);
+  font-size: 15px;
+  line-height: 1.7;
+  max-width: 420px;
+}
+
+.ge-form {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+
+.ge-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 26px;
+}
+
+.ge-field {
+  position: relative;
+}
+
+.ge-field input,
+.ge-field textarea {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--ge-line);
+  color: var(--ge-text);
+  font-family: "Inter", sans-serif;
+  font-size: 16px;
+  padding: 14px 0 10px;
+  outline: none;
+  transition: border-color 0.3s ease;
+  border-radius: 0;
+}
+
+.ge-field textarea {
+  resize: vertical;
+}
+
+.ge-field input:focus,
+.ge-field textarea:focus {
+  border-color: var(--ge-accent);
+}
+
+.ge-field label {
+  position: absolute;
+  left: 0;
+  top: 14px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--ge-muted);
+  pointer-events: none;
+  transition: all 0.25s ease;
+}
+
+.ge-field input:focus ~ label,
+.ge-field input:not(:placeholder-shown) ~ label,
+.ge-field textarea:focus ~ label,
+.ge-field textarea:not(:placeholder-shown) ~ label {
+  top: -8px;
+  font-size: 9px;
+  color: var(--ge-accent);
+}
+
+.ge-field-error {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: #ff7a5c;
+}
+
+.ge-submit {
+  align-self: flex-start;
+  border: 1px solid var(--ge-text);
+}
+
+.ge-form-success {
+  position: relative;
+  border: 1px solid rgba(224, 82, 54, 0.5);
+  background: var(--ge-surface);
+  padding: 44px 38px;
+}
+
+.ge-success-stamp {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  transform: rotate(-10deg);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--ge-accent);
+  border: 2px solid var(--ge-accent);
+  border-radius: 4px;
+  padding: 6px 11px;
+}
+
+.ge-form-success h3 {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 34px;
+  font-weight: 700;
+  color: var(--ge-accent);
+  margin-bottom: 8px;
+}
+
+.ge-success-line {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  color: var(--ge-text);
+  margin-bottom: 28px;
+}
+
+.ge-success-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 26px;
+  margin: 0 0 32px;
+}
+
+.ge-success-summary dt {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--ge-muted);
+  margin-bottom: 4px;
+}
+
+.ge-success-summary dd {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* ---------------- Responsive ---------------- */
+
+@media (max-width: 1024px) {
+  .ge-materials-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .ge-app-card,
+  .ge-app-wide {
+    grid-column: span 12;
+    height: 400px;
+  }
+  .ge-trust {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .ge-trust-item:nth-child(2) {
+    border-right: none;
+  }
+  .ge-trust-item {
+    border-bottom: 1px solid var(--ge-line);
+  }
+}
+
+@media (max-width: 768px) {
+  .ge-nav {
+    padding: 14px 18px 14px 104px;
+    gap: 14px;
+  }
+  .ge-nav-links,
+  .ge-nav-cta {
+    display: none;
+  }
+  .ge-menu-btn {
+    display: inline-flex;
+    margin-left: auto;
+  }
+  .ge-logo {
+    font-size: 17px;
+  }
+  .ge-hero-inner {
+    padding: 70px var(--ge-pad) 170px;
+  }
+  .ge-hero-ctas .ge-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  .ge-hero-ctas .fx-magnetic {
+    width: 100%;
+    display: block;
+  }
+  .ge-scroll-hint {
+    display: none;
+  }
+  .ge-trust {
+    grid-template-columns: 1fr;
+  }
+  .ge-trust-item {
+    border-right: none;
+  }
+  .ge-quality-grid,
+  .ge-counters,
+  .ge-process-qc,
+  .ge-contact-grid,
+  .ge-form-row,
+  .ge-success-summary {
+    grid-template-columns: 1fr;
+  }
+  .ge-counter {
+    border-right: none;
+    border-bottom: 1px solid var(--ge-line);
+  }
+  .ge-counter:last-child {
+    border-bottom: none;
+  }
+  .ge-materials-grid {
+    grid-template-columns: 1fr;
+  }
+  .ge-step {
+    gap: 16px;
+    padding-left: 52px;
+  }
+  .ge-step-num {
+    font-size: 30px;
+    min-width: 48px;
+  }
+  .ge-steps-line {
+    left: 15px;
+  }
+  .ge-step::before {
+    left: 9px;
+  }
+
+  /* rail degrades to native horizontal scroll — no pin, no blank */
+  .ge-rail {
+    height: auto;
+    padding: 72px 0 40px;
+  }
+  .ge-rail-sticky {
+    position: static;
+    height: auto;
+    padding: 0;
+  }
+  .ge-rail-viewport {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 12px;
+  }
+  .ge-rail-track {
+    padding: 10px var(--ge-pad);
+  }
+  .ge-spec-card {
+    flex: 0 0 82vw;
+    scroll-snap-align: start;
+  }
+  .ge-rail-progress {
+    display: none;
+  }
+
+  .ge-apps,
+  .ge-process-teaser,
+  .ge-quality {
+    padding: 72px var(--ge-pad);
+  }
+  .ge-app-card,
+  .ge-app-wide {
+    height: 360px;
+  }
+  .ge-page {
+    padding: 56px var(--ge-pad) 80px;
+  }
+  .ge-footer-top {
+    flex-direction: column;
+  }
+  .ge-footer-nav {
+    flex-wrap: wrap;
+  }
+  .ge-route-labels {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ge-road-strip-truck,
+  .ge-road-strip-truck .ge-truck-wheel,
+  .ge-scroll-hint span {
+    animation: none;
+  }
+}

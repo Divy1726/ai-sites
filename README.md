@@ -1,10 +1,10 @@
-# AI Sites — 6 Sites. 6 Worlds.
+# AI Sites — 7 Sites. 7 Worlds.
 
 Made by Divyesh Suthar
 
-Six original website concepts in one React app. The Home screen shows all 6 sites — click one to open it full screen, and use the Back button on the left side to return home. Each site has its own design language, fonts, colors and motion.
+Seven original website concepts in one React app. The Home screen shows all 7 sites — click one to open it full screen, and use the Back button on the left side to return home. Each site has its own design language, fonts, colors and motion.
 
-## The 6 Sites
+## The 7 Sites
 
 1. **VOIDWEAR** (`src/voidwear/`) — Brutalist streetwear brand. Black + acid yellow, huge type, marquee ticker, live drop countdown, cursor-parallax hero, stacking drop cards, pinned horizontal lookbook. Pages: Home, Shop (9 products with category filter), Lookbook, Manifesto.
 2. **AURELIA** (`src/aurelia/`) — Luxury perfume house. Ivory + gold, serif elegance, fragrance notes, newsletter, scroll-scrubbed manifesto. Pages: Home, Collection (6 perfumes with detail view and size selector), Story, Journal.
@@ -12,6 +12,7 @@ Six original website concepts in one React app. The Home screen shows all 6 site
 4. **SAVAGE CLUB** (`src/savage/`) — Premium gym. Black + electric red, animated counters, FAQ accordion, stacking program cards. Pages: Home, Classes (full week schedule), Trainers (book a session), Membership (pricing toggle + join form).
 5. **KOBO** (`src/kobo/`) — Tokyo specialty coffee lab. Warm cream + brown, steam animation, vertical Japanese accents, floating menu image preview. Pages: Home, Menu, Beans (grind selector + order), Brew Guide (methods + brew timer).
 6. **NOIR ATELIER** (`src/noir/`) — Creative studio. Near-black + bone + burnt orange, kinetic type, floating work previews, stacking services. Pages: Home, Work (filterable), Studio, Contact.
+7. **GREY ENTERPRISE** (`src/grey/`) — Polymer & plastic raw material trading, Ahmedabad. Near-black + warm orange, Space Grotesk. Signature: a pinned scroll journey — a truck carries one lot from the supplier (Point A) to the Grey warehouse for a 4-point quality check, then on to the customer factory (Point B). Pages: Home, Materials (8 grades, filter + detail), Process, Contact (quote form with pre-filled grade).
 
 All sites are imported in `src/App.jsx`. `src/main.jsx` starts the app.
 
