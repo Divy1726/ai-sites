@@ -500,9 +500,12 @@
   fill: #1a1a1a;
 }
 
+/* NOTE: no transform-box/origin here — framer-motion sets an inline
+   transform-origin (bbox centre, SVG user units) on the wheel group,
+   and transform-box: fill-box would re-interpret that origin relative
+   to the bbox corner, making wheels orbit instead of spin in place.
+   The hero strip overrides this with its own CSS spin rule. */
 .ge-truck-wheel {
-  transform-box: fill-box;
-  transform-origin: center;
 }
 
 /* ---------------- Trust strip + marquee ---------------- */
@@ -556,10 +559,10 @@
   margin: 0 14px;
 }
 
-/* ---------------- THE JOURNEY (pinned scene) ---------------- */
+/* ---------------- SEA TO GATE (pinned vertical journey) ---------------- */
 
-.ge-journey {
-  height: 420vh;
+.ge-sea {
+  height: 520vh;
   position: relative;
   background: var(--ge-soft);
 }
@@ -588,58 +591,52 @@
   max-width: 560px;
 }
 
-.ge-journey-stage {
+/* stage window: fixed height, the tall world pans through it */
+.ge-sea-stage {
   position: relative;
   width: 100%;
   max-width: 1400px;
   margin: 14px auto 0;
-  aspect-ratio: 1200 / 520;
-  max-height: 54vh;
+  height: 54vh;
+  min-height: 380px;
   flex-shrink: 1;
-  background-image:
-    linear-gradient(rgba(242, 240, 235, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(242, 240, 235, 0.045) 1px, transparent 1px);
-  background-size: 48px 48px;
+  overflow: clip;
   border: 1px solid var(--ge-line);
   background-color: #0c0c0c;
 }
 
-.ge-journey-svg {
+.ge-sea-world {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
   width: 100%;
-  height: 100%;
+  will-change: transform;
 }
 
-.ge-skyline rect {
-  fill: #131313;
-}
-
-.ge-crane-line {
-  stroke: #131313;
-  stroke-width: 3;
+.ge-sea-svg {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 .ge-ground {
   fill: #0a0a0a;
 }
 
-.ge-road-base {
-  stroke: #232323;
-  stroke-width: 16;
-  stroke-linecap: round;
+/* vertical road band: port -> warehouse -> customer */
+.ge-sea-road {
+  fill: #161616;
 }
 
-.ge-road-done {
-  stroke: rgba(224, 82, 54, 0.55);
-  stroke-width: 16;
-  stroke-linecap: round;
-}
-
-.ge-road-dashes {
-  stroke: rgba(242, 240, 235, 0.55);
+.ge-sea-road-edge {
+  stroke: rgba(242, 240, 235, 0.28);
   stroke-width: 2;
-  stroke-dasharray: 16 20;
+}
+
+.ge-sea-dashes {
+  stroke: rgba(242, 240, 235, 0.55);
+  stroke-width: 3;
+  stroke-dasharray: 36 30;
 }
 
 .ge-bldg {
@@ -684,9 +681,9 @@
   fill: rgba(224, 82, 54, 0.35);
 }
 
+/* origin handled by framer-motion (originY: 0 in style) — see
+   .ge-truck-wheel note about transform-box conflicts */
 .ge-shutter {
-  transform-box: fill-box;
-  transform-origin: 50% 0%;
 }
 
 .ge-shutter-door {
@@ -738,17 +735,6 @@
   font-size: 11px;
   letter-spacing: 0.18em;
   fill: var(--ge-accent);
-}
-
-.ge-journey-truck {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: clamp(160px, 20vw, 262px);
-  offset-anchor: 50% 100%;
-  will-change: offset-distance;
-  z-index: 3;
-  pointer-events: none;
 }
 
 /* QC checklist panel */
@@ -2060,8 +2046,8 @@
 
 .ge-truck-plate-text {
   font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 4.6px;
-  letter-spacing: 0.04em;
+  font-size: 3.9px;
+  letter-spacing: 0.02em;
   fill: #141414;
 }
 
@@ -2126,10 +2112,6 @@
   fill: #232323;
   stroke: rgba(242, 240, 235, 0.25);
   stroke-width: 1;
-}
-
-.ge-truck-arch {
-  fill: #0b0b0b;
 }
 
 .ge-truck-tread {
@@ -2330,9 +2312,8 @@
   stroke-width: 1.2;
 }
 
+/* origin handled by framer-motion (originX: 1 in style) */
 .ge-gate-wrap {
-  transform-box: fill-box;
-  transform-origin: 100% 50%;
 }
 
 .ge-gate-bar {
@@ -2353,12 +2334,16 @@
 .ge-hero-chips {
   position: absolute;
   inset: 0;
-  z-index: 1;
+  /* above .ge-hero-inner (z 2) so chips receive hover — the hero
+     title's full-width line-mask spans would otherwise cover them */
+  z-index: 3;
   pointer-events: none;
 }
 
 .ge-hero-chip {
   position: absolute;
+  /* hoverable: shows the floating granule preview (fine-pointer only) */
+  pointer-events: auto;
   font-family: "JetBrains Mono", ui-monospace, monospace;
   font-size: 11px;
   letter-spacing: 0.16em;
@@ -2369,6 +2354,12 @@
   padding: 8px 14px;
   border-radius: 999px;
   animation: geFloat 5s ease-in-out infinite;
+  transition: border-color 0.25s ease, background 0.25s ease;
+}
+
+.ge-hero-chip:hover {
+  border-color: var(--ge-accent);
+  background: rgba(8, 8, 8, 0.7);
 }
 
 .ge-hero-chip-1 {
@@ -2418,19 +2409,79 @@
   }
 }
 
-/* ---------------- Granule dot band on material cards ---------------- */
+/* ---------------- Granule photo headers on material cards ---------------- */
 
-.ge-dot-band {
-  height: 52px;
-  margin: -6px -6px 18px;
+.ge-spec-media,
+.ge-material-media {
+  margin: -30px -28px 22px;
+  height: 150px;
+  overflow: clip;
   border-bottom: 1px solid var(--ge-line);
-  background-color: #101010;
-  background-image: radial-gradient(
-    circle at 9px 9px,
-    var(--dot, #ededEA) 4.6px,
-    transparent 5.6px
-  );
-  background-size: 19px 19px;
+  background: #101010;
+}
+
+.ge-material-media {
+  margin: -28px -26px 22px;
+}
+
+.ge-spec-media img,
+.ge-material-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ge-spec-card:hover .ge-spec-media img,
+.ge-material-card:hover .ge-material-media img {
+  transform: scale(1.07);
+}
+
+/* ---------------- Floating material preview (fine-pointer only) ---------------- */
+
+.ge-float-preview {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 90;
+  width: 260px;
+  pointer-events: none;
+  background: rgba(10, 10, 10, 0.92);
+  border: 1px solid rgba(224, 82, 54, 0.5);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+  overflow: clip;
+}
+
+.ge-float-preview-img {
+  display: block;
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+}
+
+.ge-float-preview-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 14px 12px;
+}
+
+.ge-float-preview-meta strong {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--ge-text);
+}
+
+.ge-float-preview-meta span {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ge-accent);
 }
 
 /* ---------------- Hazard stripe divider ---------------- */
@@ -2574,24 +2625,7 @@
   border-top: 1px solid var(--ge-line);
 }
 
-/* ---------------- FROM THE PORT (pinned prequel) ---------------- */
-
-.ge-port {
-  height: 320vh;
-  position: relative;
-  background: var(--ge-bg);
-}
-
-.ge-port-stage {
-  background-color: #101820;
-}
-
-.ge-port-handoff {
-  color: var(--ge-accent);
-  font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 11px;
-  letter-spacing: 0.14em;
-}
+/* ---------------- SEA TO GATE scene parts (ship / crane / port) ---------------- */
 
 .ge-sea {
   fill: #0e2233;
@@ -2730,9 +2764,8 @@
   stroke-width: 1;
 }
 
+/* origin handled by framer-motion (originY: 0 in style) */
 .ge-cables {
-  transform-box: fill-box;
-  transform-origin: 50% 0%;
 }
 
 .ge-cable {
@@ -2745,9 +2778,8 @@
   stroke-width: 1;
 }
 
+/* origin handled by framer-motion (originX: 0.5, originY: 0 in style) */
 .ge-lift-box {
-  transform-box: fill-box;
-  transform-origin: 50% 0%;
 }
 
 .ge-lift-box-body {
@@ -2854,6 +2886,10 @@
     display: none;
   }
   .ge-hero-chips {
+    display: none;
+  }
+  /* floating preview is fine-pointer only (also JS-gated) */
+  .ge-float-preview {
     display: none;
   }
   .ge-logistics {
