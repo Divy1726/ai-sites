@@ -587,7 +587,20 @@
 
 /* ---------------- Anatomy ---------------- */
 
+/* Pinned showcase (mirrors .ct-speed): 300vh of scroll room, the stage
+   sticks at 100vh for the whole travel so the explode -> flash ->
+   snap-back plays entirely on screen. padding-bottom: 0 so the sticky
+   stage stays stuck through exactly p = 1.0. */
+.ct-anatomy {
+  height: 300vh;
+  padding-bottom: 0;
+}
+
 .ct-anatomy-stage {
+  position: sticky;
+  top: 0;
+  min-height: 100vh;
+  align-content: center;
   display: grid;
   grid-template-columns: 1.9fr 1fr;
   gap: 28px;
@@ -1896,5 +1909,308 @@
   .ct-deco-1,
   .ct-deco-2 {
     animation: none;
+  }
+}
+
+/* ---------------- Round 2: 3D + sound ----------------
+   Canvases layer over the existing photo backdrops; the photo stays
+   underneath as the graceful fallback (and dims once WebGL is live). */
+
+.ct-3d-wrap {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.ct-3d-wrap canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+.ct-3d-offline {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ct-gold);
+  background: #050508;
+  border: 1px dashed var(--ct-gold);
+  font-family: "Special Elite", monospace;
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  text-align: center;
+  padding: 20px;
+}
+
+/* The 3D stage never blocks reading or scrolling; only the garage
+   canvas takes pointer input (OrbitControls drag). */
+.ct-3d-hero,
+.ct-3d-anatomy,
+.ct-3d-speed,
+.ct-3d-outro {
+  pointer-events: none;
+}
+
+.ct-hero-media:has([data-webgl="ok"]) .ct-hero-img,
+.ct-garage-stage:has([data-webgl="ok"]) .ct-garage-img,
+.ct-anatomy-frame:has([data-webgl="ok"]) .ct-anatomy-img,
+.ct-outro-media:has([data-webgl="ok"]) .ct-outro-img {
+  opacity: 0.14;
+}
+
+.ct-anatomy-frame .ct-hotspot {
+  z-index: 3;
+}
+
+/* ---------------- Sound toggle (header) ---------------- */
+
+.ct-sound-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 14px;
+  letter-spacing: 0.2em;
+  color: var(--ct-muted);
+  background: transparent;
+  border: 1px solid var(--ct-line-soft);
+  border-radius: 999px;
+  padding: 7px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.25s ease;
+}
+
+.ct-sound-toggle:hover {
+  color: var(--ct-cream);
+  border-color: var(--ct-line);
+}
+
+.ct-sound-toggle-on {
+  color: var(--ct-gold-bright);
+  border-color: var(--ct-gold);
+  background: rgba(201, 168, 76, 0.12);
+  box-shadow: 0 0 18px rgba(201, 168, 76, 0.25);
+}
+
+/* ---------------- Rain (hero, 3d version) ---------------- */
+
+.ct-rain-toggle {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  z-index: 3;
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 14px;
+  letter-spacing: 0.24em;
+  color: var(--ct-cream);
+  background: rgba(5, 4, 2, 0.55);
+  border: 1px solid var(--ct-line);
+  border-radius: 999px;
+  padding: 9px 18px;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  transition: all 0.25s ease;
+}
+
+.ct-rain-toggle-on {
+  color: var(--ct-gold-bright);
+  border-color: var(--ct-gold);
+  background: rgba(201, 168, 76, 0.16);
+  box-shadow: 0 0 18px rgba(201, 168, 76, 0.3);
+}
+
+.ct-rain-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    102deg,
+    transparent 0,
+    transparent 14px,
+    rgba(191, 216, 255, 0.32) 14px,
+    rgba(191, 216, 255, 0.32) 15px,
+    transparent 15px,
+    transparent 34px
+  );
+  background-size: 120px 240px;
+  animation: ct-rain-fall 0.55s linear infinite;
+}
+
+@keyframes ct-rain-fall {
+  from {
+    background-position: 0 -240px;
+  }
+  to {
+    background-position: -28px 0;
+  }
+}
+
+/* ---------------- Gallery 3D ring ---------------- */
+
+.ct-ring {
+  position: relative;
+  width: min(920px, 100%);
+  height: 540px;
+  perspective: 1400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.ct-ring-rotor {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+}
+
+.ct-ring-card {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  width: min(430px, 74vw);
+  aspect-ratio: 16 / 9;
+  transform-style: preserve-3d;
+  cursor: pointer;
+  backface-visibility: hidden;
+}
+
+.ct-ring-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--ct-media);
+  border: 1px solid var(--ct-line);
+  box-shadow: 0 40px 90px rgba(0, 0, 0, 0.6);
+  transition: transform 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+  backface-visibility: hidden;
+}
+
+.ct-ring-card-inner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  backface-visibility: hidden;
+}
+
+.ct-ring-card-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 55%, rgba(5, 4, 2, 0.55));
+  pointer-events: none;
+}
+
+.ct-ring-card-num {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 44px;
+  line-height: 1;
+  color: rgba(240, 208, 128, 0.55);
+}
+
+.ct-ring-card-active .ct-ring-card-inner {
+  transform: scale(1.07);
+  border-color: var(--ct-gold);
+  box-shadow: 0 0 0 1px var(--ct-gold), 0 40px 100px rgba(0, 0, 0, 0.7),
+    0 0 42px rgba(201, 168, 76, 0.35);
+}
+
+@media (max-width: 768px) {
+  .ct-sound-toggle span {
+    display: none;
+  }
+  .ct-sound-toggle {
+    padding: 7px 10px;
+  }
+  .ct-ring {
+    height: 400px;
+  }
+  .ct-ring-card {
+    width: min(300px, 76vw);
+  }
+  .ct-rain-toggle {
+    right: 16px;
+    bottom: 16px;
+  }
+}
+
+/* ---------------- Anatomy 3D tracking labels ----------------
+   Labels + connector lines are positioned every frame by the canvas
+   (three/canvases.jsx) so each one follows its part while exploded. */
+
+.ct-anatomy-labels {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.ct-anatomy-lines {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+}
+
+.ct-anatomy-line {
+  stroke: rgba(201, 168, 76, 0.75);
+  stroke-width: 1;
+}
+
+.ct-anatomy-dot {
+  fill: #f0d080;
+}
+
+.ct-anatomy-3d-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  will-change: transform, opacity;
+}
+
+.ct-anatomy-3d-label-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--ct-gold-bright);
+  box-shadow: 0 0 16px 3px rgba(240, 208, 128, 0.65);
+  flex-shrink: 0;
+}
+
+.ct-anatomy-3d-label-text {
+  font-family: "Special Elite", monospace;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ct-cream);
+  background: linear-gradient(90deg, rgba(5, 4, 2, 0.92), rgba(15, 12, 5, 0.75));
+  padding: 7px 13px;
+  border-left: 1px solid var(--ct-gold);
+  white-space: nowrap;
+  box-shadow: 6px 6px 18px rgba(0, 0, 0, 0.6);
+}
+
+@media (max-width: 768px) {
+  .ct-anatomy-3d-label-text {
+    font-size: 10px;
+    padding: 5px 9px;
+    letter-spacing: 0.12em;
   }
 }

@@ -13,8 +13,24 @@ import {
   ChevronLeft,
   ChevronRight,
   Gauge,
+  Volume2,
+  VolumeX,
   X,
 } from "lucide-react";
+import {
+  AnatomyCanvas,
+  GarageCanvas,
+  HeroCanvas,
+  OutroCanvas,
+  SpeedCanvas,
+} from "./three/canvases";
+import GalleryRing from "./three/GalleryRing";
+import {
+  isSoundEnabled,
+  playMetallicClick,
+  rainUpdate,
+  setSoundEnabled,
+} from "./three/audio";
 import VelocityMarquee from "../fx/VelocityMarquee";
 import ScrubWords from "../fx/ScrubWords";
 import Reveal from "../fx/Reveal";
@@ -64,6 +80,8 @@ const IMG = {
 const CARS = [
   {
     id: "bugatti-atlantic",
+    color: "#1a1a2e",
+    accentColor: "#c9a84c",
     name: "Bugatti Type 57 Atlantic",
     year: 1936,
     era: "1930s",
@@ -78,6 +96,8 @@ const CARS = [
   },
   {
     id: "mercedes-540k",
+    color: "#2d1b00",
+    accentColor: "#d4d8e0",
     name: "Mercedes-Benz 540K",
     year: 1937,
     era: "1930s",
@@ -92,6 +112,8 @@ const CARS = [
   },
   {
     id: "alfa-8c",
+    color: "#8b0000",
+    accentColor: "#f0d080",
     name: "Alfa Romeo 8C 2900",
     year: 1938,
     era: "1930s",
@@ -106,6 +128,8 @@ const CARS = [
   },
   {
     id: "mercedes-300sl",
+    color: "#b8bcc0",
+    accentColor: "#c9a84c",
     name: "Mercedes-Benz 300SL Gullwing",
     year: 1954,
     era: "1950s",
@@ -120,6 +144,8 @@ const CARS = [
   },
   {
     id: "jaguar-etype",
+    color: "#003322",
+    accentColor: "#00cc88",
     name: "Jaguar E-Type Series 1",
     year: 1961,
     era: "1960s",
@@ -134,6 +160,8 @@ const CARS = [
   },
   {
     id: "ferrari-gto",
+    color: "#cc2200",
+    accentColor: "#ff8844",
     name: "Ferrari 250 GTO",
     year: 1962,
     era: "1960s",
@@ -148,6 +176,8 @@ const CARS = [
   },
   {
     id: "corvette-c2",
+    color: "#1b2f5e",
+    accentColor: "#e8e8e8",
     name: "Chevrolet Corvette C2 Sting Ray",
     year: 1963,
     era: "1960s",
@@ -162,6 +192,8 @@ const CARS = [
   },
   {
     id: "aston-db5",
+    color: "#9a9a92",
+    accentColor: "#c9a84c",
     name: "Aston Martin DB5",
     year: 1964,
     era: "1960s",
@@ -176,6 +208,8 @@ const CARS = [
   },
   {
     id: "shelby-cobra",
+    color: "#0d1b3e",
+    accentColor: "#f0d080",
     name: "Shelby Cobra 427",
     year: 1965,
     era: "1960s",
@@ -190,6 +224,8 @@ const CARS = [
   },
   {
     id: "lamborghini-miura",
+    color: "#b85c14",
+    accentColor: "#f0d080",
     name: "Lamborghini Miura P400",
     year: 1966,
     era: "1960s",
@@ -204,6 +240,8 @@ const CARS = [
   },
   {
     id: "mustang-boss429",
+    color: "#1a1a00",
+    accentColor: "#ffcc00",
     name: "Ford Mustang Boss 429",
     year: 1969,
     era: "1960s",
@@ -218,6 +256,8 @@ const CARS = [
   },
   {
     id: "porsche-911rs",
+    color: "#d8d8d0",
+    accentColor: "#c0392b",
     name: "Porsche 911 Carrera RS 2.7",
     year: 1973,
     era: "1970s",
@@ -362,8 +402,9 @@ function Footer({ goTo }) {
 /* HOME — hero                                                        */
 /* ------------------------------------------------------------------ */
 
-function Hero() {
+function Hero({ soundOn }) {
   const ref = useRef(null);
+  const [rainOn, setRainOn] = useState(false);
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
@@ -374,6 +415,12 @@ function Hero() {
   const contentOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
   const contentY = useTransform(scrollYProgress, [0, 1], [0, -60]);
 
+  // Rain sound follows the rain toggle, but only while sound is on.
+  useEffect(() => {
+    rainUpdate(rainOn && soundOn);
+    return () => rainUpdate(false);
+  }, [rainOn, soundOn]);
+
   return (
     <section ref={ref} className="ct-hero">
       <div className="ct-hero-media" aria-hidden="true">
@@ -383,8 +430,29 @@ function Hero() {
           alt=""
           style={{ y: imgY, scale: imgScale }}
         />
+        <HeroCanvas rainOn={rainOn} />
         <span className="ct-hero-shade" />
+        {rainOn ? (
+          <span
+            className="ct-rain-overlay"
+            data-testid="rain-overlay"
+            data-rain="on"
+          />
+        ) : null}
       </div>
+
+      <button
+        type="button"
+        className={`ct-rain-toggle${rainOn ? " ct-rain-toggle-on" : ""}`}
+        data-testid="rain-toggle"
+        aria-pressed={rainOn}
+        onClick={() => {
+          playMetallicClick();
+          setRainOn((prev) => !prev);
+        }}
+      >
+        {rainOn ? "RAIN ON" : "RAIN OFF"}
+      </button>
 
       <motion.div
         className="ct-hero-content"
@@ -546,7 +614,7 @@ function SpeedFlash({ progress, range, className, children }) {
   );
 }
 
-function SpeedSection() {
+function SpeedSection({ soundOn }) {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -557,6 +625,7 @@ function SpeedSection() {
   return (
     <section ref={ref} className="ct-speed">
       <div className="ct-speed-sticky">
+        <SpeedCanvas progress={scrollYProgress} soundOn={soundOn} />
         <motion.div
           className="ct-speed-lines"
           style={{ opacity: linesOpacity }}
@@ -595,32 +664,20 @@ function SpeedSection() {
 /* HOME — anatomy                                                     */
 /* ------------------------------------------------------------------ */
 
-const HOTSPOTS = [
-  { label: "Supercharged Straight-8", x: "79%", y: "40%", range: [0.18, 0.32] },
-  { label: "Open Cabin", x: "54%", y: "34%", range: [0.3, 0.44] },
-  { label: "Swept Fenders", x: "19%", y: "52%", range: [0.42, 0.56] },
-  { label: "Wire Wheels", x: "76%", y: "74%", range: [0.54, 0.68] },
-];
-
-function Hotspot({ progress, spot }) {
-  const opacity = useTransform(progress, spot.range, [0, 1]);
-  const x = useTransform(progress, spot.range, [-14, 0]);
-  return (
-    <motion.span
-      className="ct-hotspot"
-      style={{ opacity, x, left: spot.x, top: spot.y }}
-    >
-      <span className="ct-hotspot-dot" />
-      <span className="ct-hotspot-text">{spot.label}</span>
-    </motion.span>
-  );
-}
+/* NOTE: the old fixed-position hotspots are gone — the 3D Anatomy canvas
+   now renders live-tracking labels + connector lines that follow each
+   part's projected position (see three/canvases.jsx ANATOMY_LABELS). */
 
 function AnatomySection() {
   const ref = useRef(null);
+  // PINNED showcase (like Speed): ["start start","end end"] + a 300vh
+  // section with the stage sticky at 100vh, so the whole explode ->
+  // flash -> snap-back cycle plays on screen. The owner's original used
+  // GSAP ScrollTrigger pin:true; without the pin the frame scrolled away
+  // at p~0.75 and the flash + snap-back climax happened offscreen.
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ["start end", "end start"],
+    offset: ["start start", "end end"],
   });
 
   return (
@@ -639,10 +696,8 @@ function AnatomySection() {
             alt="Mercedes-Benz 540K side profile"
             loading="lazy"
           />
+          <AnatomyCanvas progress={scrollYProgress} />
           <span className="ct-anatomy-shade" aria-hidden="true" />
-          {HOTSPOTS.map((spot) => (
-            <Hotspot key={spot.label} progress={scrollYProgress} spot={spot} />
-          ))}
         </div>
         <motion.figure
           className="ct-anatomy-detail"
@@ -712,8 +767,10 @@ function HallOfFame({ goTo }) {
   const [index, setIndex] = useState(0);
   const car = CARS[index];
 
-  const step = (dir) =>
+  const step = (dir) => {
+    playMetallicClick();
     setIndex((prev) => (prev + dir + CARS.length) % CARS.length);
+  };
 
   return (
     <section className="ct-hall ct-section">
@@ -721,41 +778,30 @@ function HallOfFame({ goTo }) {
         index="04"
         kicker="HALL OF FAME"
         title="Hall of *Fame*"
-        sub="Twelve machines that refused to be forgotten."
+        sub="Twelve machines that refused to be forgotten. Drag the ring, or step through it."
       />
 
       <div className="ct-hall-stage">
         <button
           type="button"
           className="ct-hall-nav ct-hall-prev"
+          data-testid="gal-prev"
           onClick={() => step(-1)}
           aria-label="Previous car"
         >
           <ChevronLeft size={22} />
         </button>
 
-        <div className="ct-hall-card" data-cursor="DRIVE">
-          <AnimatePresence mode="wait">
-            <motion.figure
-              key={car.id}
-              className="ct-hall-figure"
-              initial={{ opacity: 0, scale: 1.04 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.98 }}
-              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <img src={car.img} alt={car.name} />
-              <span className="ct-hall-shade" aria-hidden="true" />
-              <span className="ct-hall-num" aria-hidden="true">
-                {String(index + 1).padStart(2, "0")}
-              </span>
-            </motion.figure>
-          </AnimatePresence>
-        </div>
+        <GalleryRing
+          cars={CARS}
+          index={index}
+          onSelect={(next) => setIndex(next)}
+        />
 
         <button
           type="button"
           className="ct-hall-nav ct-hall-next"
+          data-testid="gal-next"
           onClick={() => step(1)}
           aria-label="Next car"
         >
@@ -819,6 +865,7 @@ function Outro({ goTo }) {
           alt=""
           style={{ y: imgY }}
         />
+        <OutroCanvas progress={scrollYProgress} />
         <span className="ct-outro-shade" />
       </div>
       <div className="ct-outro-content">
@@ -842,10 +889,10 @@ function Outro({ goTo }) {
   );
 }
 
-function HomePage({ goTo }) {
+function HomePage({ goTo, soundOn }) {
   return (
     <div className="ct-page">
-      <Hero />
+      <Hero soundOn={soundOn} />
 
       <div className="ct-marquee-wrap">
         <VelocityMarquee className="ct-marquee" chunkClassName="ct-marquee-chunk" baseVelocity={1.6}>
@@ -858,7 +905,7 @@ function HomePage({ goTo }) {
         </VelocityMarquee>
       </div>
 
-      <SpeedSection />
+      <SpeedSection soundOn={soundOn} />
       <AnatomySection />
       <StatsSection />
       <HallOfFame goTo={goTo} />
@@ -879,11 +926,17 @@ function GaragePage() {
   const car = CARS.find((c) => c.id === selectedId) || filtered[0] || CARS[0];
 
   function pickEra(next) {
+    playMetallicClick();
     setEra(next);
     const list = next === "All" ? CARS : CARS.filter((c) => c.era === next);
     if (list.length && !list.some((c) => c.id === selectedId)) {
       setSelectedId(list[0].id);
     }
+  }
+
+  function pickCar(id) {
+    playMetallicClick();
+    setSelectedId(id);
   }
 
   return (
@@ -921,7 +974,7 @@ function GaragePage() {
               key={c.id}
               type="button"
               className={`ct-selector-btn${c.id === car.id ? " ct-selector-btn-active" : ""}`}
-              onClick={() => setSelectedId(c.id)}
+              onClick={() => pickCar(c.id)}
               data-cursor="DRIVE"
             >
               <span className="ct-selector-year">{c.year}</span>
@@ -943,6 +996,7 @@ function GaragePage() {
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             />
           </AnimatePresence>
+          <GarageCanvas car={car} />
           <span className="ct-garage-stage-shade" aria-hidden="true" />
           <span className="ct-garage-stage-year" aria-hidden="true">
             {car.year}
@@ -1262,6 +1316,11 @@ function CollectionPage() {
   const [selected, setSelected] = useState(null);
   const filtered = era === "All" ? CARS : CARS.filter((c) => c.era === era);
 
+  function openCar(car) {
+    playMetallicClick();
+    setSelected(car);
+  }
+
   return (
     <div className="ct-page ct-collection ct-section">
       <SectionHead
@@ -1279,7 +1338,10 @@ function CollectionPage() {
             role="tab"
             aria-selected={era === e}
             className={`ct-era-chip${era === e ? " ct-era-chip-active" : ""}`}
-            onClick={() => setEra(e)}
+            onClick={() => {
+              playMetallicClick();
+              setEra(e);
+            }}
           >
             {e}
           </button>
@@ -1302,7 +1364,7 @@ function CollectionPage() {
               <button
                 type="button"
                 className="ct-collection-btn"
-                onClick={() => setSelected(car)}
+                onClick={() => openCar(car)}
                 data-cursor="VIEW"
                 aria-label={`View ${car.name}`}
               >
@@ -1339,6 +1401,20 @@ function CollectionPage() {
 
 export default function Chrome() {
   const [page, setPage] = useState("home");
+  const [soundOn, setSoundOn] = useState(() => {
+    try {
+      return isSoundEnabled();
+    } catch (e) {
+      return false;
+    }
+  });
+
+  function toggleSound() {
+    const next = !soundOn;
+    setSoundEnabled(next);
+    setSoundOn(next);
+    if (next) playMetallicClick();
+  }
 
   function goTo(next) {
     if (next === page) {
@@ -1374,6 +1450,18 @@ export default function Chrome() {
           ))}
         </nav>
 
+        <button
+          type="button"
+          className={`ct-sound-toggle${soundOn ? " ct-sound-toggle-on" : ""}`}
+          data-testid="sound-toggle"
+          aria-pressed={soundOn}
+          aria-label={soundOn ? "Turn sound off" : "Turn sound on"}
+          onClick={toggleSound}
+        >
+          {soundOn ? <Volume2 size={16} /> : <VolumeX size={16} />}
+          <span>{soundOn ? "SOUND ON" : "SOUND OFF"}</span>
+        </button>
+
         <span className="ct-nav-meta">1930 — 1970</span>
       </header>
 
@@ -1387,7 +1475,7 @@ export default function Chrome() {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.35, ease: "easeOut" }}
         >
-          {page === "home" && <HomePage goTo={goTo} />}
+          {page === "home" && <HomePage goTo={goTo} soundOn={soundOn} />}
           {page === "garage" && <GaragePage />}
           {page === "timeline" && <TimelinePage />}
           {page === "collection" && <CollectionPage />}
