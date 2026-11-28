@@ -11,69 +11,18 @@ import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import {
+  applyStudioEnv,
   buildProceduralCar,
   makeDust,
   makeFloor,
+  makeLightPool,
   makeRain,
   stepRain,
 } from "./carBuilder";
 import { engineUpdate } from "./audio";
 
-/** Studio reflections: the black chrome body only reads as a car when it
-    has something to reflect. The environment is a painted studio
-    gradient (bright ceiling key, gold rim strip, warm floor bounce) as
-    an equirect texture — deliberately NOT a RoomEnvironment PMREM bake:
-    on software GL that bake costs 8–10s of main-thread time per canvas
-    and stacked into a ~35s stall across the four home canvases. The
-    painted texture costs nothing and still gives the clearcoat bright
-    streaks to catch. Shared across canvases; three uploads it per GL
-    context on demand. Returns a no-op cancel for call-site symmetry. */
-let studioEnvTexture = null;
-function makeStudioEnvTexture() {
-  if (studioEnvTexture) return studioEnvTexture;
-  const c = document.createElement("canvas");
-  c.width = 512;
-  c.height = 256;
-  const g = c.getContext("2d");
-  g.fillStyle = "#0a0908";
-  g.fillRect(0, 0, 512, 256);
-  // Bright ceiling key strip
-  const key = g.createLinearGradient(0, 0, 0, 64);
-  key.addColorStop(0, "rgba(255,245,230,1)");
-  key.addColorStop(1, "rgba(255,245,230,0)");
-  g.fillStyle = key;
-  g.fillRect(60, 0, 392, 64);
-  // Gold rim strip
-  g.fillStyle = "rgba(212,175,55,0.9)";
-  g.fillRect(0, 100, 512, 10);
-  g.fillStyle = "rgba(212,175,55,0.35)";
-  g.fillRect(0, 110, 512, 26);
-  // Cool side strips
-  g.fillStyle = "rgba(220,225,235,0.55)";
-  g.fillRect(0, 40, 14, 120);
-  g.fillRect(498, 40, 14, 120);
-  // Warm floor bounce
-  const floor = g.createLinearGradient(0, 200, 0, 256);
-  floor.addColorStop(0, "rgba(139,0,0,0)");
-  floor.addColorStop(1, "rgba(255,120,60,0.5)");
-  g.fillStyle = floor;
-  g.fillRect(0, 200, 512, 56);
-  const tex = new THREE.CanvasTexture(c);
-  tex.mapping = THREE.EquirectangularReflectionMapping;
-  tex.colorSpace = THREE.SRGBColorSpace;
-  studioEnvTexture = tex;
-  return tex;
-}
-
-function applyStudioEnv(scene, renderer, intensity = 0.6, name = "canvas") {
-  try {
-    scene.environment = makeStudioEnvTexture();
-    scene.environmentIntensity = intensity;
-  } catch (e) {
-    // No environment — the direct lights still carry the scene.
-  }
-  return () => {};
-}
+/** Era variant from a car's year: pre-1950 = tall-grille vintage. */
+const variantForYear = (year) => (year && year < 1950 ? "vintage" : "sleek");
 
 const isMobile = () =>
   typeof window !== "undefined" && window.innerWidth < 768;
@@ -295,19 +244,21 @@ export function HeroCanvas({ rainOn }) {
       className="ct-3d-hero"
       setup={({ container, scene, camera, renderer, mobile }) => {
         scene.fog = new THREE.FogExp2(0x050508, 0.06);
-        renderer.toneMappingExposure = 1.25;
-        const cancelEnv = applyStudioEnv(scene, renderer, 0.6, "hero");
+        renderer.toneMappingExposure = 1.35;
+        const cancelEnv = applyStudioEnv(scene, renderer, 0.85, "hero");
         camera.position.set(12, 6, 15);
         const startPos = camera.position.clone();
+        // Front 3/4 is the money shot — never a dead rear or top-down.
         const endPos = new THREE.Vector3(
-          mobile ? 6 : 4.5,
-          mobile ? 2.5 : 1.6,
-          mobile ? 12 : 7.5
+          mobile ? 7 : 6.8,
+          mobile ? 2.2 : 1.9,
+          mobile ? 6 : 5.2
         );
 
-        const car = buildProceduralCar({ color: "#050508", accentColor: "#c9a84c" });
+        const car = buildProceduralCar({ color: "#050508", accentColor: "#c9a84c", variant: "vintage" });
         scene.add(car.group);
         scene.add(makeFloor(80, 0x020202, 0.08));
+        scene.add(makeLightPool(4.5));
 
         const dust = makeDust(mobile ? 150 : 400);
         scene.add(dust);
@@ -339,9 +290,12 @@ export function HeroCanvas({ rainOn }) {
         scene.add(rimLight);
         // Warm front fill from the camera side so the black body has an
         // edge to read against the dark floor.
-        const fillLight = new THREE.DirectionalLight(0xfff5e6, 1.2);
+        const fillLight = new THREE.DirectionalLight(0xfff5e6, 4);
         fillLight.position.set(4, 3, 8);
         scene.add(fillLight);
+        // The dark studio env is what makes the body read black; the hero
+        // is a wide shot, so boost the env so the chrome streaks read.
+        scene.environmentIntensity = 1.6;
         const underglow = new THREE.PointLight(0x8b0000, 0, 8);
         underglow.position.set(0, 0.2, 0);
         scene.add(underglow);
@@ -351,7 +305,7 @@ export function HeroCanvas({ rainOn }) {
         let rain = null;
         // Look slightly above the car so it sits in the lower third,
         // clear of the centered headline.
-        const target = new THREE.Vector3(0, 1.15, 0);
+        const target = new THREE.Vector3(0, 0.95, 0);
         const swoopStart = performance.now();
 
         return {
@@ -372,10 +326,10 @@ export function HeroCanvas({ rainOn }) {
             camera.position.lerp(goal, 0.03);
             camera.lookAt(target);
 
-            keyLight.intensity += (5 - keyLight.intensity) * 0.01;
-            rimLight.intensity += (6 - rimLight.intensity) * 0.01;
+            keyLight.intensity += (8 - keyLight.intensity) * 0.01;
+            rimLight.intensity += (9 - rimLight.intensity) * 0.01;
             underglow.intensity = 2 + Math.sin(time * 2) * 0.5;
-            shimmerLight.intensity += (2.5 - shimmerLight.intensity) * 0.01;
+            shimmerLight.intensity += (3 - shimmerLight.intensity) * 0.01;
             shimmerLight.position.set(
               Math.sin(time * 0.5) * 6,
               2,
@@ -440,19 +394,23 @@ export function GarageCanvas({ car }) {
       fallback="[ SHOWROOM 3D OFFLINE ]"
       className="ct-3d-garage"
       setup={({ container, scene, camera, renderer }) => {
-        scene.fog = new THREE.FogExp2(0x0a0a0c, 0.04);
-        renderer.toneMappingExposure = 1.25;
-        const cancelEnv = applyStudioEnv(scene, renderer, 0.7, "garage");
-        camera.position.set(6, 3, 8);
+        scene.fog = new THREE.FogExp2(0x0a0a0c, 0.05);
+        renderer.toneMappingExposure = 1.2;
+        const cancelEnv = applyStudioEnv(scene, renderer, 0.85, "garage");
+        // Front 3/4 default — the money shot, never the rear. Pulled
+        // back so the whole car (scaled 1.25x) fits the stage.
+        camera.position.set(7.6, 3.0, 6.6);
         camera.lookAt(0, 0.8, 0);
 
         const built = buildProceduralCar({
           color: carRef.current.color,
           accentColor: carRef.current.accentColor,
+          variant: variantForYear(carRef.current.year),
         });
-        built.group.scale.set(1.4, 1.4, 1.4);
+        built.group.scale.set(1.25, 1.25, 1.25);
         scene.add(built.group);
-        scene.add(makeFloor(80, 0x050505, 0.15));
+        scene.add(makeFloor(80, 0x010101, 0.15));
+        scene.add(makeLightPool(5));
 
         scene.add(new THREE.AmbientLight(0xffffff, 0.5));
         const keyLight = new THREE.SpotLight(0xffffff, 4);
@@ -467,10 +425,12 @@ export function GarageCanvas({ car }) {
         scene.add(fillLight);
         const moodLight = new THREE.PointLight(
           new THREE.Color(carRef.current.accentColor),
-          5,
+          2,
           20
         );
-        moodLight.position.set(0, 1.5, 0);
+        // Low and BEHIND the car — its old spot (0, 1.5, 0) sat right
+        // over the roof and dyed it gold-brown.
+        moodLight.position.set(0, 0.5, -4);
         scene.add(moodLight);
 
         const controls = new OrbitControls(camera, renderer.domElement);
@@ -478,10 +438,33 @@ export function GarageCanvas({ car }) {
         controls.enableDamping = true;
         controls.dampingFactor = 0.05;
         controls.enablePan = false;
-        controls.minDistance = 5;
-        controls.maxDistance = 15;
+        // Wheel must scroll the PAGE, not zoom the car — the Lenis fight
+        // was one of the reported glitches.
+        controls.enableZoom = false;
+        controls.minDistance = 4;
+        controls.maxDistance = 16;
         controls.minPolarAngle = 0.15;
         controls.maxPolarAngle = Math.PI / 2 - 0.05;
+        // Fit the whole car to the stage whatever its aspect is: the
+        // stage used to stretch to ~640px tall (portrait), so the car
+        // overflowed the frame even at a "pulled back" camera.
+        const fitCamera = () => {
+          const aspect = container.clientWidth / Math.max(1, container.clientHeight);
+          const halfTan = Math.tan(THREE.MathUtils.degToRad(22.5));
+          const d = Math.max(4.4, 3.6 / (halfTan * aspect));
+          const dir = camera.position.clone().sub(controls.target).normalize();
+          camera.position.copy(controls.target).addScaledVector(dir, d);
+          controls.update();
+        };
+        fitCamera();
+        const fitRO = new ResizeObserver(() => fitCamera());
+        fitRO.observe(container);
+        // Gentle sweep that NEVER reaches the rear: azimuth 0 = side
+        // (+Z), PI/2 = front (+X). The auto-rotate ping-pongs between
+        // front 3/4 and side 3/4 instead of spinning through the ugly
+        // rear and sitting there.
+        const AZ_MIN = 0.35;
+        const AZ_MAX = 1.35;
         controls.autoRotate = true;
         controls.autoRotateSpeed = 0.8;
         controls.update();
@@ -490,8 +473,20 @@ export function GarageCanvas({ car }) {
         const onStart = () => {
           controls.autoRotate = false;
           window.clearTimeout(resumeTimer);
+          // Stop Lenis while dragging so the page does not scroll
+          // under the user's finger.
+          try {
+            window.__lenis?.stop?.();
+          } catch (e) {
+            // Ignore.
+          }
         };
         const onEnd = () => {
+          try {
+            window.__lenis?.start?.();
+          } catch (e) {
+            // Ignore.
+          }
           resumeTimer = window.setTimeout(() => {
             controls.autoRotate = true;
           }, 3000);
@@ -508,6 +503,18 @@ export function GarageCanvas({ car }) {
           window.__ctGarage = {
             getAzimuth: () => controls.getAzimuthalAngle(),
             getBodyColor: () => `#${built.bodyMat.color.getHexString()}`,
+            // Test hook: park the camera at an exact azimuth (radians;
+            // 0 = side, PI/2 = front) for angle screenshots.
+            setView: (az, polar = 1.15) => {
+              controls.autoRotate = false;
+              const r = camera.position.distanceTo(controls.target);
+              camera.position.set(
+                controls.target.x + r * Math.sin(polar) * Math.sin(az),
+                controls.target.y + r * Math.cos(polar),
+                controls.target.z + r * Math.sin(polar) * Math.cos(az)
+              );
+              controls.update();
+            },
           };
         } catch (e) {
           // Ignore.
@@ -527,10 +534,17 @@ export function GarageCanvas({ car }) {
             built.accentMat.color.lerp(targetAccent, 0.06);
             moodLight.color.lerp(targetAccent, 0.06);
             built.group.rotation.y += (spinTarget - built.group.rotation.y) * 0.05;
+            // Ping-pong the auto-rotate inside the front hemisphere.
+            if (controls.autoRotate) {
+              const az = controls.getAzimuthalAngle();
+              if (az > AZ_MAX) controls.autoRotateSpeed = -0.8;
+              else if (az < AZ_MIN) controls.autoRotateSpeed = 0.8;
+            }
             controls.update();
           },
           dispose() {
             cancelEnv();
+            fitRO.disconnect();
             window.clearTimeout(resumeTimer);
             controls.removeEventListener("start", onStart);
             controls.removeEventListener("end", onEnd);
@@ -575,16 +589,17 @@ export function AnatomyCanvas({ progress }) {
       className="ct-3d-anatomy"
       setup={({ container, scene, camera, renderer }) => {
         scene.fog = new THREE.FogExp2(0x020202, 0.05);
-        renderer.toneMappingExposure = 1.25;
-        const cancelEnv = applyStudioEnv(scene, renderer, 0.6, "anatomy");
-        camera.position.set(9, 6, 11);
+        renderer.toneMappingExposure = 1.2;
+        const cancelEnv = applyStudioEnv(scene, renderer, 0.85, "anatomy");
+        camera.position.set(8.5, 5, 10.5);
         const camStart = camera.position.clone();
-        const camExploded = new THREE.Vector3(8, 4, 10);
-        const camPush = new THREE.Vector3(7.5, 3.8, 9);
+        const camExploded = new THREE.Vector3(7.5, 4.2, 9.5);
+        const camPush = new THREE.Vector3(7, 3.8, 8.5);
 
-        const built = buildProceduralCar({ color: "#050508", accentColor: "#c9a84c" });
+        const built = buildProceduralCar({ color: "#050508", accentColor: "#c9a84c", variant: "vintage" });
         scene.add(built.group);
         scene.add(makeFloor(100, 0x010101, 0.1));
+        scene.add(makeLightPool(5));
 
         scene.add(new THREE.AmbientLight(0x0a0a0f, 0.5));
         const topSpot = new THREE.SpotLight(0xfff5e6, 8);
@@ -793,11 +808,11 @@ export function SpeedCanvas({ progress, soundOn }) {
       setup={({ container, scene, camera, renderer, mobile, isVisible }) => {
         scene.fog = new THREE.FogExp2(0x020202, 0.04);
         renderer.toneMappingExposure = 1.2;
-        const cancelEnv = applyStudioEnv(scene, renderer, 0.4, "speed");
+        const cancelEnv = applyStudioEnv(scene, renderer, 0.6, "speed");
         camera.position.set(0, 3.0, 7);
         const baseCam = new THREE.Vector3(0, 3.0, 7);
 
-        const built = buildProceduralCar({ color: "#050508", accentColor: "#c9a84c" });
+        const built = buildProceduralCar({ color: "#050508", accentColor: "#c9a84c", variant: "vintage" });
         built.group.rotation.y = Math.PI / 2;
         scene.add(built.group);
 
@@ -948,16 +963,21 @@ export function OutroCanvas({ progress }) {
       className="ct-3d-outro"
       setup={({ container, scene, camera, renderer }) => {
         scene.fog = new THREE.FogExp2(0x010101, 0.08);
-        const cancelEnv = applyStudioEnv(scene, renderer, 0.35, "outro");
+        const cancelEnv = applyStudioEnv(scene, renderer, 0.6, "outro");
         camera.position.set(2, 3.5, 14);
         camera.lookAt(0, 0.8, -2);
 
-        const built = buildProceduralCar({ color: "#050508", accentColor: "#c9a84c" });
+        const built = buildProceduralCar({ color: "#050508", accentColor: "#c9a84c", variant: "vintage" });
         built.lampMat.emissiveIntensity = 5;
-        built.group.rotation.y = Math.PI / 2;
+        // FRONT toward the camera: rotation.y = -PI/2 maps local +X
+        // (the grille/headlights) to world +Z. Round 2 used +PI/2, which
+        // faced the car AWAY — the headlights were invisible from the
+        // camera and the spots shone from the wrong end.
+        built.group.rotation.y = -Math.PI / 2;
         built.group.position.set(0, 0, -2);
         scene.add(built.group);
         scene.add(makeFloor(100, 0x000000, 0.1));
+        scene.add(makeLightPool(5));
 
         const lSpot = new THREE.SpotLight(0xfff5e6, 3, 50, Math.PI / 5, 1.0, 1);
         lSpot.position.set(-0.6, 0.6, 0.3);

@@ -976,7 +976,7 @@
   display: grid;
   grid-template-columns: 260px 1fr 380px;
   gap: 26px;
-  align-items: stretch;
+  align-items: start;
   max-width: 1440px;
   margin: 0 auto;
   padding: 10px 28px 110px;
@@ -1057,7 +1057,11 @@
 
 .ct-garage-stage {
   position: relative;
-  min-height: 520px;
+  /* Capped so the whole car fits above the fold: the grid used to
+     stretch the stage to the 12-item selector's height (~640px),
+     leaving the car half below the fold. */
+  height: min(68vh, 600px);
+  min-height: 420px;
   background: var(--ct-media);
   border: 1px solid var(--ct-line-soft);
   overflow: hidden;
